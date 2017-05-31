@@ -1,0 +1,50 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".MainActivity">
+
+    <item android:id="@+id/search"
+        android:title="@string/search_title"
+        android:icon="@drawable/ic_search"
+        android:orderInCategory="2"
+        app:showAsAction="always|collapseActionView"
+        app:actionViewClass="android.support.v7.widget.SearchView"
+        android:actionLayout="@layout/app_search_view"/>
+
+    <item
+        android:id="@+id/menu_refresh"
+        android:title="@string/menu_refresh"
+        android:icon="@drawable/ic_refresh"
+        android:orderInCategory="4"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/overflow"
+        android:icon="@drawable/ic_menu"
+        android:orderInCategory="201"
+        android:title=""
+        app:showAsAction="always">
+
+        <menu>
+
+            <item
+                android:id="@+id/action_notification"
+                android:title="@string/action_notification"
+                android:icon="@drawable/ic_notifications"
+                android:orderInCategory="5"
+                app:showAsAction="never" />
+            <item
+                android:id="@+id/menu_dance_video_gallery"
+                android:title="@string/title_activity_dance_video_gallery"
+                android:icon="@drawable/ic_line_dance"
+                android:orderInCategory="6"
+                app:showAsAction="never" />
+            <item
+                android:id="@+id/menu_food_video_gallery"
+                android:title="@string/title_activity_food_video_gallery"
+                android:icon="@drawable/ic_food_gallery"
+                android:orderInCategory="7"
+                app:showAsAction="never" />
+        </menu>
+    </item>
+</menu>

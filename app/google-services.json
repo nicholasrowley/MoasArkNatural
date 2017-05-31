@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "220821074698",
+    "firebase_url": "https://moas-ark-natural.firebaseio.com",
+    "project_id": "moas-ark-natural",
+    "storage_bucket": "moas-ark-natural.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:220821074698:android:8586a48742183163",
+        "android_client_info": {
+          "package_name": "com.wordpress.onelifegroupnz.moaarknatural"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "220821074698-fnuc0860ambrkaqq6eiguvpfjpviq33d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB7--41lrT5L_7S01jRSeEt1gaNf19Vl_I"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

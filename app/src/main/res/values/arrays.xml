@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="search_video_options">
+        <item>@string/search_type_food</item>
+        <item>@string/search_type_dance</item>
+    </string-array>
+</resources>

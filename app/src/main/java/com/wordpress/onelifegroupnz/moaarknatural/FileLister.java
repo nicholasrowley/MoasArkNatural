@@ -72,10 +72,7 @@ public class FileLister extends AsyncTask<Object, Void, Object> {
                     List<Metadata> resultsList = new ArrayList<>();
                     CharSequence searchSequence = searchString.toLowerCase();
                     for(Metadata file : folderContents){
-                            if (file.getName().toLowerCase().contains(searchSequence)) {
-                                if (folderPath.equals(GlobalAppData.DANCEVIDEOPATH)
-                                        || file.getName().toLowerCase().replaceFirst("[.][^.]+$", "")
-                                        .equals(searchSequence))
+                            if (file.getName().toLowerCase().contains(searchSequence)){
                                     //for stepsheet pdfs the name must be exactly the same as the video
                                     resultsList.add(file);
                             }

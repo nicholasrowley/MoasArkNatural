@@ -30,7 +30,7 @@ public class RssAdapter extends BaseAdapter {
         //To remove the feeds that don't point to a website post.
         List<RssItem> itemsToKeep = new ArrayList<>();
         for ( RssItem item : items ) {
-            if (!item.getLink().equals("https://onelifegroupnz.wordpress.com")){
+            if (!item.getLink().equals("https://moasarknaturalnz.com")){
                 itemsToKeep.add(item);
                 //Toast.makeText(context.getApplicationContext(), "Loaded: " + item.getTitle(), Toast.LENGTH_SHORT);
             }

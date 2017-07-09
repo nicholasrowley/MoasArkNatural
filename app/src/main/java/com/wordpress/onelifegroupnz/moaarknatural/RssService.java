@@ -21,7 +21,7 @@ import java.util.List;
  */
 
 public class RssService extends IntentService {
-    private static final String RSS_LINK = "https://onelifegroupnz.wordpress.com/feed/";
+    private static final String RSS_LINK = "https://moasarknaturalnz.com/feed/";
     public static final String ITEMS = "items";
     public static final String RECEIVER = "receiver";
 

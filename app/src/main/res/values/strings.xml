@@ -25,7 +25,7 @@
     <string name="server_connection_error">Please check your wifi and try again.</string>
     <string name="ACCESS_TOKEN">yX8KtvfFf9AAAAAAAAAAHjju0_x8uz3Z4ZRV7x3n96AlpBsdCWbibprKG7rZHdF7</string>
     <string name="moa_s_ark_products">Moa\'s Ark Products</string>
-    <string name="website_url">http://www.onelifegroupnz.wordpress.com</string>
+    <string name="website_url">https://moasarknaturalnz.com/</string>
     <string name="stepsheet_not_found">No step sheet currently exists for this dance or exercise.</string>
     <string name="recipe_not_found">No recipe sheet currently exists for this food.</string>
     <string name="banner_ad_unit_id_test">ca-app-pub-3940256099942544/6300978111</string>

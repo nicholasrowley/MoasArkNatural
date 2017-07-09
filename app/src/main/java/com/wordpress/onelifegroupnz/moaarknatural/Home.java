@@ -342,7 +342,7 @@ public class Home extends AppCompatActivity {
                 }
                 break;
             case R.id.productLinkBtn:
-                Uri uri = Uri.parse(getString(R.string.website_url));
+                Uri uri = Uri.parse(getString(R.string.website_shop_url));
                 intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 break;

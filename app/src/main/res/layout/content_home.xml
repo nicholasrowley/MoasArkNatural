@@ -98,21 +98,21 @@ android:layout_height="match_parent"
                 android:typeface="normal" />
 
             <Button
-                android:text="@string/moa_s_ark_products"
-                android:textSize="@dimen/btn_text_size"
+                android:id="@+id/productLinkBtn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/productLinkBtn"
-                android:layout_marginTop="10dp"
                 android:layout_gravity="center"
-                android:typeface="normal"
-                android:textStyle="bold"
-                android:paddingStart="15dp"
-                android:paddingLeft="15dp"
-                android:paddingEnd="15dp"
-                android:paddingRight="15dp"
+                android:layout_marginTop="10dp"
+                android:layout_weight="0.19"
                 android:onClick="btnOnClick"
-                android:layout_weight="0.19" />
+                android:paddingEnd="15dp"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp"
+                android:paddingStart="15dp"
+                android:text="@string/moa_s_ark_shop"
+                android:textSize="@dimen/btn_text_size"
+                android:textStyle="bold"
+                android:typeface="normal" />
 
             <TextView
                 android:id="@+id/textBlogsTitle"

@@ -62,7 +62,6 @@ tools:showIn="@layout/activity_view_video">
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
                 android:gravity="center"
-                android:text="[Video Title]"
                 android:textAppearance="?android:attr/textAppearanceLarge" />
 
             <TextView

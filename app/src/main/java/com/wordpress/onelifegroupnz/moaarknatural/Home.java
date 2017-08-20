@@ -75,10 +75,7 @@ public class Home extends AppCompatActivity {
         blogsTitleText = (TextView) findViewById(R.id.textBlogsTitle);
 
         //For fragment implementation
-        savedInstanceExists = true;
-        if (savedInstanceState == null) {
-            savedInstanceExists = false;
-        }
+        savedInstanceExists = savedInstanceState != null;
         addSearchFragment();
 
         refreshContent();
@@ -374,7 +371,7 @@ public class Home extends AppCompatActivity {
 
     private void initialiseAds() {
         //initialise ads
-        MobileAds.initialize(getApplicationContext(), "ca-app-pub-3940256099942544~3347511713");
+        MobileAds.initialize(this, getString(R.string.banner_ad_unit_id_test));
 
         AdView mAdView = (AdView) findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
@@ -390,32 +387,6 @@ public class Home extends AppCompatActivity {
                 (android.support.v7.widget.SearchView) menu.findItem(R.id.search).getActionView();
         searchView.setSearchableInfo(
                 searchManager.getSearchableInfo(getComponentName()));
-
-        /*searchView.setOnQueryTextListener(new android.support.v7.widget.SearchView.OnQueryTextListener() {
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                //Log.e("onQueryTextChange", "called");
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                //Proceed to Search Results
-                Intent intent = new Intent(getApplicationContext(), SearchResults.class);
-                intent.putExtra("searchInput", searchView.getQuery().toString());
-                searchView.clearFocus();
-                startActivity(intent);
-                return false;
-            }
-
-        });*/
-
-        //customise the search view
-        /*int searchImgId = getResources().getIdentifier("android:id/search_button", null, null);
-        ImageView v = (ImageView) searchView.findViewById(searchImgId);
-        v.setImageResource(R.drawable.ic_search);*/ //Doesn't work with support.v7.searchview but redundant for changing icon color.
-        //searchView.setIconifiedByDefault(false);
 
         //disable default search icon next to search box
         ImageView searchImage = (ImageView)searchView.findViewById(android.support.v7.appcompat.R.id.search_mag_icon);

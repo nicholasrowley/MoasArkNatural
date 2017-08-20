@@ -48,6 +48,7 @@ import android.widget.VideoView;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -79,6 +80,8 @@ public class ViewVideo extends AppCompatActivity {
 
     private boolean savedInstanceExists;
     private CustomSearchFragment searchFragment;
+
+    private FirebaseAnalytics mFirebaseAnalytics;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -335,6 +338,14 @@ public class ViewVideo extends AppCompatActivity {
 
                     videoView.setLayoutParams(params);
                     videoContainer.setLayoutParams(contParams);
+
+                    // Obtain the FirebaseAnalytics instance.
+                    mFirebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
+
+                    //log when the video starts
+                    Bundle vsparams = new Bundle();
+                    vsparams.putDouble(FirebaseAnalytics.Param.VALUE, 1.0);
+                    mFirebaseAnalytics.logEvent(videoData.getVideoStatsName(), vsparams);
                 }
             });
         } catch (Exception e) {

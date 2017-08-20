@@ -28,7 +28,6 @@
     <string name="website_shop_url">https://moasarknaturalnz.com/shop/</string>
     <string name="stepsheet_not_found">No step sheet currently exists for this wellbeing dance exercise.</string>
     <string name="recipe_not_found">No recipe sheet currently exists for this food.</string>
-    <string name="banner_ad_unit_id_test">ca-app-pub-3940256099942544/6300978111</string>
     <string name="blogs_title">Blogs from Moa\'s Ark</string>
 
     <!-- Search Type spinner suggestions-->
@@ -36,4 +35,9 @@
     <string name="search_type_all">All</string>
     <string name="search_type_dance">Wellbeing Dance Exercise</string>
     <string name="search_type_food">Food</string>
+
+    <!-- This is the advertisement ids for adMob please use the testing one for clicking (Do not click the real ad) -->
+    <string name="banner_ad_unit_id_test">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="banner_ad_unit_id_live">ca-app-pub-2838047532476449/3742836256</string>
+
 </resources>

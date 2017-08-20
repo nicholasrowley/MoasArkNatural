@@ -422,8 +422,7 @@ public class ViewVideo extends AppCompatActivity {
             public void run() {
                 try {
                     //check for pdf data
-                    pdfData = appData.getPdfContent(getString(R.string.ACCESS_TOKEN),
-                            ViewVideo.this, videoData.getName(), videoData.getFolderPath());
+                    pdfData = appData.getPdfContent(getString(R.string.ACCESS_TOKEN), videoData.getName(), videoData.getFolderPath());
                     //refreshDialog.show(); //generally bad to show a toast with something that can be executed repetitively
                     sleep(100);
                 } catch (InterruptedException e) {

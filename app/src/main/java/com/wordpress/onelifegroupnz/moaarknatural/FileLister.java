@@ -1,6 +1,5 @@
 package com.wordpress.onelifegroupnz.moaarknatural;
 
-import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 

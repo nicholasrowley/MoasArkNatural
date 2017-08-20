@@ -74,13 +74,6 @@ public class CustomSearchFragment extends Fragment {
         setHasOptionsMenu(true);
     }
 
-    //Each activity will provide their own onCreateOptions/menu
-    /*@Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        //inflater.inflate(R.menu.menu, menu);
-    }*/
-
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);

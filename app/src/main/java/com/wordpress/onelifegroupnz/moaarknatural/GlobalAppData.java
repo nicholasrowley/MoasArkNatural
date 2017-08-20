@@ -135,11 +135,9 @@ public class GlobalAppData {
         populateSearchSuggestions(context);
     }
 
-    //TODO Test Scenario: load video gallery with load more button. then remove a video that has yet to load from dropbox folder
-    //TODO Then try loading that video and see how the app deals with 404
     /*This method is for loading dropbox files in the background until fully loaded. This method
     * uses partially loaded files and doesn't load new files stored on dropbox servers*/
-    public void loadDropboxFiles(String ACCESS_TOKEN, Context context, String searchString, String videoPath) {
+    public void loadDropboxFiles(String ACCESS_TOKEN, String searchString, String videoPath) {
         if (videoPath.equals(DANCEVIDEOPATH)) {
             danceVideoFileLister = new FileLister(DropboxClient.getClient(ACCESS_TOKEN), dropboxDanceVideoLoadData, danceVideoInfoList, searchString, DANCEVIDEOPATH);
             danceVideoFileLister.execute();
@@ -179,7 +177,7 @@ public class GlobalAppData {
 
     /*method which returns the single latest version of the step sheet which contains the given
      name. (if one exists otherwise null)*/
-    public FileData getPdfContent(String ACCESS_TOKEN, Context context, String pdfName, String pdfPath) {
+    public FileData getPdfContent(String ACCESS_TOKEN, String pdfName, String pdfPath) {
 
         List<FileData> pdfInfoList;
 

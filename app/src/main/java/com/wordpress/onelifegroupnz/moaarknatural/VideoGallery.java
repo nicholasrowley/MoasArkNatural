@@ -340,8 +340,7 @@ public class VideoGallery extends AppCompatActivity {
                     if (appData == null)
                         appData = GlobalAppData.getInstance(getString(R.string.ACCESS_TOKEN), VideoGallery.this, "");
                     else {
-                        appData.loadDropboxFiles(getString(R.string.ACCESS_TOKEN),
-                                VideoGallery.this, "", targetFolder);
+                        appData.loadDropboxFiles(getString(R.string.ACCESS_TOKEN), "", targetFolder);
                         refreshDialog.show();
                     }
                     sleep(100);

@@ -10,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -75,7 +74,7 @@ public class RssFragment extends Fragment implements AdapterView.OnItemClickList
             }
             progressBar.setVisibility(View.GONE);
             listView.setVisibility(View.VISIBLE);
-        };
+        }
     };
 
     @Override

@@ -14,7 +14,6 @@ import android.os.Handler;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
@@ -59,7 +58,6 @@ public class SearchResults extends AppCompatActivity {
     private String folderPathCode;
     private SearchView searchView;
     private ProgressBar progressBar;
-    private boolean savedInstanceExists;
     private CustomSearchFragment searchFragment;
 
     @Override
@@ -81,12 +79,13 @@ public class SearchResults extends AppCompatActivity {
         }
 
         //Generate folder path code based on search preference
-        if (searchType.equals(getString(R.string.search_type_dance)))
-            folderPathCode = DANCEVIDEOPATH;
-        else
-            if (searchType.equals(getString(R.string.search_type_food))) {
+        if (searchType != null) {
+            if (searchType.equals(getString(R.string.search_type_dance)))
+                folderPathCode = DANCEVIDEOPATH;
+            else if (searchType.equals(getString(R.string.search_type_food))) {
                 folderPathCode = FOODVIDEOPATH;
             }
+        }
 
         //resultsDescription.setText("Search results for '" + searchInput + "'");
 
@@ -97,10 +96,6 @@ public class SearchResults extends AppCompatActivity {
         progressBar = (ProgressBar) findViewById(R.id.progressBar4);
 
         //For fragment implementation
-        savedInstanceExists = true;
-        if (savedInstanceState == null) {
-            savedInstanceExists = false;
-        }
         addSearchFragment();
 
         refreshContent();
@@ -228,6 +223,7 @@ public class SearchResults extends AppCompatActivity {
 
             //use this for pre v21 devices
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                //noinspection deprecation
                 resultLinks.get(i).setBackgroundColor(getResources().getColor(R.color.colorPrimary));
             }
 
@@ -267,7 +263,7 @@ public class SearchResults extends AppCompatActivity {
                             appData = GlobalAppData.getInstance(getString(R.string.ACCESS_TOKEN), SearchResults.this, "");
 
                         searchVideoLister = new FileLister(DropboxClient.getClient(getString(R.string.ACCESS_TOKEN)),
-                                getApplicationContext(), new ArrayList<Metadata>(), new ArrayList<FileData>(),
+                                new ArrayList<Metadata>(), new ArrayList<FileData>(),
                                 searchInput, folderPathCode);
 
                         searchVideoLister.execute();
@@ -352,8 +348,7 @@ public class SearchResults extends AppCompatActivity {
                     if (appData == null)
                         appData = GlobalAppData.getInstance(getString(R.string.ACCESS_TOKEN), SearchResults.this, "");
 
-                    searchVideoLister = new FileLister(DropboxClient.getClient(getString(R.string.ACCESS_TOKEN)),
-                            getApplicationContext(), dropboxSearchData, videoInfoResults,
+                    searchVideoLister = new FileLister(DropboxClient.getClient(getString(R.string.ACCESS_TOKEN)), dropboxSearchData, videoInfoResults,
                             searchInput, folderPathCode);
 
                     searchVideoLister.execute();

@@ -10,21 +10,17 @@ import java.io.Serializable;
 public class FileData implements Serializable {
     private String name;
     private String tempUrl;
-    private String dropboxUri;
     private String folderPath;
-    private String viewStatsName; //TODO check if still wanted. not currently implemented
+    private String viewStatsName; //log entry for stats
     private static final long serialVersionUID = 1L; //required for Serializable
 
-    public FileData(String fileName, String temporaryUrl, String dbUri, String dbFolderPath)
+    public FileData(String fileName, String temporaryUrl, String dbFolderPath)
     {
         name = fileName.replaceFirst("[.][^.]+$", ""); //remove the file extension
         tempUrl = temporaryUrl;
-        dropboxUri = dbUri;
         folderPath = dbFolderPath;
         viewStatsName = "views_" + name.replaceAll(" ", "_").toLowerCase();
     }
-
-    public String getDbUri() { return dropboxUri; }
 
     public String getName() {
         return name;

@@ -24,7 +24,6 @@ public class FileLister extends AsyncTask<Object, Void, Object> {
     private List<FileData> fileInfoList;
     private List<Metadata> folderContents;
     private String folderPath;
-    private Context context;
     private int filesLoaded;
     private int remainingLoads;
     private boolean dbSuccess;
@@ -32,10 +31,9 @@ public class FileLister extends AsyncTask<Object, Void, Object> {
     private boolean searchEnabled;
     private static final int LOADAMOUNT = 5; //number of files loaded with a single execution of the class. Less is faster.
 
-    FileLister(DbxClientV2 dbxClient, Context context, List<Metadata> dropboxLoadData,
+    FileLister(DbxClientV2 dbxClient, List<Metadata> dropboxLoadData,
                List<FileData> loadedVideos, String searchInput, String path) {
         this.dbxClient = dbxClient;
-        this.context = context;
         folderContents = dropboxLoadData;
         fileInfoList = loadedVideos;
         folderPath = path;
@@ -44,12 +42,7 @@ public class FileLister extends AsyncTask<Object, Void, Object> {
         remainingLoads = (int) Math.ceil((folderContents.size() - filesLoaded) / (float) LOADAMOUNT);
         searchString = searchInput;
 
-        if (searchString.equals("")) {
-            searchEnabled = false;
-        } else
-        {
-            searchEnabled = true;
-        }
+        searchEnabled = !searchString.equals("");
         dbSuccess = false;
     }
 
@@ -87,8 +80,7 @@ public class FileLister extends AsyncTask<Object, Void, Object> {
                 if (filesLoaded < folderContents.size()) {
                     int entryToLoad = folderContents.size() - 1 - filesLoaded; //load in reverse
                     fileInfoList.add(new FileData(folderContents.get(entryToLoad).getName(), dbxClient.files()
-                            .getTemporaryLink(folderContents.get(entryToLoad).getPathLower()).getLink(),
-                            folderContents.get(entryToLoad).getPathLower(), folderPath));
+                            .getTemporaryLink(folderContents.get(entryToLoad).getPathLower()).getLink(), folderPath));
                     filesLoaded++;
                     remainingLoads = (int) Math.ceil((folderContents.size() - filesLoaded) / (float) LOADAMOUNT);
                 }
@@ -109,10 +101,6 @@ public class FileLister extends AsyncTask<Object, Void, Object> {
     @Override
     protected void onPostExecute(Object o) {
         super.onPostExecute(o);
-    }
-
-    public void setContext(Context context){
-        this.context = context;
     }
 
     public List<FileData> getFileDatas() {

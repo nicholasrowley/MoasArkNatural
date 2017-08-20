@@ -36,10 +36,7 @@ public class MyListView extends ListView {
             oldCount = getCount();
             int height = getChildAt(0).getHeight() + 1 + getDividerHeight();
             params = getLayoutParams();
-            /*for (int i = 0; i < getCount(); i++) {
-                height += getItemAtPosition(i).;
-                getAt
-            }*/
+
             params.height = getCount() * height;
             setLayoutParams(params);
         }

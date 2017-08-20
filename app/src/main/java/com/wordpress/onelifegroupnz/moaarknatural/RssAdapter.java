@@ -1,15 +1,12 @@
 package com.wordpress.onelifegroupnz.moaarknatural;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +29,6 @@ public class RssAdapter extends BaseAdapter {
         for ( RssItem item : items ) {
             if (!item.getLink().equals("https://moasarknaturalnz.com")){
                 itemsToKeep.add(item);
-                //Toast.makeText(context.getApplicationContext(), "Loaded: " + item.getTitle(), Toast.LENGTH_SHORT);
             }
         }
 

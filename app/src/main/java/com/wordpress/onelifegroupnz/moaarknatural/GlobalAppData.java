@@ -2,7 +2,6 @@ package com.wordpress.onelifegroupnz.moaarknatural;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
 
 import com.dropbox.core.v2.files.Metadata;
@@ -65,12 +64,7 @@ public class GlobalAppData {
         if (instance == null) {
             instance = new GlobalAppData(ACCESS_TOKEN, context, searchString);
         }
-        instance.setContext(context);
         return instance;
-    }
-
-    public void setContext(Context context) {
-        danceVideoFileLister.setContext(context);
     }
 
     public List<FileData> getVideoData(String videoPath) {
@@ -114,8 +108,7 @@ public class GlobalAppData {
         };
 
         if (videoPath.equals(DANCEVIDEOPATH) || videoPath.equals(ALLVIDEOSCODE)) {
-            danceVideoFileLister = new FileLister(DropboxClient.getClient(ACCESS_TOKEN),
-                    context, new ArrayList<Metadata>(), new ArrayList<FileData>(), searchString, DANCEVIDEOPATH);
+            danceVideoFileLister = new FileLister(DropboxClient.getClient(ACCESS_TOKEN), new ArrayList<Metadata>(), new ArrayList<FileData>(), searchString, DANCEVIDEOPATH);
 
             danceVideoInfoList = new ArrayList<>();
             dropboxDanceVideoLoadData = new ArrayList<>();
@@ -123,8 +116,7 @@ public class GlobalAppData {
         }
 
         if (videoPath.equals(FOODVIDEOPATH) || videoPath.equals(ALLVIDEOSCODE)) {
-            foodVideoFileLister = new FileLister(DropboxClient.getClient(ACCESS_TOKEN),
-                    context, new ArrayList<Metadata>(), new ArrayList<FileData>(), searchString, FOODVIDEOPATH);
+            foodVideoFileLister = new FileLister(DropboxClient.getClient(ACCESS_TOKEN), new ArrayList<Metadata>(), new ArrayList<FileData>(), searchString, FOODVIDEOPATH);
 
             foodVideoInfoList = new ArrayList<>();
             dropboxFoodVideoLoadData = new ArrayList<>();
@@ -149,14 +141,12 @@ public class GlobalAppData {
     * uses partially loaded files and doesn't load new files stored on dropbox servers*/
     public void loadDropboxFiles(String ACCESS_TOKEN, Context context, String searchString, String videoPath) {
         if (videoPath.equals(DANCEVIDEOPATH)) {
-            danceVideoFileLister = new FileLister(DropboxClient.getClient(ACCESS_TOKEN),
-                    context, dropboxDanceVideoLoadData, danceVideoInfoList, searchString, DANCEVIDEOPATH);
+            danceVideoFileLister = new FileLister(DropboxClient.getClient(ACCESS_TOKEN), dropboxDanceVideoLoadData, danceVideoInfoList, searchString, DANCEVIDEOPATH);
             danceVideoFileLister.execute();
 
             waitForDanceVideoFileListerExecution(0);
         } else if (videoPath.equals(FOODVIDEOPATH)) {
-            foodVideoFileLister = new FileLister(DropboxClient.getClient(ACCESS_TOKEN),
-                    context, dropboxFoodVideoLoadData, foodVideoInfoList, searchString, FOODVIDEOPATH);
+            foodVideoFileLister = new FileLister(DropboxClient.getClient(ACCESS_TOKEN), dropboxFoodVideoLoadData, foodVideoInfoList, searchString, FOODVIDEOPATH);
             foodVideoFileLister.execute();
 
             waitForFoodVideoFileListerExecution(0);
@@ -182,8 +172,7 @@ public class GlobalAppData {
         } else {
             if (danceVideoFileLister.dbConnectionSuccessfull() && foodVideoFileLister.dbConnectionSuccessfull()) {
                 return true;
-            }
-            else
+            } else
                 return false;
         }
     }
@@ -197,12 +186,10 @@ public class GlobalAppData {
         //Identify whether a Stepsheet or Recipe is needed.
         if (pdfPath.equals(DANCEVIDEOPATH))
         {
-            pdfFileLister = new FileLister(DropboxClient.getClient(ACCESS_TOKEN),
-                    context, new ArrayList<Metadata>(), new ArrayList<FileData>(), pdfName, STEPSHEETPATH);
+            pdfFileLister = new FileLister(DropboxClient.getClient(ACCESS_TOKEN), new ArrayList<Metadata>(), new ArrayList<FileData>(), pdfName, STEPSHEETPATH);
         } else
             if (pdfPath.equals(FOODVIDEOPATH)) {
-                pdfFileLister = new FileLister(DropboxClient.getClient(ACCESS_TOKEN),
-                        context, new ArrayList<Metadata>(), new ArrayList<FileData>(), pdfName, RECIPEPATH);
+                pdfFileLister = new FileLister(DropboxClient.getClient(ACCESS_TOKEN), new ArrayList<Metadata>(), new ArrayList<FileData>(), pdfName, RECIPEPATH);
             }
         pdfFileLister.execute();
 
@@ -212,7 +199,7 @@ public class GlobalAppData {
 
         //if no result. declare with empty fields
         if (pdfInfoList.size() == 0)
-            pdfInfoList.add(new FileData("", "", "", ""));
+            pdfInfoList.add(new FileData("", "", ""));
 
         return pdfInfoList.get(0); //returns the latest step sheet
     }
@@ -262,7 +249,6 @@ public class GlobalAppData {
     }
 
     private void populateSearchSuggestions(Context context) {
-        //TODO search suggestions currently work for dance videos only.
         //populate the suggestions
         searchSuggestions = new ArrayList<>();
         for (Metadata content : dropboxDanceVideoLoadData) {

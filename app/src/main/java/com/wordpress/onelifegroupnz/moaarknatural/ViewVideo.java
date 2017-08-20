@@ -1,15 +1,14 @@
 package com.wordpress.onelifegroupnz.moaarknatural;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -19,7 +18,6 @@ import android.os.SystemClock;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
@@ -42,7 +40,6 @@ import android.widget.LinearLayout;
 import android.widget.MediaController;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.google.android.gms.ads.AdRequest;
@@ -51,7 +48,6 @@ import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DANCEVIDEOPATH;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.FOODVIDEOPATH;
 
@@ -78,7 +74,6 @@ public class ViewVideo extends AppCompatActivity {
     private WebView webview;
     private LinearLayout videoContainer;
 
-    private boolean savedInstanceExists;
     private CustomSearchFragment searchFragment;
 
     private FirebaseAnalytics mFirebaseAnalytics;
@@ -103,12 +98,6 @@ public class ViewVideo extends AppCompatActivity {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             videoData = (FileData) extras.getSerializable("videoIndex");
-        }
-
-        //For fragment implementation
-        savedInstanceExists = true;
-        if (savedInstanceState == null) {
-            savedInstanceExists = false;
         }
 
         //check if activity refreshed
@@ -317,7 +306,6 @@ public class ViewVideo extends AppCompatActivity {
                         );
                     }
 
-                    //progressDialog.dismiss();
                     progressBar.setVisibility(View.GONE);
 
                     videoView.start();
@@ -349,7 +337,6 @@ public class ViewVideo extends AppCompatActivity {
                 }
             });
         } catch (Exception e) {
-            //progressDialog.dismiss();
             System.out.println("Video Play Error :" + e.toString());
             finish();
         }
@@ -430,8 +417,6 @@ public class ViewVideo extends AppCompatActivity {
     }
 
     private void loadPdf() {
-        final Toast refreshDialog = Toast.makeText(getApplicationContext(), "Loading Complete", Toast.LENGTH_SHORT);
-
         //Data load is done here
         final Thread loadTask = new Thread() {
             public void run() {
@@ -449,6 +434,7 @@ public class ViewVideo extends AppCompatActivity {
 
         //Loading UI Elements in this thread
         final Thread setTask = new Thread() {
+            @SuppressLint("SetJavaScriptEnabled")
             public void run() {
                 TextView noPdfMsg = (TextView) findViewById(R.id.noSheetMsg);
                 if (videoData.getFolderPath().equals(DANCEVIDEOPATH)) {
@@ -477,11 +463,11 @@ public class ViewVideo extends AppCompatActivity {
                         @Override
                         public boolean shouldOverrideUrlLoading(WebView view, String url) {
                             view.reload();
-                            if (url.contains("print=true") || url.toString().equals(pdf)) {
+                            if (url.contains("print=true") || url.equals(pdf)) {
                                 Uri uri = Uri.parse(pdf);
                                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                                 startActivity(intent);
-                            } else if (url.toString().contains("google.com/ServiceLogin")) {
+                            } else if (url.contains("google.com/ServiceLogin")) {
                                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                                 startActivity(intent);
                             }
@@ -554,32 +540,6 @@ public class ViewVideo extends AppCompatActivity {
                 (android.support.v7.widget.SearchView) menu.findItem(R.id.search).getActionView();
         searchView.setSearchableInfo(
                 searchManager.getSearchableInfo(getComponentName()));
-
-        /*searchView.setOnQueryTextListener(new android.support.v7.widget.SearchView.OnQueryTextListener() {
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                //Log.e("onQueryTextChange", "called");
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                //Proceed to Search Results
-                Intent intent = new Intent(getApplicationContext(), SearchResults.class);
-                intent.putExtra("searchInput", searchView.getQuery().toString());
-                searchView.clearFocus();
-                startActivity(intent);
-                return false;
-            }
-
-        });*/
-
-        //customise the search view
-        /*int searchImgId = getResources().getIdentifier("android:id/search_button", null, null);
-        ImageView v = (ImageView) searchView.findViewById(searchImgId);
-        v.setImageResource(R.drawable.ic_search);*/ //Doesn't work with support.v7.searchview but redundant for changing icon color.
-        //searchView.setIconifiedByDefault(false);
 
         //disable default search icon next to search box
         ImageView searchImage = (ImageView)searchView.findViewById(android.support.v7.appcompat.R.id.search_mag_icon);

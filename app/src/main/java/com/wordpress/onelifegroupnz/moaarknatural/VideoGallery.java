@@ -7,40 +7,28 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.PixelFormat;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.DisplayMetrics;
-import android.util.TypedValue;
-import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.MediaController;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.VideoView;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -49,9 +37,7 @@ import com.google.android.gms.ads.MobileAds;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.R.attr.selectableItemBackground;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.ALLVIDEOSCODE;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DANCEVIDEOPATH;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.FOODVIDEOPATH;
@@ -70,7 +56,6 @@ public class VideoGallery extends AppCompatActivity {
     private Button loadMore;
     private SearchView searchView;
     private ProgressBar progressBar;
-    private boolean savedInstanceExists;
     private CustomSearchFragment searchFragment;
     private String targetFolder;
 
@@ -85,12 +70,6 @@ public class VideoGallery extends AppCompatActivity {
         //load more button
         loadMore = (Button) findViewById(R.id.loadMoreBtn);
         progressBar = (ProgressBar) findViewById(R.id.progressBar2);
-
-        //For fragment implementation
-        savedInstanceExists = true;
-        if (savedInstanceState == null) {
-            savedInstanceExists = false;
-        }
 
         //determine which videos to show.
         Bundle extras = getIntent().getExtras();
@@ -204,6 +183,7 @@ public class VideoGallery extends AppCompatActivity {
 
             //use this for pre v21 devices
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                //noinspection deprecation
                 galleryLinks.get(i).setBackgroundColor(getResources().getColor(R.color.colorPrimary));
             }
 

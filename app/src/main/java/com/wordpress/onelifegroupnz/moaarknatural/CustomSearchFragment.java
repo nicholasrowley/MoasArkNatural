@@ -88,7 +88,7 @@ public class CustomSearchFragment extends Fragment {
         //populate spinner and filter tools
         final Spinner spinner = (Spinner) view.findViewById(R.id.videoTypeSpinner);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(view.getContext(), R.layout.spinner_item,
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(view.getContext(), R.layout.spinner_item,
                 getResources().getStringArray(R.array.search_video_options));
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 

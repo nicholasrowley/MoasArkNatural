@@ -360,7 +360,7 @@ public class Home extends AppCompatActivity {
 
     private void initialiseAds() {
         //initialise ads
-        MobileAds.initialize(this, getString(R.string.banner_ad_unit_id_test));
+        MobileAds.initialize(this, getString(R.string.banner_ad_unit_id_live));
 
         AdView mAdView = (AdView) findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();

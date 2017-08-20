@@ -431,7 +431,7 @@ public class SearchResults extends AppCompatActivity {
 
     private void initialiseAds() {
         //initialise ads
-        MobileAds.initialize(getApplicationContext(), "ca-app-pub-3940256099942544~3347511713");
+        MobileAds.initialize(this, getString(R.string.banner_ad_unit_id_live));
 
         AdView mAdView = (AdView) findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();

@@ -34,7 +34,7 @@
     <string name="search_type_title">Search Type:</string>
     <string name="search_type_all">All</string>
     <string name="search_type_dance">Wellbeing Dance Exercise</string>
-    <string name="search_type_food">Food</string>
+    <string name="search_type_food">Food Health Investment</string>
 
     <!-- This is the advertisement ids for adMob please use the testing one for clicking (Do not click the real ad) -->
     <string name="banner_ad_unit_id_test">ca-app-pub-3940256099942544/6300978111</string>

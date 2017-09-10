@@ -2,6 +2,8 @@ package com.wordpress.onelifegroupnz.moaarknatural;
 
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -21,6 +23,8 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -33,6 +37,7 @@ public class BgpSignUp extends AppCompatActivity {
 
     private SearchView searchView;
     private CustomSearchFragment searchFragment;
+    private TextView formEmail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +46,8 @@ public class BgpSignUp extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_home);
+
+        formEmail = (TextView) findViewById(R.id.bgpSubmitEmail);
 
         addSearchFragment();
 
@@ -53,6 +60,15 @@ public class BgpSignUp extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu, menu);
 
         setUpSearchbar(menu);
+
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem item;
+        item = menu.findItem(R.id.menu_refresh);
+        item.setVisible(false);
 
         return true;
     }
@@ -96,6 +112,12 @@ public class BgpSignUp extends AppCompatActivity {
                 Uri bgpSharesUri = Uri.parse(getString(R.string.BGP_Shares_url));
                 intent = new Intent(Intent.ACTION_VIEW, bgpSharesUri);
                 startActivity(intent);
+                break;
+            case R.id.copyBtn:
+                ClipboardManager clipboard = (ClipboardManager) this.getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("Share Link", formEmail.getText());
+                clipboard.setPrimaryClip(clip);
+                Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_SHORT).show();
                 break;
         }
     }

@@ -47,5 +47,9 @@
     <string name="bgp_sign_up">BGP Sign up</string>
     <string name="participation_agreement_in_bgp_one_life_trust">Participation Agreement in BGP One Life Trust</string>
     <string name="notice_of_application_for_bgp_shares">Notice of application for BGP Shares</string>
+    <string name="sales_email">sales@moasarknaturalnz.com</string>
+    <string name="sales_email_desc">If you have already completed a form please send it to the following email address:</string>
+    <string name="bgp_sign_up_desc">You can view and download the following forms from here.</string>
+    <string name="copy_text_desc">Copy to clipboard</string>
 
 </resources>

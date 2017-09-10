@@ -27,11 +27,18 @@
             android:weightSum="1">
 
             <TextView
-                android:id="@+id/textView"
+                android:id="@+id/BgpPageTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/bgp_sign_up"
                 android:textSize="26sp" />
+
+            <TextView
+                android:id="@+id/pageDesc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/bgp_sign_up_desc"
+                android:textSize="14sp" />
 
             <Button
                 android:id="@+id/paFormBtn"
@@ -46,6 +53,48 @@
                 android:layout_height="wrap_content"
                 android:onClick="btnOnClick"
                 android:text="@string/notice_of_application_for_bgp_shares" />
+
+            <TextView
+                android:id="@+id/emailDesc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="5sp"
+                android:text="@string/sales_email_desc"
+                android:textSize="14sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/black"
+                android:orientation="vertical"
+                android:padding="2sp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/colorBody"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingLeft="2sp"
+                    android:paddingRight="2sp">
+
+                    <TextView
+                        android:id="@+id/bgpSubmitEmail"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/sales_email"
+                        android:textSize="18sp" />
+
+                    <ImageButton
+                        android:id="@+id/copyBtn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:onClick="btnOnClick"
+                        app:srcCompat="@drawable/ic_action_copy"
+                        android:contentDescription="@string/copy_text_desc" />
+                </LinearLayout>
+            </LinearLayout>
 
         </LinearLayout>
     </ScrollView>

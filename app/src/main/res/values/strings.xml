@@ -40,4 +40,12 @@
     <string name="banner_ad_unit_id_test">ca-app-pub-3940256099942544/6300978111</string>
     <string name="banner_ad_unit_id_live">ca-app-pub-2838047532476449/3742836256</string>
 
+    <!-- BGP sign up strings -->
+    <string name="title_activity_bgp_sign_up">Bgp Sign Up</string>
+    <string name="BGP_Shares_url">https://moasarknaturalnz.com/wp-content/uploads/2017/09/Notice-of-Application-for-BGP-Shares-Form.pdf</string>
+    <string name="BGP_Agreement_url">https://moasarknaturalnz.com/wp-content/uploads/2017/09/Participation-Agreement-in-BGP-One-Life-Trust-Form.pdf</string>
+    <string name="bgp_sign_up">BGP Sign up</string>
+    <string name="participation_agreement_in_bgp_one_life_trust">Participation Agreement in BGP One Life Trust</string>
+    <string name="notice_of_application_for_bgp_shares">Notice of application for BGP Shares</string>
+
 </resources>

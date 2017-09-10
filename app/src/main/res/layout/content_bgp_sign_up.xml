@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ads="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorBody"
+    tools:context="com.wordpress.onelifegroupnz.moaarknatural.BgpSignUp"
+    tools:showIn="@layout/activity_bgp_sign_up">
+
+    <ScrollView
+        android:id="@+id/ScrollViewHome"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:id="@+id/pageLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="@dimen/activity_with_bannerad_paddingBottom"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin"
+            android:paddingTop="@dimen/activity_vertical_margin"
+            android:weightSum="1">
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/bgp_sign_up"
+                android:textSize="26sp" />
+
+            <Button
+                android:id="@+id/paFormBtn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="btnOnClick"
+                android:text="@string/participation_agreement_in_bgp_one_life_trust" />
+
+            <Button
+                android:id="@+id/bgpSharesBtn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="btnOnClick"
+                android:text="@string/notice_of_application_for_bgp_shares" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <com.google.android.gms.ads.AdView xmlns:ads="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/adView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        ads:adSize="BANNER"
+        ads:adUnitId="@string/banner_ad_unit_id_live" />
+
+</RelativeLayout>

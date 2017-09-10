@@ -332,6 +332,10 @@ public class Home extends AppCompatActivity {
                 intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 break;
+            case R.id.bgpSignUpBtn:
+                intent = new Intent(Home.this, BgpSignUp.class);
+                startActivity(intent);
+                break;
         }
     }
 

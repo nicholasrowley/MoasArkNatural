@@ -120,6 +120,11 @@ public class Home extends AppCompatActivity {
             case R.id.menu_refresh:
                 refreshContent();
                 return true;
+            case R.id.menu_contact_form:
+                //Proceed to contact form
+                intent = new Intent(Home.this, ContactForm.class);
+                startActivity(intent);
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -348,18 +353,18 @@ public class Home extends AppCompatActivity {
         transaction.commit();
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean("fragment_added", true);
+    }
+
     private void addSearchFragment() {
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
         searchFragment = new CustomSearchFragment();
         transaction.add(R.id.search_fragment, searchFragment);
         transaction.commit();
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putBoolean("fragment_added", true);
     }
 
     private void initialiseAds() {

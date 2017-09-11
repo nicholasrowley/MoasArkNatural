@@ -238,6 +238,11 @@ public class ViewVideo extends AppCompatActivity {
                 return true;
             case R.id.menu_refresh:
                 loadActivity();
+            case R.id.menu_contact_form:
+                //Proceed to contact form
+                intent = new Intent(ViewVideo.this, ContactForm.class);
+                startActivity(intent);
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }

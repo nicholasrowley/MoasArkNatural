@@ -2,13 +2,13 @@ package com.wordpress.onelifegroupnz.moaarknatural;
 
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
@@ -16,14 +16,15 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
@@ -33,25 +34,30 @@ import com.google.android.gms.ads.MobileAds;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DANCEVIDEOPATH;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.FOODVIDEOPATH;
 
-public class BgpSignUp extends AppCompatActivity {
+public class ContactForm extends AppCompatActivity {
 
+    private EditText nameField;
+    private EditText subjectField;
+    private EditText messageField;
     private SearchView searchView;
     private CustomSearchFragment searchFragment;
-    private TextView formEmail;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_bgp_sign_up);
+        setContentView(R.layout.activity_contact_form);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_home);
 
-        formEmail = (TextView) findViewById(R.id.bgpSubmitEmail);
+        nameField = (EditText) findViewById(R.id.nameField);
+        subjectField = (EditText) findViewById(R.id.subjectField);
+        messageField = (EditText) findViewById(R.id.messageField);
 
         addSearchFragment();
-
         initialiseAds();
+
     }
 
     @Override
@@ -69,6 +75,7 @@ public class BgpSignUp extends AppCompatActivity {
         MenuItem item;
         item = menu.findItem(R.id.menu_refresh);
         item.setVisible(false);
+        menu.findItem(R.id.menu_contact_form).setVisible(false);
 
         return true;
     }
@@ -77,86 +84,91 @@ public class BgpSignUp extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent intent;
         switch (item.getItemId()) {
-            // Respond to the action bar's Up/Home button
-            case android.R.id.home:
-                searchView.clearFocus();
-                startActivity(new Intent(BgpSignUp.this, Home.class));
+            case R.id.action_notification:
+                openAppSettings();
                 return true;
             case R.id.menu_dance_video_gallery:
                 //Proceed to Line Dance video gallery
-                intent = new Intent(BgpSignUp.this, VideoGallery.class);
+                intent = new Intent(ContactForm.this, VideoGallery.class);
                 intent.putExtra("videoPath", DANCEVIDEOPATH); //using video path to set the gallery
                 startActivity(intent);
                 return true;
             case R.id.menu_food_video_gallery:
                 //Proceed to Food video gallery
-                intent = new Intent(BgpSignUp.this, VideoGallery.class);
+                intent = new Intent(ContactForm.this, VideoGallery.class);
                 intent.putExtra("videoPath", FOODVIDEOPATH); //using video path to set the gallery
-                startActivity(intent);
-                return true;
-            case R.id.action_notification:
-                openAppSettings();
-                return true;
-            case R.id.menu_contact_form:
-                //Proceed to contact form
-                intent = new Intent(BgpSignUp.this, ContactForm.class);
                 startActivity(intent);
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
-    public void btnOnClick(View v) {
-        Intent intent;
-        switch (v.getId()) {
-            case R.id.paFormBtn:
-                Uri paFormUri = Uri.parse(getString(R.string.BGP_Agreement_url));
-                intent = new Intent(Intent.ACTION_VIEW, paFormUri);
-                startActivity(intent);
-                break;
-            case R.id.bgpSharesBtn:
-                Uri bgpSharesUri = Uri.parse(getString(R.string.BGP_Shares_url));
-                intent = new Intent(Intent.ACTION_VIEW, bgpSharesUri);
-                startActivity(intent);
-                break;
-            case R.id.copyBtn:
-                ClipboardManager clipboard = (ClipboardManager) this.getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText("Share Link", formEmail.getText());
-                clipboard.setPrimaryClip(clip);
-                Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_SHORT).show();
-                break;
+
+    /*
+    Description:
+        Provides validation for incorrectly filled fields checked on submission.
+    */
+    public boolean validateFields() {
+        if (nameField.getText().toString().equals(""))
+            nameField.setError("Name is Required");
+        else
+            nameField.setError(null);
+
+        if (messageField.getText().toString().equals(""))
+            messageField.setError("Message is Required");
+        else
+            messageField.setError(null);
+
+        return TextUtils.isEmpty(nameField.getError()) &&
+                (TextUtils.isEmpty(messageField.getError()));
+    }
+
+    /*
+    Description:
+        Clears fields in feedback form
+    */
+    public void clearFields() {
+        EditText name = (EditText)findViewById(R.id.nameField);
+        name.setText("");
+
+        EditText subject = (EditText)findViewById(R.id.subjectField);
+        subject.setText("");
+
+        EditText message = (EditText)findViewById(R.id.messageField);
+        message.setText("");
+    }
+
+    /*
+    Description:
+        Gathers form data and sends it to email intent
+        intent opens email client chooser
+    */
+    public void sendFeedback(View view) {
+
+        String subject = "Moa's Ark Natural Android - Feedback from " + nameField.getText()
+                + ": " + subjectField.getText();
+        String message = "" + messageField.getText();
+        //clearFields(); Might not be required at this point.
+
+        //intent creates chooser for only email apps
+        Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+        emailIntent.setData(Uri.parse("mailto:" + getString(R.string.sales_email)));
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
+        emailIntent.putExtra(Intent.EXTRA_TEXT, message);
+        try {
+            startActivity(Intent.createChooser(emailIntent, "Send feedback using..."));
+        } catch (android.content.ActivityNotFoundException ex) {
+            Toast.makeText(ContactForm.this, "No email clients installed.", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void initialiseAds() {
-        //initialise ads
-        MobileAds.initialize(this, getString(R.string.banner_ad_unit_id_live));
-
-        AdView mAdView = (AdView) findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
-    }
-
-    //Opens the app setting so the user can turn notifications on or off
-    public void openAppSettings() {
-        String packageName = getString(R.string.package_name);
-
-        try {
-            //Open the specific App Info page:
-            Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-            intent.setData(Uri.parse("package:" + packageName));
-            startActivity(intent);
-
-        } catch ( ActivityNotFoundException e ) {
-            new AlertDialog.Builder(BgpSignUp.this)
-                    .setTitle("Notification Settings Not Available")
-                    .setMessage("Unable to open the apps settings screen, please try again later")
-                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            // continue with delete
-                        }
-                    })
-                    .setIcon(android.R.drawable.ic_dialog_alert)
-                    .show();
+    public void btnOnClick(View v) {
+        switch (v.getId()) {
+            case R.id.submitBtn:
+                //checks whether there are error messages is set
+                //runs email intent if no errors
+                if(validateFields())
+                    sendFeedback(v);
+                break;
         }
     }
 
@@ -168,7 +180,17 @@ public class BgpSignUp extends AppCompatActivity {
         transaction.commit();
     }
 
+    private void initialiseAds() {
+        //initialise ads
+        MobileAds.initialize(this, getString(R.string.banner_ad_unit_id_live));
+
+        AdView mAdView = (AdView) findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
+    }
+
     private void setUpSearchbar( Menu menu ) {
+
         // Associate searchable configuration with the SearchView
         SearchManager searchManager =
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
@@ -210,6 +232,30 @@ public class BgpSignUp extends AppCompatActivity {
                 return true;
             }
         });
+    }
+
+    //Opens the app setting so the user can turn notifications on or off
+    public void openAppSettings() {
+        String packageName = getString(R.string.package_name);
+
+        try {
+            //Open the specific App Info page:
+            Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            intent.setData(Uri.parse("package:" + packageName));
+            startActivity(intent);
+
+        } catch ( ActivityNotFoundException e ) {
+            new AlertDialog.Builder(ContactForm.this)
+                    .setTitle("Notification Settings Not Available")
+                    .setMessage("Unable to open the apps settings screen, please try again later")
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            // continue with delete
+                        }
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+        }
     }
 
 }

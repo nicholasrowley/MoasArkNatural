@@ -45,6 +45,12 @@
                 android:icon="@drawable/ic_food_gallery"
                 android:orderInCategory="7"
                 app:showAsAction="never" />
+            <item
+                android:id="@+id/menu_contact_form"
+                android:title="@string/title_activity_contact_form"
+                android:icon="@mipmap/ic_contact_form"
+                android:orderInCategory="7"
+                app:showAsAction="never" />
         </menu>
     </item>
 </menu>

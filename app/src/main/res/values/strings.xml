@@ -51,5 +51,12 @@
     <string name="sales_email_desc">If you have already completed a form please send it to the following email address:</string>
     <string name="bgp_sign_up_desc">You can view and download the following forms from here.</string>
     <string name="copy_text_desc">Copy to clipboard</string>
+    <string name="title_activity_contact_form">Contact Form</string>
+    <string name="contact_form_title">Contact Moa\'s Ark Natural</string>
+    <string name="contact_form_desc">If you have any questions or concerns please use this contact form. Emails are sent using an external email client.</string>
+    <string name="name_field_hint">Name</string>
+    <string name="subject_field_hint">Subject</string>
+    <string name="message_field_hint">Message</string>
+    <string name="submit_btn_text">Submit</string>
 
 </resources>

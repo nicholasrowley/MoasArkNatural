@@ -157,6 +157,11 @@ public class VideoGallery extends AppCompatActivity {
             case R.id.menu_refresh:
                 refreshContent();
                 return true;
+            case R.id.menu_contact_form:
+                //Proceed to contact form
+                intent = new Intent(VideoGallery.this, ContactForm.class);
+                startActivity(intent);
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }

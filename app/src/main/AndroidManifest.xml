@@ -74,6 +74,10 @@
         <activity
             android:name=".BgpSignUp"
             android:label="@string/title_activity_bgp_sign_up"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ContactForm"
+            android:label="@string/title_activity_contact_form"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 

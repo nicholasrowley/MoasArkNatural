@@ -124,6 +124,11 @@ public class BgpSignUp extends AppCompatActivity {
                 clipboard.setPrimaryClip(clip);
                 Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_SHORT).show();
                 break;
+            case R.id.oneCoinRegisterBtn:
+                //Proceed to contact form
+                intent = new Intent(BgpSignUp.this, OneCoinRegister.class);
+                startActivity(intent);
+                break;
         }
     }
 

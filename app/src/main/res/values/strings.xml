@@ -64,7 +64,7 @@
     <string name="one_life_form_desc">In order to register your One Coin package with the Onelife.eu website (https://www.onelife.eu/en/#login), we will need the following information completed:</string>
     <string name="hint_email_address">Email Address</string>
     <string name="hint_confirm_email_address">Confirm Email Address</string>
-    <string name="hint_first_name">First Name</string>
+    <string name="hint_first_name">First Name(s)</string>
     <string name="hint_last_name">Last Name</string>
     <string name="hint_user_name">Preferred Online User Name</string>
     <string name="hint_country_of_residence">Country of Residence:</string>

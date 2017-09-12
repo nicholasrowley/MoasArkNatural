@@ -31,8 +31,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="100sp"
                 android:layout_gravity="center"
-                app:srcCompat="@drawable/onelifelogo"
-                android:contentDescription="@string/one_life_logo" />
+                android:contentDescription="@string/one_life_logo"
+                app:srcCompat="@drawable/onelifelogo" />
 
             <TextView
                 android:id="@+id/textView2"
@@ -108,7 +108,7 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:paddingLeft="4sp"
                 android:paddingRight="4sp">
@@ -139,7 +139,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ems="10"
-                android:inputType="text"
+                android:inputType="number"
                 android:hint="@string/hint_postcode" />
 
             <EditText
@@ -147,7 +147,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ems="10"
-                android:inputType="textPhonetic"
+                android:inputType="phone"
                 android:hint="@string/hint_mobile_phone" />
 
             <EditText
@@ -155,7 +155,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ems="10"
-                android:inputType="textPhonetic"
+                android:inputType="phone"
                 android:hint="@string/hint_home_phone" />
 
             <TextView

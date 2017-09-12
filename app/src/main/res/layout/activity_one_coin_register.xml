@@ -6,16 +6,22 @@
     android:layout_height="match_parent"
     tools:context="com.wordpress.onelifegroupnz.moaarknatural.OneCoinRegister">
 
-    <android.support.design.widget.AppBarLayout
+    <!--LinearLayout is required or scrollview will break-->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <include layout="@layout/main_toolbar" />
+        <android.support.design.widget.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-        <include layout="@layout/content_one_coin_register" />
+            <include layout="@layout/main_toolbar" />
 
-    </android.support.design.widget.AppBarLayout>
+            <include layout="@layout/content_one_coin_register" />
 
+        </android.support.design.widget.AppBarLayout>
+    </LinearLayout>
 
 
 </android.support.design.widget.CoordinatorLayout>

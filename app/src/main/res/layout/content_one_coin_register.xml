@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.wordpress.onelifegroupnz.moaarknatural.OneCoinRegister"
+    tools:showIn="@layout/activity_one_coin_register"
+    android:background="@color/colorBody">
+
+    <ScrollView
+        android:id="@+id/ScrollViewHome"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:id="@+id/homeLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="@dimen/activity_with_bannerad_paddingBottom"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin"
+            android:paddingTop="@dimen/activity_vertical_margin"
+            android:weightSum="1">
+
+
+            <ImageView
+                android:id="@+id/onelifelogo"
+                android:layout_width="match_parent"
+                android:layout_height="100sp"
+                android:layout_gravity="center"
+                app:srcCompat="@drawable/onelifelogo"
+                android:contentDescription="@string/one_life_logo" />
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/one_coin_account_form_title"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/oneCoinFormDesc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/one_life_form_desc" />
+
+            <EditText
+                android:id="@+id/emailField"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="textEmailAddress"
+                android:hint="@string/hint_email_address" />
+
+            <TextView
+                android:id="@+id/emailInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="(You need to have access to change Passwords etc)" />
+
+            <EditText
+                android:id="@+id/emailConField"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="textEmailAddress"
+                android:hint="@string/hint_confirm_email_address" />
+
+            <EditText
+                android:id="@+id/fnameField"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="textPersonName"
+                android:hint="@string/hint_first_name" />
+
+            <EditText
+                android:id="@+id/lnameField"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="textPersonName"
+                android:hint="@string/hint_last_name" />
+
+            <TextView
+                android:id="@+id/nameInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="(Must be the same as the Legal name on your Passport)" />
+
+            <EditText
+                android:id="@+id/usernameField"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="text"
+                android:hint="@string/hint_user_name" />
+
+            <TextView
+                android:id="@+id/usernameInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="(Cannot be changed later)" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:paddingLeft="4sp"
+                android:paddingRight="4sp">
+
+                <TextView
+                    android:id="@+id/countryDesc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/hint_country_of_residence"
+                    android:textSize="18sp" />
+
+                <Spinner
+                    android:id="@+id/countrySpinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <EditText
+                android:id="@+id/cityField"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="textPersonName|textNoSuggestions"
+                android:hint="@string/hint_city_of_residence" />
+
+            <EditText
+                android:id="@+id/postCodeField"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="text"
+                android:hint="@string/hint_postcode" />
+
+            <EditText
+                android:id="@+id/mobNumField"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="textPhonetic"
+                android:hint="@string/hint_mobile_phone" />
+
+            <EditText
+                android:id="@+id/homNumField"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="textPhonetic"
+                android:hint="@string/hint_home_phone" />
+
+            <TextView
+                android:id="@+id/oneCointFormDetails"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/one_coin_form_details" />
+
+            <Button
+                android:id="@+id/submitBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/submit_btn_text" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <com.google.android.gms.ads.AdView xmlns:ads="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/adView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        ads:adSize="BANNER"
+        ads:adUnitId="@string/banner_ad_unit_id_live" />
+
+</RelativeLayout>

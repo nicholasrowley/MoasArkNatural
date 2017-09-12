@@ -55,6 +55,18 @@
                 android:text="@string/notice_of_application_for_bgp_shares" />
 
             <TextView
+                android:id="@+id/textView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/availiable_forms_desc" />
+
+            <Button
+                android:id="@+id/button2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/one_coin_account_form_title" />
+
+            <TextView
                 android:id="@+id/emailDesc"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

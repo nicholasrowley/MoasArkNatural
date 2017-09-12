@@ -40,7 +40,7 @@
     <string name="banner_ad_unit_id_test">ca-app-pub-3940256099942544/6300978111</string>
     <string name="banner_ad_unit_id_live">ca-app-pub-2838047532476449/3742836256</string>
 
-    <!-- BGP sign up strings -->
+    <!-- BGP sign up and contact form strings -->
     <string name="title_activity_bgp_sign_up">Bgp Sign Up</string>
     <string name="BGP_Shares_url">https://moasarknaturalnz.com/wp-content/uploads/2017/09/Notice-of-Application-for-BGP-Shares-Form.pdf</string>
     <string name="BGP_Agreement_url">https://moasarknaturalnz.com/wp-content/uploads/2017/09/Participation-Agreement-in-BGP-One-Life-Trust-Form.pdf</string>
@@ -58,5 +58,21 @@
     <string name="subject_field_hint">Subject</string>
     <string name="message_field_hint">Message</string>
     <string name="submit_btn_text">Submit</string>
+    <string name="title_activity_one_coin_register">One Coin Account Registration</string>
+    <string name="one_coin_form_details">In order to complete the “Know Your Customer”(KYC) requirements at a later stage, you will need to supply: \n\nFull Residential Address including Street Number and Suburb, Date of Birth, Country of Birth, Passport Number and Passport Expiry Date. \n\nA copy of your passport identification page plus proof of address (Bank Statement or Utility Bill showing full name and address) matching the details supplied by upload. Upon completion and approval, you will be free to transact in Cryptocurrency and e-currency through your Onelife.eu online account.</string>
+    <string name="one_life_logo">one life logo</string>
+    <string name="one_life_form_desc">In order to register your One Coin package with the Onelife.eu website (https://www.onelife.eu/en/#login), we will need the following information completed:</string>
+    <string name="hint_email_address">Email Address</string>
+    <string name="hint_confirm_email_address">Confirm Email Address</string>
+    <string name="hint_first_name">First Name</string>
+    <string name="hint_last_name">Last Name</string>
+    <string name="hint_user_name">Preferred Online User Name</string>
+    <string name="hint_country_of_residence">Country of Residence:</string>
+    <string name="hint_city_of_residence">City of Residence</string>
+    <string name="hint_postcode">Postcode</string>
+    <string name="hint_mobile_phone">Mobile Phone</string>
+    <string name="hint_home_phone">Home Phone</string>
+    <string name="availiable_forms_desc">The following registration forms are available here</string>
+    <string name="one_coin_account_form_title">One Coin Package Account Registration</string>
 
 </resources>

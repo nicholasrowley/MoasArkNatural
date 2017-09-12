@@ -74,5 +74,6 @@
     <string name="hint_home_phone">Home Phone</string>
     <string name="availiable_forms_desc">The following registration forms are available here</string>
     <string name="one_coin_account_form_title">One Coin Package Account Registration</string>
+    <string name="text_country">Select a Country</string>
 
 </resources>

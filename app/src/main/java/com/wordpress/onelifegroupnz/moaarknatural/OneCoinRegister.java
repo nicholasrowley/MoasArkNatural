@@ -1,14 +1,24 @@
 package com.wordpress.onelifegroupnz.moaarknatural;
 
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import java.util.LinkedList;
 
 public class OneCoinRegister extends AppCompatActivity {
 
@@ -43,11 +53,14 @@ public class OneCoinRegister extends AppCompatActivity {
         mobNumField = (TextView) findViewById(R.id.mobNumField);
         homNumField = (TextView) findViewById(R.id.homNumField);
 
+        String[] countryList = getResources().getStringArray(R.array.country_options);
+        //countryList[0] = "This is a string";
+
         //sets country options
         countrySpinner = (Spinner) findViewById(R.id.countrySpinner);
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner_item,
-                getResources().getStringArray(R.array.country_options));
+                countryList);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         countrySpinner.setAdapter(adapter);

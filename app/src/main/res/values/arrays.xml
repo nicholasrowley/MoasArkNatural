@@ -6,6 +6,8 @@
     </string-array>
 
     <string-array name="country_options">
+        <item>@string/text_country</item>
+
         <item>Afghanistan</item>
 
         <item>Albania</item>

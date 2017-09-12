@@ -87,8 +87,6 @@ public class SearchResults extends AppCompatActivity {
             }
         }
 
-        //resultsDescription.setText("Search results for '" + searchInput + "'");
-
         //load more button
         loadMore = (Button) findViewById(R.id.loadMoreBtn);
         loadMore.setVisibility(View.GONE);

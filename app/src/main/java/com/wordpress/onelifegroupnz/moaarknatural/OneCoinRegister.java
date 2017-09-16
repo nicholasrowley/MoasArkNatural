@@ -38,26 +38,26 @@ public class OneCoinRegister extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_one_coin_register);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_home);
 
         //find all textview fields
-        emailField = (TextView) findViewById(R.id.emailField);
-        confEmailField = (TextView) findViewById(R.id.emailConField);
-        fnameField = (TextView) findViewById(R.id.fnameField);
-        lnameField = (TextView) findViewById(R.id.lnameField);
-        usernameField = (TextView) findViewById(R.id.usernameField);
-        cityField = (TextView) findViewById(R.id.cityField);
-        postcodeField = (TextView) findViewById(R.id.postCodeField);
-        mobNumField = (TextView) findViewById(R.id.mobNumField);
-        homNumField = (TextView) findViewById(R.id.homNumField);
+        emailField = findViewById(R.id.emailField);
+        confEmailField = findViewById(R.id.emailConField);
+        fnameField = findViewById(R.id.fnameField);
+        lnameField = findViewById(R.id.lnameField);
+        usernameField = findViewById(R.id.usernameField);
+        cityField = findViewById(R.id.cityField);
+        postcodeField = findViewById(R.id.postCodeField);
+        mobNumField = findViewById(R.id.mobNumField);
+        homNumField = findViewById(R.id.homNumField);
 
         String[] countryList = getResources().getStringArray(R.array.country_options);
         //countryList[0] = "This is a string";
 
         //sets country options
-        countrySpinner = (Spinner) findViewById(R.id.countrySpinner);
+        countrySpinner = findViewById(R.id.countrySpinner);
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner_item,
                 countryList);

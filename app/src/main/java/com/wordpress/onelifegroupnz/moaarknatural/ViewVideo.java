@@ -83,16 +83,16 @@ public class ViewVideo extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_video);
         setTitle(R.string.app_name);
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_home);
 
-        portraitItems = (LinearLayout) findViewById(R.id.portraitItems);
-        videoContainer = (LinearLayout) findViewById(R.id.videoContainer);
-        webview = (WebView) findViewById(R.id.webview);
+        portraitItems = findViewById(R.id.portraitItems);
+        videoContainer = findViewById(R.id.videoContainer);
+        webview = findViewById(R.id.webview);
 
         //vid view imp onCreate code
-        videoView = (VideoView) findViewById(R.id.videoView);
+        videoView = findViewById(R.id.videoView);
         refreshed = false;
 
         Bundle extras = getIntent().getExtras();
@@ -107,12 +107,8 @@ public class ViewVideo extends AppCompatActivity {
         }
         dialogIsOpen = false;
 
-        /*progress dialog shows when video is buffering
-        progressDialog = ProgressDialog.show(ViewVideo.this, "", "Buffering video...", true);
-        progressDialog.setCancelable(true);*/
-
         //progress bar shows when video is buffering
-        progressBar = (ProgressBar) findViewById(R.id.progressBar3);
+        progressBar = findViewById(R.id.progressBar3);
 
         //set up lister to handle VideoView errors
         videoView.setOnErrorListener(new MediaPlayer.OnErrorListener() {
@@ -139,13 +135,12 @@ public class ViewVideo extends AppCompatActivity {
                                         Intent intent = new Intent(ViewVideo.this, VideoGallery.class);
                                         intent.putExtra("videoPath", DANCEVIDEOPATH); //using video path to set the gallery
                                         startActivity(intent);
-                                    } else
-                                        if (videoData.getFolderPath().equals(FOODVIDEOPATH)) {
-                                            //Proceed to Food video gallery
-                                            Intent intent = new Intent(ViewVideo.this, VideoGallery.class);
-                                            intent.putExtra("videoPath", FOODVIDEOPATH); //using video path to set the gallery
-                                            startActivity(intent);
-                                        }
+                                    } else if (videoData.getFolderPath().equals(FOODVIDEOPATH)) {
+                                        //Proceed to Food video gallery
+                                        Intent intent = new Intent(ViewVideo.this, VideoGallery.class);
+                                        intent.putExtra("videoPath", FOODVIDEOPATH); //using video path to set the gallery
+                                        startActivity(intent);
+                                    }
 
                                 }
                             })
@@ -172,14 +167,14 @@ public class ViewVideo extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-        InputMethodManager inm = (InputMethodManager)  this.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        InputMethodManager inm = (InputMethodManager) this.getSystemService(Activity.INPUT_METHOD_SERVICE);
         View focusedView = this.getCurrentFocus();
-        if(focusedView != null)
+        if (focusedView != null)
             inm.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), 0);
     }
 
     @Override
-    protected void onResume(){
+    protected void onResume() {
         super.onResume();
         progressBar.setVisibility(View.VISIBLE);
     }
@@ -238,6 +233,7 @@ public class ViewVideo extends AppCompatActivity {
                 return true;
             case R.id.menu_refresh:
                 loadActivity();
+                return true;
             case R.id.menu_contact_form:
                 //Proceed to contact form
                 intent = new Intent(ViewVideo.this, ContactForm.class);
@@ -318,8 +314,8 @@ public class ViewVideo extends AppCompatActivity {
                     //set the video frame to match the video
                     DisplayMetrics displayMetrics = new DisplayMetrics();
                     getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-                    ViewGroup.LayoutParams params=videoView.getLayoutParams();
-                    ViewGroup.LayoutParams contParams=videoContainer.getLayoutParams();
+                    ViewGroup.LayoutParams params = videoView.getLayoutParams();
+                    ViewGroup.LayoutParams contParams = videoContainer.getLayoutParams();
                     if (portraitView) {
                         params.height = MATCH_PARENT;
                         contParams.height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
@@ -370,6 +366,7 @@ public class ViewVideo extends AppCompatActivity {
                     .show();
         }
     }
+
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
@@ -377,18 +374,18 @@ public class ViewVideo extends AppCompatActivity {
         setOrientation();
     }
 
-    public void setOrientation(){
+    public void setOrientation() {
         portraitView = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
 
         View decorView = getWindow().getDecorView();
 
-        ViewGroup.LayoutParams contParams=videoContainer.getLayoutParams();
+        ViewGroup.LayoutParams contParams = videoContainer.getLayoutParams();
         ViewGroup.LayoutParams params = videoView.getLayoutParams();
 
         TextView videoTitle;
         //Check if in portrait or landscape
         if (portraitView) {
-            videoTitle = (TextView) findViewById(R.id.txtVideoTitle);
+            videoTitle = findViewById(R.id.txtVideoTitle);
             videoTitle.setText(videoData.getName());
             toolbar.setVisibility(View.VISIBLE);
             decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
@@ -440,13 +437,12 @@ public class ViewVideo extends AppCompatActivity {
         final Thread setTask = new Thread() {
             @SuppressLint("SetJavaScriptEnabled")
             public void run() {
-                TextView noPdfMsg = (TextView) findViewById(R.id.noSheetMsg);
+                TextView noPdfMsg = findViewById(R.id.noSheetMsg);
                 if (videoData.getFolderPath().equals(DANCEVIDEOPATH)) {
                     noPdfMsg.setText(R.string.stepsheet_not_found);
-                } else
-                    if (videoData.getFolderPath().equals(FOODVIDEOPATH)) {
-                        noPdfMsg.setText(R.string.recipe_not_found);
-                    }
+                } else if (videoData.getFolderPath().equals(FOODVIDEOPATH)) {
+                    noPdfMsg.setText(R.string.recipe_not_found);
+                }
 
                 //if a matching pdf is found
                 if (!pdfData.getName().equals("")) {
@@ -523,7 +519,7 @@ public class ViewVideo extends AppCompatActivity {
         //initialise ads
         MobileAds.initialize(this, getString(R.string.banner_ad_unit_id_live));
 
-        AdView mAdView = (AdView) findViewById(R.id.adView);
+        AdView mAdView = findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
     }
@@ -536,7 +532,7 @@ public class ViewVideo extends AppCompatActivity {
         transaction.commit();
     }
 
-    private void setUpSearchbar( Menu menu ) {
+    private void setUpSearchbar(Menu menu) {
         // Associate searchable configuration with the SearchView
         SearchManager searchManager =
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
@@ -546,16 +542,17 @@ public class ViewVideo extends AppCompatActivity {
                 searchManager.getSearchableInfo(getComponentName()));
 
         //disable default search icon next to search box
-        ImageView searchImage = (ImageView)searchView.findViewById(android.support.v7.appcompat.R.id.search_mag_icon);
+        ImageView searchImage = searchView.findViewById(android.support.v7.appcompat.R.id.search_mag_icon);
         ViewGroup LayoutSearchView =
                 (ViewGroup) searchImage.getParent();
         LayoutSearchView.removeView(searchImage);
 
-        final LinearLayout searchFragmentLayout = (LinearLayout) findViewById(R.id.search_fragment);
+        final LinearLayout searchFragmentLayout = findViewById(R.id.search_fragment);
         searchFragmentLayout.setVisibility(View.GONE);
 
         MenuItem searchItem = menu.findItem(R.id.search);
-        MenuItemCompat.setOnActionExpandListener(searchItem, new MenuItemCompat.OnActionExpandListener() {
+
+        searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
                 searchFragmentLayout.setVisibility(View.GONE);
@@ -573,14 +570,14 @@ public class ViewVideo extends AppCompatActivity {
                 searchView.requestFocusFromTouch();
 
                 //set width of search view
-                searchView.setMaxWidth( Integer.MAX_VALUE );
+                searchView.setMaxWidth(Integer.MAX_VALUE);
 
                 return true;
             }
         });
     }
 
-    public void loadActivity(){
+    public void loadActivity() {
         loadPdf();
 
         PlayVideo();

@@ -79,7 +79,7 @@ public class CustomSearchFragment extends Fragment {
         super.onPrepareOptionsMenu(menu);
 
         //populate spinner and filter tools
-        final Spinner spinner = (Spinner) view.findViewById(R.id.videoTypeSpinner);
+        final Spinner spinner = view.findViewById(R.id.videoTypeSpinner);
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(view.getContext(), R.layout.spinner_item,
                 getResources().getStringArray(R.array.search_video_options));
@@ -87,8 +87,8 @@ public class CustomSearchFragment extends Fragment {
 
         spinner.setAdapter(adapter);
 
-        final SearchView searchView = (SearchView) MenuItemCompat
-                .getActionView(menu.findItem(R.id.search));
+        final SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+
         searchView.setSuggestionsAdapter(mAdapter);
         searchView.setIconifiedByDefault(false);
         // Getting selected (clicked) item suggestion

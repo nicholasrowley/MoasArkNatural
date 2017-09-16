@@ -47,13 +47,13 @@ public class ContactForm extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contact_form);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_home);
 
-        nameField = (EditText) findViewById(R.id.nameField);
-        subjectField = (EditText) findViewById(R.id.subjectField);
-        messageField = (EditText) findViewById(R.id.messageField);
+        nameField = findViewById(R.id.nameField);
+        subjectField = findViewById(R.id.subjectField);
+        messageField = findViewById(R.id.messageField);
 
         addSearchFragment();
         initialiseAds();
@@ -127,13 +127,13 @@ public class ContactForm extends AppCompatActivity {
         Clears fields in feedback form
     */
     public void clearFields() {
-        EditText name = (EditText)findViewById(R.id.nameField);
+        EditText name = findViewById(R.id.nameField);
         name.setText("");
 
-        EditText subject = (EditText)findViewById(R.id.subjectField);
+        EditText subject = findViewById(R.id.subjectField);
         subject.setText("");
 
-        EditText message = (EditText)findViewById(R.id.messageField);
+        EditText message = findViewById(R.id.messageField);
         message.setText("");
     }
 
@@ -184,7 +184,7 @@ public class ContactForm extends AppCompatActivity {
         //initialise ads
         MobileAds.initialize(this, getString(R.string.banner_ad_unit_id_live));
 
-        AdView mAdView = (AdView) findViewById(R.id.adView);
+        AdView mAdView = findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
     }
@@ -200,16 +200,16 @@ public class ContactForm extends AppCompatActivity {
                 searchManager.getSearchableInfo(getComponentName()));
 
         //disable default search icon next to search box
-        ImageView searchImage = (ImageView)searchView.findViewById(android.support.v7.appcompat.R.id.search_mag_icon);
+        ImageView searchImage = searchView.findViewById(android.support.v7.appcompat.R.id.search_mag_icon);
         ViewGroup LayoutSearchView =
                 (ViewGroup) searchImage.getParent();
         LayoutSearchView.removeView(searchImage);
 
-        final LinearLayout searchFragmentLayout = (LinearLayout) findViewById(R.id.search_fragment);
+        final LinearLayout searchFragmentLayout = findViewById(R.id.search_fragment);
         searchFragmentLayout.setVisibility(View.GONE);
 
         MenuItem searchItem = menu.findItem(R.id.search);
-        MenuItemCompat.setOnActionExpandListener(searchItem, new MenuItemCompat.OnActionExpandListener() {
+        searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener()  {
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
                 searchFragmentLayout.setVisibility(View.GONE);

@@ -43,11 +43,11 @@ public class BgpSignUp extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bgp_sign_up);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_home);
 
-        formEmail = (TextView) findViewById(R.id.bgpSubmitEmail);
+        formEmail = findViewById(R.id.bgpSubmitEmail);
 
         addSearchFragment();
 
@@ -136,7 +136,7 @@ public class BgpSignUp extends AppCompatActivity {
         //initialise ads
         MobileAds.initialize(this, getString(R.string.banner_ad_unit_id_live));
 
-        AdView mAdView = (AdView) findViewById(R.id.adView);
+        AdView mAdView = findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
     }
@@ -183,16 +183,16 @@ public class BgpSignUp extends AppCompatActivity {
                 searchManager.getSearchableInfo(getComponentName()));
 
         //disable default search icon next to search box
-        ImageView searchImage = (ImageView)searchView.findViewById(android.support.v7.appcompat.R.id.search_mag_icon);
+        ImageView searchImage = searchView.findViewById(android.support.v7.appcompat.R.id.search_mag_icon);
         ViewGroup LayoutSearchView =
                 (ViewGroup) searchImage.getParent();
         LayoutSearchView.removeView(searchImage);
 
-        final LinearLayout searchFragmentLayout = (LinearLayout) findViewById(R.id.search_fragment);
+        final LinearLayout searchFragmentLayout = findViewById(R.id.search_fragment);
         searchFragmentLayout.setVisibility(View.GONE);
 
         MenuItem searchItem = menu.findItem(R.id.search);
-        MenuItemCompat.setOnActionExpandListener(searchItem, new MenuItemCompat.OnActionExpandListener() {
+        searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener()  {
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
                 searchFragmentLayout.setVisibility(View.GONE);

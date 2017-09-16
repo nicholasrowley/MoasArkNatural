@@ -63,13 +63,13 @@ public class VideoGallery extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video_gallery);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_home);
         refreshing = false;
         //load more button
-        loadMore = (Button) findViewById(R.id.loadMoreBtn);
-        progressBar = (ProgressBar) findViewById(R.id.progressBar2);
+        loadMore = findViewById(R.id.loadMoreBtn);
+        progressBar = findViewById(R.id.progressBar2);
 
         //determine which videos to show.
         Bundle extras = getIntent().getExtras();
@@ -77,7 +77,7 @@ public class VideoGallery extends AppCompatActivity {
             targetFolder = (String) extras.getSerializable("videoPath");
         }
         //prepare gallery based on target folder
-        TextView galleryTitle = (TextView) findViewById(R.id.galleryTitle);
+        TextView galleryTitle = findViewById(R.id.galleryTitle);
         if (targetFolder.equals(DANCEVIDEOPATH))
             galleryTitle.setText(getString(R.string.title_activity_dance_video_gallery));
         else
@@ -172,7 +172,7 @@ public class VideoGallery extends AppCompatActivity {
         LinearLayout galleryView;
 
         //create video gallery buttons
-        galleryView = (LinearLayout) findViewById(R.id.gallery);
+        galleryView = findViewById(R.id.gallery);
         //clears the linearlayout for the video buttons
         galleryView.removeAllViews();
         galleryLinks = new ArrayList<>();
@@ -393,7 +393,7 @@ public class VideoGallery extends AppCompatActivity {
         //initialise ads
         MobileAds.initialize(this, getString(R.string.banner_ad_unit_id_live));
 
-        AdView mAdView = (AdView) findViewById(R.id.adView);
+        AdView mAdView = findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
     }
@@ -422,16 +422,16 @@ public class VideoGallery extends AppCompatActivity {
                 searchManager.getSearchableInfo(getComponentName()));
 
         //disable default search icon next to search box
-        ImageView searchImage = (ImageView)searchView.findViewById(android.support.v7.appcompat.R.id.search_mag_icon);
+        ImageView searchImage = searchView.findViewById(android.support.v7.appcompat.R.id.search_mag_icon);
         ViewGroup LayoutSearchView =
                 (ViewGroup) searchImage.getParent();
         LayoutSearchView.removeView(searchImage);
 
-        final LinearLayout searchFragmentLayout = (LinearLayout) findViewById(R.id.search_fragment);
+        final LinearLayout searchFragmentLayout = findViewById(R.id.search_fragment);
         searchFragmentLayout.setVisibility(View.GONE);
 
         MenuItem searchItem = menu.findItem(R.id.search);
-        MenuItemCompat.setOnActionExpandListener(searchItem, new MenuItemCompat.OnActionExpandListener() {
+        searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener()  {
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
                 searchFragmentLayout.setVisibility(View.GONE);

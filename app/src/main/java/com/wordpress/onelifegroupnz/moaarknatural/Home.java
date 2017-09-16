@@ -24,6 +24,8 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -49,23 +51,29 @@ public class Home extends AppCompatActivity {
 
     private CustomSearchFragment searchFragment;
 
+    private ProgressBar refreshProgressbar;
+    private RelativeLayout rssView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setLogo(R.mipmap.ic_launcher);
 
         refreshing = false;
 
-        featureDanceVideo = (Button) findViewById(R.id.featureDanceVideoBtn);
-        featureFoodVideo = (Button) findViewById(R.id.featureFoodVideoBtn);
-        blogsTitleText = (TextView) findViewById(R.id.textBlogsTitle);
+        featureDanceVideo = findViewById(R.id.featureDanceVideoBtn);
+        featureFoodVideo = findViewById(R.id.featureFoodVideoBtn);
+        blogsTitleText = findViewById(R.id.textBlogsTitle);
 
         //For fragment implementation
         savedInstanceExists = savedInstanceState != null;
         addSearchFragment();
+
+        refreshProgressbar = findViewById(R.id.refreshProgress);
+        rssView = findViewById(R.id.fragment_container);
 
         refreshContent();
 
@@ -118,7 +126,8 @@ public class Home extends AppCompatActivity {
                 startActivity(intent);
                 return true;
             case R.id.menu_refresh:
-                refreshContent();
+                if(!(refreshProgressbar.getVisibility() == View.VISIBLE))
+                    refreshContent();
                 return true;
             case R.id.menu_contact_form:
                 //Proceed to contact form
@@ -134,36 +143,64 @@ public class Home extends AppCompatActivity {
     public void refreshContent() {
         if (!refreshing) {
             refreshing = true;
+            refreshProgressbar.setProgress(0);
+            refreshProgressbar.setVisibility(View.VISIBLE);
 
+            final ProgressBarAnimation anim = new ProgressBarAnimation(refreshProgressbar, 0, 80);
+            anim.setDuration(3040);
+            refreshProgressbar.startAnimation(anim);
+
+            //TODO check the impact of user interaction without the progress dialog
             //progress dialog shows when videos are loading
-            final ProgressDialog progressDialog = ProgressDialog.show(Home.this, "", "Loading Videos...", true);
+            //final ProgressDialog progressDialog = ProgressDialog.show(Home.this, "", "Loading Videos...", true);
             final Toast refreshDialog = Toast.makeText(getApplicationContext(), "Feature Videos Refreshed", Toast.LENGTH_SHORT);
 
             //Data load is done here
             final Thread refreshTask = new Thread() {
                 public void run() {
                     try {
-                        if (appData == null)
+                        if (appData == null) {
                             appData = GlobalAppData.getInstance(getString(R.string.ACCESS_TOKEN), Home.this, "");
+                        }
                         else {
                             appData.refreshDropboxVideoFiles(getString(R.string.ACCESS_TOKEN), Home.this, "", ALLVIDEOSCODE);
+
                             refreshDialog.show();
                         }
                         //if data failed to load attempt to reload it.
                         if (appData.getVideoData(DANCEVIDEOPATH).size() == 0
                                 || appData.getVideoData(FOODVIDEOPATH).size() == 0) {
                             if (appData.getVideoData(DANCEVIDEOPATH).size() == 0
-                                    && appData.getVideoData(FOODVIDEOPATH).size() == 0)
+                                    && appData.getVideoData(FOODVIDEOPATH).size() == 0) {
                                 appData.refreshDropboxVideoFiles(getString(R.string.ACCESS_TOKEN), Home.this, "", ALLVIDEOSCODE);
-                            else if (appData.getVideoData(DANCEVIDEOPATH).size() == 0)
+                            }
+                            else if (appData.getVideoData(DANCEVIDEOPATH).size() == 0) {
                                 appData.refreshDropboxVideoFiles(getString(R.string.ACCESS_TOKEN), Home.this, "", DANCEVIDEOPATH);
-                            else if (appData.getVideoData(FOODVIDEOPATH).size() == 0)
+                            }
+                            else if (appData.getVideoData(FOODVIDEOPATH).size() == 0) {
                                 appData.refreshDropboxVideoFiles(getString(R.string.ACCESS_TOKEN), Home.this, "", FOODVIDEOPATH);
+                            }
                         }
+
                         sleep(100);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+                }
+            };
+
+            final Thread finishLoading = new Thread() {
+                public void run() {
+                    ProgressBarAnimation anim5 = new ProgressBarAnimation(refreshProgressbar, 80, 100);
+                    anim5.setDuration(1000);
+                    refreshProgressbar.startAnimation(anim5);
+                }
+            };
+
+            final Thread setProgressComplete = new Thread() {
+                public void run() {
+                    refreshProgressbar.setVisibility(View.GONE);
+                    refreshing = false;
                 }
             };
 
@@ -196,13 +233,15 @@ public class Home extends AppCompatActivity {
                         setFeatureVideoLink();
                         blogsTitleText.setVisibility(View.VISIBLE);
 
-                        //rss fragment implemented here
-                        if (!savedInstanceExists) {
-                            addRssFragment();
+                        try{
+                            //rss fragment implemented here
+                            if (!savedInstanceExists) {
+                                addRssFragment();
+                            }
+                        } catch(IllegalStateException e) {
+                            e.printStackTrace();
                         }
                     }
-                    progressDialog.dismiss();
-                    refreshing = false;
                 }
             };
 
@@ -215,6 +254,26 @@ public class Home extends AppCompatActivity {
                         e.printStackTrace();
                     }
                     runOnUiThread(setTask);
+                    try {
+                        setTask.join();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    //TODO retirement of progress dialog
+                    //progressDialog.dismiss();
+
+                        try {
+                            sleep(anim.getDuration() - (refreshProgressbar.getProgress()*38));
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    runOnUiThread(finishLoading);
+                    try {
+                        finishLoading.join();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    runOnUiThread(setProgressComplete);
                 }
             };
             refreshTask.start();
@@ -349,7 +408,7 @@ public class Home extends AppCompatActivity {
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
         fragment = new RssFragment();
-        transaction.add(R.id.fragment_container, fragment);
+        transaction.add(rssView.getId(), fragment);
         transaction.commit();
     }
 
@@ -371,7 +430,7 @@ public class Home extends AppCompatActivity {
         //initialise ads
         MobileAds.initialize(this, getString(R.string.banner_ad_unit_id_live));
 
-        AdView mAdView = (AdView) findViewById(R.id.adView);
+        AdView mAdView = findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
     }
@@ -387,16 +446,16 @@ public class Home extends AppCompatActivity {
                 searchManager.getSearchableInfo(getComponentName()));
 
         //disable default search icon next to search box
-        ImageView searchImage = (ImageView)searchView.findViewById(android.support.v7.appcompat.R.id.search_mag_icon);
+        ImageView searchImage = searchView.findViewById(android.support.v7.appcompat.R.id.search_mag_icon);
         ViewGroup LayoutSearchView =
                 (ViewGroup) searchImage.getParent();
         LayoutSearchView.removeView(searchImage);
 
-        final LinearLayout searchFragmentLayout = (LinearLayout) findViewById(R.id.search_fragment);
+        final LinearLayout searchFragmentLayout = findViewById(R.id.search_fragment);
         searchFragmentLayout.setVisibility(View.GONE);
 
         MenuItem searchItem = menu.findItem(R.id.search);
-        MenuItemCompat.setOnActionExpandListener(searchItem, new MenuItemCompat.OnActionExpandListener() {
+        searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener()  {
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
                 searchFragmentLayout.setVisibility(View.GONE);
@@ -419,5 +478,18 @@ public class Home extends AppCompatActivity {
                 return true;
             }
         });
+    }
+
+
+    private void disableOnlineServices(){
+        featureDanceVideo.setVisibility(View.GONE);
+        featureFoodVideo.setVisibility(View.GONE);
+        rssView.setVisibility(View.GONE);
+    }
+
+    private void enableOnlineServices(){
+        featureDanceVideo.setVisibility(View.VISIBLE);
+        featureFoodVideo.setVisibility(View.VISIBLE);
+        rssView.setVisibility(View.VISIBLE);
     }
 }

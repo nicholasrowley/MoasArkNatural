@@ -65,7 +65,7 @@ public class SearchResults extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_results);
         setTitle(R.string.app_name);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_home);
 
@@ -88,10 +88,10 @@ public class SearchResults extends AppCompatActivity {
         }
 
         //load more button
-        loadMore = (Button) findViewById(R.id.loadMoreBtn);
+        loadMore = findViewById(R.id.loadMoreBtn);
         loadMore.setVisibility(View.GONE);
 
-        progressBar = (ProgressBar) findViewById(R.id.progressBar4);
+        progressBar = findViewById(R.id.progressBar4);
 
         //For fragment implementation
         addSearchFragment();
@@ -185,13 +185,13 @@ public class SearchResults extends AppCompatActivity {
         LinearLayout resultsView;
 
         //create video gallery buttons
-        resultsView = (LinearLayout) findViewById(R.id.resultsView);
+        resultsView = findViewById(R.id.resultsView);
         //clears the linearlayout for the video buttons
         resultsView.removeAllViews();
         resultLinks = new ArrayList<>();
         int i = 0;
 
-        TextView title = (TextView) findViewById(R.id.resultsDescription);
+        TextView title = findViewById(R.id.resultsDescription);
 
         Integer numResults;
 
@@ -436,7 +436,7 @@ public class SearchResults extends AppCompatActivity {
         //initialise ads
         MobileAds.initialize(this, getString(R.string.banner_ad_unit_id_live));
 
-        AdView mAdView = (AdView) findViewById(R.id.adView);
+        AdView mAdView = findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
     }
@@ -465,16 +465,16 @@ public class SearchResults extends AppCompatActivity {
                 searchManager.getSearchableInfo(getComponentName()));
 
         //disable default search icon next to search box
-        ImageView searchImage = (ImageView)searchView.findViewById(android.support.v7.appcompat.R.id.search_mag_icon);
+        ImageView searchImage = searchView.findViewById(android.support.v7.appcompat.R.id.search_mag_icon);
         ViewGroup LayoutSearchView =
                 (ViewGroup) searchImage.getParent();
         LayoutSearchView.removeView(searchImage);
 
-        final LinearLayout searchFragmentLayout = (LinearLayout) findViewById(R.id.search_fragment);
+        final LinearLayout searchFragmentLayout = findViewById(R.id.search_fragment);
         searchFragmentLayout.setVisibility(View.GONE);
 
         MenuItem searchItem = menu.findItem(R.id.search);
-        MenuItemCompat.setOnActionExpandListener(searchItem, new MenuItemCompat.OnActionExpandListener() {
+        searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
                 searchFragmentLayout.setVisibility(View.GONE);

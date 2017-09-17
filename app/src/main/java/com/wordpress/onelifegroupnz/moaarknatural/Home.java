@@ -75,6 +75,7 @@ public class Home extends AppCompatActivity {
         refreshProgressbar = findViewById(R.id.refreshProgress);
         rssView = findViewById(R.id.fragment_container);
 
+
         refreshContent();
 
         initialiseAds();
@@ -82,7 +83,7 @@ public class Home extends AppCompatActivity {
 
     //looks for feature videos automatically if required when resuming the Home screen
     @Override
-    protected void onResume(){
+    protected void onResume() {
         super.onResume();
         setFeatureVideoLink();
     }
@@ -90,9 +91,9 @@ public class Home extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-        InputMethodManager inm = (InputMethodManager)  this.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        InputMethodManager inm = (InputMethodManager) this.getSystemService(Activity.INPUT_METHOD_SERVICE);
         View focusedView = this.getCurrentFocus();
-        if(focusedView != null)
+        if (focusedView != null)
             inm.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), 0);
     }
 
@@ -126,7 +127,7 @@ public class Home extends AppCompatActivity {
                 startActivity(intent);
                 return true;
             case R.id.menu_refresh:
-                if(!(refreshProgressbar.getVisibility() == View.VISIBLE))
+                if (!(refreshProgressbar.getVisibility() == View.VISIBLE))
                     refreshContent();
                 return true;
             case R.id.menu_contact_form:
@@ -143,6 +144,8 @@ public class Home extends AppCompatActivity {
     public void refreshContent() {
         if (!refreshing) {
             refreshing = true;
+
+            //progress bar shows when videos are loading
             refreshProgressbar.setProgress(0);
             refreshProgressbar.setVisibility(View.VISIBLE);
 
@@ -150,9 +153,6 @@ public class Home extends AppCompatActivity {
             anim.setDuration(3040);
             refreshProgressbar.startAnimation(anim);
 
-            //TODO check the impact of user interaction without the progress dialog
-            //progress dialog shows when videos are loading
-            //final ProgressDialog progressDialog = ProgressDialog.show(Home.this, "", "Loading Videos...", true);
             final Toast refreshDialog = Toast.makeText(getApplicationContext(), "Feature Videos Refreshed", Toast.LENGTH_SHORT);
 
             //Data load is done here
@@ -161,23 +161,21 @@ public class Home extends AppCompatActivity {
                     try {
                         if (appData == null) {
                             appData = GlobalAppData.getInstance(getString(R.string.ACCESS_TOKEN), Home.this, "");
-                        }
-                        else {
+                        } else {
                             appData.refreshDropboxVideoFiles(getString(R.string.ACCESS_TOKEN), Home.this, "", ALLVIDEOSCODE);
 
                             refreshDialog.show();
                         }
+
                         //if data failed to load attempt to reload it.
                         if (appData.getVideoData(DANCEVIDEOPATH).size() == 0
                                 || appData.getVideoData(FOODVIDEOPATH).size() == 0) {
                             if (appData.getVideoData(DANCEVIDEOPATH).size() == 0
                                     && appData.getVideoData(FOODVIDEOPATH).size() == 0) {
                                 appData.refreshDropboxVideoFiles(getString(R.string.ACCESS_TOKEN), Home.this, "", ALLVIDEOSCODE);
-                            }
-                            else if (appData.getVideoData(DANCEVIDEOPATH).size() == 0) {
+                            } else if (appData.getVideoData(DANCEVIDEOPATH).size() == 0) {
                                 appData.refreshDropboxVideoFiles(getString(R.string.ACCESS_TOKEN), Home.this, "", DANCEVIDEOPATH);
-                            }
-                            else if (appData.getVideoData(FOODVIDEOPATH).size() == 0) {
+                            } else if (appData.getVideoData(FOODVIDEOPATH).size() == 0) {
                                 appData.refreshDropboxVideoFiles(getString(R.string.ACCESS_TOKEN), Home.this, "", FOODVIDEOPATH);
                             }
                         }
@@ -191,7 +189,7 @@ public class Home extends AppCompatActivity {
 
             final Thread finishLoading = new Thread() {
                 public void run() {
-                    ProgressBarAnimation anim5 = new ProgressBarAnimation(refreshProgressbar, 80, 100);
+                    ProgressBarAnimation anim5 = new ProgressBarAnimation(refreshProgressbar, refreshProgressbar.getProgress(), 100);
                     anim5.setDuration(1000);
                     refreshProgressbar.startAnimation(anim5);
                 }
@@ -213,6 +211,7 @@ public class Home extends AppCompatActivity {
                         featureDanceVideo.setVisibility(View.GONE);
                         featureFoodVideo.setVisibility(View.GONE);
                         blogsTitleText.setVisibility(View.GONE);
+
                         new AlertDialog.Builder(Home.this)
                                 .setTitle(getString(R.string.server_connection_error_title))
                                 .setMessage(getString(R.string.server_connection_error))
@@ -233,12 +232,12 @@ public class Home extends AppCompatActivity {
                         setFeatureVideoLink();
                         blogsTitleText.setVisibility(View.VISIBLE);
 
-                        try{
+                        try {
                             //rss fragment implemented here
                             if (!savedInstanceExists) {
                                 addRssFragment();
                             }
-                        } catch(IllegalStateException e) {
+                        } catch (IllegalStateException e) {
                             e.printStackTrace();
                         }
                     }
@@ -253,23 +252,30 @@ public class Home extends AppCompatActivity {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+                    //give the appData extra time to load.
+                    if (appData.getVideoData(DANCEVIDEOPATH).size() == 0
+                            || appData.getVideoData(FOODVIDEOPATH).size() == 0) {
+                        try {
+                            sleep(3000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
                     runOnUiThread(setTask);
                     try {
                         setTask.join();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    //TODO retirement of progress dialog
-                    //progressDialog.dismiss();
 
-                        try {
-                            sleep(anim.getDuration() - (refreshProgressbar.getProgress()*38));
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
                     runOnUiThread(finishLoading);
                     try {
                         finishLoading.join();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        sleep(1000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -285,13 +291,13 @@ public class Home extends AppCompatActivity {
         featureDanceVideo.setVisibility(View.GONE);
         featureFoodVideo.setVisibility(View.GONE);
 
-            //set the first dance video in the list as the featured video
-            if (appData.getVideoData(DANCEVIDEOPATH).size() != 0) {
-                String buttonText = getString(R.string.hm_feature_dance_video_aut_text) + "\n" +
-                        appData.getVideoData(DANCEVIDEOPATH).get(0).getName().replaceFirst("[.][^.]+$", "");
-                featureDanceVideo.setText(buttonText);
-                featureDanceVideo.setVisibility(View.VISIBLE);
-            }
+        //set the first dance video in the list as the featured video
+        if (appData.getVideoData(DANCEVIDEOPATH).size() != 0) {
+            String buttonText = getString(R.string.hm_feature_dance_video_aut_text) + "\n" +
+                    appData.getVideoData(DANCEVIDEOPATH).get(0).getName().replaceFirst("[.][^.]+$", "");
+            featureDanceVideo.setText(buttonText);
+            featureDanceVideo.setVisibility(View.VISIBLE);
+        }
 
         //set the first food video in the list as the featured video
         if (appData.getVideoData(FOODVIDEOPATH).size() != 0) {
@@ -312,7 +318,7 @@ public class Home extends AppCompatActivity {
             intent.setData(Uri.parse("package:" + packageName));
             startActivity(intent);
 
-        } catch ( ActivityNotFoundException e ) {
+        } catch (ActivityNotFoundException e) {
             new AlertDialog.Builder(Home.this)
                     .setTitle("Notification Settings Not Available")
                     .setMessage("Unable to open the apps settings screen, please try again later")
@@ -435,7 +441,7 @@ public class Home extends AppCompatActivity {
         mAdView.loadAd(adRequest);
     }
 
-    private void setUpSearchbar( Menu menu ) {
+    private void setUpSearchbar(Menu menu) {
 
         // Associate searchable configuration with the SearchView
         SearchManager searchManager =
@@ -455,7 +461,7 @@ public class Home extends AppCompatActivity {
         searchFragmentLayout.setVisibility(View.GONE);
 
         MenuItem searchItem = menu.findItem(R.id.search);
-        searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener()  {
+        searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
                 searchFragmentLayout.setVisibility(View.GONE);
@@ -473,23 +479,10 @@ public class Home extends AppCompatActivity {
                 searchView.requestFocusFromTouch();
 
                 //set width of search view
-                searchView.setMaxWidth( Integer.MAX_VALUE );
+                searchView.setMaxWidth(Integer.MAX_VALUE);
 
                 return true;
             }
         });
-    }
-
-
-    private void disableOnlineServices(){
-        featureDanceVideo.setVisibility(View.GONE);
-        featureFoodVideo.setVisibility(View.GONE);
-        rssView.setVisibility(View.GONE);
-    }
-
-    private void enableOnlineServices(){
-        featureDanceVideo.setVisibility(View.VISIBLE);
-        featureFoodVideo.setVisibility(View.VISIBLE);
-        rssView.setVisibility(View.VISIBLE);
     }
 }

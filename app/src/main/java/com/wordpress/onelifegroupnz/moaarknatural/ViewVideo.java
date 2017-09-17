@@ -40,6 +40,7 @@ import android.widget.LinearLayout;
 import android.widget.MediaController;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.google.android.gms.ads.AdRequest;
@@ -77,6 +78,8 @@ public class ViewVideo extends AppCompatActivity {
     private CustomSearchFragment searchFragment;
 
     private FirebaseAnalytics mFirebaseAnalytics;
+
+    private ProgressBar refreshProgressbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -157,9 +160,16 @@ public class ViewVideo extends AppCompatActivity {
 
         addSearchFragment();
 
+        refreshProgressbar = findViewById(R.id.refreshProgress);
+
         loadActivity();
 
         setOrientation();
+
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
+            Toast.makeText(getApplicationContext(), "Switch to landscape for fullscreen view", Toast.LENGTH_SHORT).show();
+        else
+            Toast.makeText(getApplicationContext(), "Switch to portrait to exit fullscreen view", Toast.LENGTH_SHORT).show();
 
         initialiseAds();
     }
@@ -232,7 +242,10 @@ public class ViewVideo extends AppCompatActivity {
                 startActivity(intent);
                 return true;
             case R.id.menu_refresh:
-                loadActivity();
+                if(!(refreshProgressbar.getVisibility() == View.VISIBLE)) {
+                    refreshProgressbar.setVisibility(View.VISIBLE);
+                    loadActivity();
+                }
                 return true;
             case R.id.menu_contact_form:
                 //Proceed to contact form
@@ -578,8 +591,52 @@ public class ViewVideo extends AppCompatActivity {
     }
 
     public void loadActivity() {
+        refreshProgressbar.setProgress(0);
+        refreshProgressbar.setVisibility(View.VISIBLE);
+
+        final ProgressBarAnimation anim = new ProgressBarAnimation(refreshProgressbar, 0, 80);
+        anim.setDuration(3040);
+        refreshProgressbar.startAnimation(anim);
+
         loadPdf();
 
         PlayVideo();
+
+        finishLoading();
+    }
+
+    /* A method for completing the progress bar animation on the toolbar*/
+    private void finishLoading() {
+        final Thread finishLoading = new Thread() {
+            public void run() {
+                ProgressBarAnimation anim5 = new ProgressBarAnimation(refreshProgressbar, refreshProgressbar.getProgress(), 100);
+                anim5.setDuration(1000);
+                refreshProgressbar.startAnimation(anim5);
+            }
+        };
+
+        final Thread setProgressComplete = new Thread() {
+            public void run() {
+                refreshProgressbar.setVisibility(View.GONE);
+            }
+        };
+
+        Thread waitForRefresh = new Thread() {
+            public void run() {
+                runOnUiThread(finishLoading);
+                try {
+                    finishLoading.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                runOnUiThread(setProgressComplete);
+            }
+        };
+        waitForRefresh.start();
     }
 }

@@ -60,6 +60,8 @@ public class SearchResults extends AppCompatActivity {
     private ProgressBar progressBar;
     private CustomSearchFragment searchFragment;
 
+    private ProgressBar refreshProgressbar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,6 +94,8 @@ public class SearchResults extends AppCompatActivity {
         loadMore.setVisibility(View.GONE);
 
         progressBar = findViewById(R.id.progressBar4);
+
+        refreshProgressbar = findViewById(R.id.refreshProgress);
 
         //For fragment implementation
         addSearchFragment();
@@ -144,7 +148,10 @@ public class SearchResults extends AppCompatActivity {
                 startActivity(intent);
                 return true;
             case R.id.menu_refresh:
-                refreshContent();
+                if(!(refreshProgressbar.getVisibility() == View.VISIBLE)){
+                    refreshProgressbar.setVisibility(View.VISIBLE);
+                    refreshContent();
+                }
                 return true;
             case R.id.menu_contact_form:
                 //Proceed to contact form
@@ -248,15 +255,20 @@ public class SearchResults extends AppCompatActivity {
         progressBar.setVisibility(View.GONE);
     }
 
-    /*Checks Dropbox for videos in another thread and shows a progress dialog in the main thread.
+    /*Checks Dropbox for videos in another thread and shows a progress bar
     * Run when tbe activity needs to be loaded from scratch when opened or by refresh button. */
     public void refreshContent() {
         if (!refreshing) {
             refreshing = true;
-            //progress dialog shows when videos are loading
-            final ProgressDialog progressDialog = ProgressDialog.show(SearchResults.this, "", "Loading Videos...", true);
+            //progress bar shows when videos are loading
+            refreshProgressbar.setProgress(0);
+            refreshProgressbar.setVisibility(View.VISIBLE);
+
+            final ProgressBarAnimation anim = new ProgressBarAnimation(refreshProgressbar, 0, 80);
+            anim.setDuration(3040);
+            refreshProgressbar.startAnimation(anim);
+
             final Toast refreshDialog = Toast.makeText(getApplicationContext(), "Results refreshed", Toast.LENGTH_SHORT);
-            final Handler mHandler = new Handler();
 
             //Data load is done here
             final Thread refreshTask = new Thread() {
@@ -289,7 +301,6 @@ public class SearchResults extends AppCompatActivity {
                         refreshDialog.show();
                         sleep(100);
                     } catch (InterruptedException e) {
-                        progressDialog.dismiss();
                         e.printStackTrace();
                     }
                 }
@@ -319,8 +330,20 @@ public class SearchResults extends AppCompatActivity {
                                 .setCancelable(false)
                                 .show();
                     }
+                }
+            };
 
-                    progressDialog.dismiss();
+            final Thread finishLoading = new Thread() {
+                public void run() {
+                    ProgressBarAnimation anim5 = new ProgressBarAnimation(refreshProgressbar, refreshProgressbar.getProgress(), 100);
+                    anim5.setDuration(1000);
+                    refreshProgressbar.startAnimation(anim5);
+                }
+            };
+
+            final Thread setProgressComplete = new Thread() {
+                public void run() {
+                    refreshProgressbar.setVisibility(View.GONE);
                     refreshing = false;
                 }
             };
@@ -333,7 +356,25 @@ public class SearchResults extends AppCompatActivity {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    mHandler.post(setTask);
+                    runOnUiThread(setTask);
+                    try {
+                        setTask.join();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    runOnUiThread(finishLoading);
+                    try {
+                        finishLoading.join();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    runOnUiThread(setProgressComplete);
+
                 }
             };
             refreshTask.start();

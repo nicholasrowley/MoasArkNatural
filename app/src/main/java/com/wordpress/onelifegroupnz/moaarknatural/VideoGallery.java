@@ -58,6 +58,7 @@ public class VideoGallery extends AppCompatActivity {
     private ProgressBar progressBar;
     private CustomSearchFragment searchFragment;
     private String targetFolder;
+    private ProgressBar refreshProgressbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +86,8 @@ public class VideoGallery extends AppCompatActivity {
                 galleryTitle.setText(getString(R.string.title_activity_food_video_gallery));
 
         addSearchFragment();
+
+        refreshProgressbar = findViewById(R.id.refreshProgress);
 
         refreshContent();
 
@@ -155,7 +158,10 @@ public class VideoGallery extends AppCompatActivity {
                 openAppSettings();
                 return true;
             case R.id.menu_refresh:
-                refreshContent();
+                if(!(refreshProgressbar.getVisibility() == View.VISIBLE)) {
+                    refreshProgressbar.setVisibility(View.VISIBLE);
+                    refreshContent();
+                }
                 return true;
             case R.id.menu_contact_form:
                 //Proceed to contact form
@@ -225,13 +231,23 @@ public class VideoGallery extends AppCompatActivity {
         }
     }
 
-    /*Checks Dropbox for videos in another thread and shows a progress dialog in the main thread.
+    /*Checks Dropbox for videos in another thread and shows a progress bar.
     * Run when tbe activity needs to be loaded from scratch when opened or by refresh button. */
     public void refreshContent() {
         if (!refreshing) {
             refreshing = true;
-            //progress dialog shows when videos are loading
-            final ProgressDialog progressDialog = ProgressDialog.show(VideoGallery.this, "", "Loading Videos...", true);
+            findViewById(R.id.gallery).setVisibility(View.GONE);
+            findViewById(R.id.loadMoreBtn).setVisibility(View.GONE);
+            progressBar.setVisibility(View.VISIBLE);
+            //progress bar shows when videos are loading
+            refreshProgressbar.setProgress(0);
+            refreshProgressbar.setVisibility(View.VISIBLE);
+
+            final ProgressBarAnimation anim = new ProgressBarAnimation(refreshProgressbar, 0, 80);
+            anim.setDuration(3040);
+            refreshProgressbar.startAnimation(anim);
+
+            //final ProgressDialog progressDialog = ProgressDialog.show(VideoGallery.this, "", "Loading Videos...", true);
             final Toast refreshDialog = Toast.makeText(getApplicationContext(), "Gallery refreshed", Toast.LENGTH_SHORT);
             final Handler mHandler = new Handler();
 
@@ -258,7 +274,6 @@ public class VideoGallery extends AppCompatActivity {
                         }
                         sleep(100);
                     } catch (InterruptedException e) {
-                        progressDialog.dismiss();
                         e.printStackTrace();
                     }
                 }
@@ -268,6 +283,9 @@ public class VideoGallery extends AppCompatActivity {
             final Thread setTask = new Thread() {
                 public void run() {
                     loadGallery();
+                    findViewById(R.id.gallery).setVisibility(View.VISIBLE);
+                    progressBar.setVisibility(View.GONE);
+
                     //if Dropbox connection has failed.
                     if (!appData.dbSuccess(targetFolder)) {
                         new AlertDialog.Builder(VideoGallery.this)
@@ -287,8 +305,20 @@ public class VideoGallery extends AppCompatActivity {
                                 .setCancelable(false)
                                 .show();
                     }
+                }
+            };
 
-                    progressDialog.dismiss();
+            final Thread finishLoading = new Thread() {
+                public void run() {
+                    ProgressBarAnimation anim5 = new ProgressBarAnimation(refreshProgressbar, refreshProgressbar.getProgress(), 100);
+                    anim5.setDuration(1000);
+                    refreshProgressbar.startAnimation(anim5);
+                }
+            };
+
+            final Thread setProgressComplete = new Thread() {
+                public void run() {
+                    refreshProgressbar.setVisibility(View.GONE);
                     refreshing = false;
                 }
             };
@@ -301,7 +331,34 @@ public class VideoGallery extends AppCompatActivity {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    mHandler.post(setTask);
+                    //give the appData extra time to load.
+                    if (!appData.dbSuccess(targetFolder)) {
+                        try {
+                            sleep(3000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    runOnUiThread(setTask);
+
+                    try {
+                        setTask.join();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    runOnUiThread(finishLoading);
+                    try {
+                        finishLoading.join();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    runOnUiThread(setProgressComplete);
                 }
             };
             refreshTask.start();

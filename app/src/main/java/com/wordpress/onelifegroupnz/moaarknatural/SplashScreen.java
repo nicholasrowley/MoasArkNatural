@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.Toast;
 
 /* Loading screen when app is opened. Also can process notification payloads*/
 public class SplashScreen extends AppCompatActivity {
@@ -16,15 +17,34 @@ public class SplashScreen extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
 
+        final Thread warningThread = new Thread(){
+            public void run(){
+                try{
+                    sleep(30000);
+                    Thread warningMessage = new Thread() {
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), "Slow Internet Detected", Toast.LENGTH_SHORT).show();
+                        }
+                    };
+                    runOnUiThread(warningMessage);
+                }catch(InterruptedException e){
+                    e.printStackTrace();
+                }
+            }
+        };
+
         Thread timerThread = new Thread(){
             public void run(){
                 try{
+                    warningThread.start();
                     sleep(100);
                     appData = GlobalAppData.getInstance(getString(R.string.ACCESS_TOKEN), SplashScreen.this, "");
                     sleep(100);
                 }catch(InterruptedException e){
                     e.printStackTrace();
                 }finally{
+                    //cancel warning
+                    warningThread.interrupt();
                     //checks for notification then starts activity
                     checkNotification();
                 }

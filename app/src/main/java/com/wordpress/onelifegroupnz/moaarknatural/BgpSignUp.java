@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,6 +53,8 @@ public class BgpSignUp extends AppCompatActivity {
         addSearchFragment();
 
         initialiseAds();
+
+        finishLoading();
     }
 
     @Override
@@ -215,6 +218,44 @@ public class BgpSignUp extends AppCompatActivity {
                 return true;
             }
         });
+    }
+
+    /* A method for completing the progress bar animation on the toolbar*/
+    private void finishLoading() {
+        final ProgressBar refreshProgressbar = findViewById(R.id.refreshProgress);
+        if (refreshProgressbar.getVisibility() == View.VISIBLE) {
+            final Thread finishLoading = new Thread() {
+                public void run() {
+                    ProgressBarAnimation anim5 = new ProgressBarAnimation(refreshProgressbar, refreshProgressbar.getProgress(), 100);
+                    anim5.setDuration(1000);
+                    refreshProgressbar.startAnimation(anim5);
+                }
+            };
+
+            final Thread setProgressComplete = new Thread() {
+                public void run() {
+                    refreshProgressbar.setVisibility(View.GONE);
+                }
+            };
+
+            Thread waitForRefresh = new Thread() {
+                public void run() {
+                    runOnUiThread(finishLoading);
+                    try {
+                        finishLoading.join();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    runOnUiThread(setProgressComplete);
+                }
+            };
+            waitForRefresh.start();
+        }
     }
 
 }

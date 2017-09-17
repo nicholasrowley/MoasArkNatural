@@ -86,6 +86,10 @@ public class ContactForm extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent intent;
         switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                startActivity(new Intent(ContactForm.this, Home.class));
+                return true;
             case R.id.action_notification:
                 openAppSettings();
                 return true;

@@ -82,7 +82,6 @@ public class BgpSignUp extends AppCompatActivity {
         switch (item.getItemId()) {
             // Respond to the action bar's Up/Home button
             case android.R.id.home:
-                searchView.clearFocus();
                 startActivity(new Intent(BgpSignUp.this, Home.class));
                 return true;
             case R.id.menu_dance_video_gallery:
@@ -108,6 +107,7 @@ public class BgpSignUp extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
     public void btnOnClick(View v) {
         Intent intent;
         switch (v.getId()) {

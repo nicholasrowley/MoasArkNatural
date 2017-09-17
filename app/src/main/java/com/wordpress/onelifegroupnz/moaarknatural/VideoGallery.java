@@ -139,7 +139,6 @@ public class VideoGallery extends AppCompatActivity {
         switch (item.getItemId()) {
             // Respond to the action bar's Up/Home button
             case android.R.id.home:
-                searchView.clearFocus();
                 startActivity(new Intent(VideoGallery.this, Home.class));
                 return true;
             case R.id.menu_dance_video_gallery:

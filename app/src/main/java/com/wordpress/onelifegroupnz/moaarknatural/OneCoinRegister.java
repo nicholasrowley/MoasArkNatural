@@ -1,27 +1,59 @@
 package com.wordpress.onelifegroupnz.moaarknatural;
 
+import android.app.SearchManager;
+import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.telephony.TelephonyManager;
+import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+
 import java.util.LinkedList;
+import java.util.Locale;
+
+import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DANCEVIDEOPATH;
+import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.FOODVIDEOPATH;
 
 public class OneCoinRegister extends AppCompatActivity {
+
+    private SearchView searchView;
+    private CustomSearchFragment searchFragment;
 
     private TextView emailField;
     private TextView confEmailField;
@@ -55,7 +87,14 @@ public class OneCoinRegister extends AppCompatActivity {
         homNumField = findViewById(R.id.homNumField);
 
         String[] countryList = getResources().getStringArray(R.array.country_options);
-        //countryList[0] = "This is a string";
+
+        //sets network location as the default country
+        if (this.getSystemService(Context.TELEPHONY_SERVICE) != null) {
+            TelephonyManager tm = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
+
+            Locale l = new Locale("", tm.getNetworkCountryIso());
+            countryList[0] = l.getDisplayCountry();
+        }
 
         //sets country options
         countrySpinner = findViewById(R.id.countrySpinner);
@@ -66,8 +105,144 @@ public class OneCoinRegister extends AppCompatActivity {
 
         countrySpinner.setAdapter(adapter);
 
+        addSearchFragment();
+
+        initialiseAds();
+
         finishLoading();
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu, menu);
+
+        setUpSearchbar(menu);
+
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem item;
+        item = menu.findItem(R.id.menu_refresh);
+        item.setVisible(false);
+        menu.findItem(R.id.menu_contact_form).setVisible(false);
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Intent intent;
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                startActivity(new Intent(OneCoinRegister.this, Home.class));
+                return true;
+            case R.id.action_notification:
+                openAppSettings();
+                return true;
+            case R.id.menu_dance_video_gallery:
+                //Proceed to Line Dance video gallery
+                intent = new Intent(OneCoinRegister.this, VideoGallery.class);
+                intent.putExtra("videoPath", DANCEVIDEOPATH); //using video path to set the gallery
+                startActivity(intent);
+                return true;
+            case R.id.menu_food_video_gallery:
+                //Proceed to Food video gallery
+                intent = new Intent(OneCoinRegister.this, VideoGallery.class);
+                intent.putExtra("videoPath", FOODVIDEOPATH); //using video path to set the gallery
+                startActivity(intent);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void initialiseAds() {
+        //initialise ads
+        MobileAds.initialize(this, getString(R.string.banner_ad_unit_id_live));
+
+        AdView mAdView = findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
+    }
+
+    //Opens the app setting so the user can turn notifications on or off
+    public void openAppSettings() {
+        String packageName = getString(R.string.package_name);
+
+        try {
+            //Open the specific App Info page:
+            Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            intent.setData(Uri.parse("package:" + packageName));
+            startActivity(intent);
+
+        } catch ( ActivityNotFoundException e ) {
+            new AlertDialog.Builder(OneCoinRegister.this)
+                    .setTitle("Notification Settings Not Available")
+                    .setMessage("Unable to open the apps settings screen, please try again later")
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            // continue with delete
+                        }
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+        }
+    }
+
+    private void addSearchFragment() {
+        FragmentManager manager = getSupportFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+        searchFragment = new CustomSearchFragment();
+        transaction.add(R.id.search_fragment, searchFragment);
+        transaction.commit();
+    }
+
+    private void setUpSearchbar( Menu menu ) {
+        // Associate searchable configuration with the SearchView
+        SearchManager searchManager =
+                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        searchView =
+                (android.support.v7.widget.SearchView) menu.findItem(R.id.search).getActionView();
+        searchView.setSearchableInfo(
+                searchManager.getSearchableInfo(getComponentName()));
+
+        //disable default search icon next to search box
+        ImageView searchImage = searchView.findViewById(android.support.v7.appcompat.R.id.search_mag_icon);
+        ViewGroup LayoutSearchView =
+                (ViewGroup) searchImage.getParent();
+        LayoutSearchView.removeView(searchImage);
+
+        final LinearLayout searchFragmentLayout = findViewById(R.id.search_fragment);
+        searchFragmentLayout.setVisibility(View.GONE);
+
+        MenuItem searchItem = menu.findItem(R.id.search);
+        searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener()  {
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem item) {
+                searchFragmentLayout.setVisibility(View.GONE);
+                searchView.clearFocus();
+                return true;
+            }
+
+            @Override
+            public boolean onMenuItemActionExpand(MenuItem item) {
+                searchFragmentLayout.setVisibility(View.VISIBLE);
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+                searchView.setIconifiedByDefault(false);
+                searchView.setFocusable(true);
+                searchView.requestFocusFromTouch();
+
+                //set width of search view
+                searchView.setMaxWidth( Integer.MAX_VALUE );
+
+                return true;
+            }
+        });
     }
 
     /* A method for completing the progress bar animation on the toolbar*/
@@ -106,6 +281,37 @@ public class OneCoinRegister extends AppCompatActivity {
             };
             waitForRefresh.start();
         }
+    }
+
+    /*
+    Description:
+        Provides validation for incorrectly filled fields checked on submission.
+    */
+    public boolean validateFields() {
+
+        //TODO set validation for fields
+        //First Name Validation.
+        if (fnameField.getText().toString().equals(""))
+            fnameField.setError("Name is Required");
+        else
+            fnameField.setError(null);
+
+        //postcode validation
+        if (postcodeField.getText().toString().equals(""))
+            fnameField.setError("Postcode is Required");
+        else
+            fnameField.setError(null);
+
+        String postcode = postcodeField.getText().toString();
+
+        //TODO Postcode validation.
+        if (postcode.contains("+"))
+            fnameField.setError("Postcode is Required");
+        else
+            fnameField.setError(null);
+
+        //return true if all fields pass or false if a field fails validation
+        return false;
     }
 
 }

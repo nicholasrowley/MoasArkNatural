@@ -23,6 +23,7 @@ import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.Patterns;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -35,6 +36,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -56,7 +58,6 @@ public class OneCoinRegister extends AppCompatActivity {
     private CustomSearchFragment searchFragment;
 
     private TextView emailField;
-    private TextView confEmailField;
     private TextView fnameField;
     private TextView lnameField;
     private TextView usernameField;
@@ -64,6 +65,8 @@ public class OneCoinRegister extends AppCompatActivity {
     private TextView postcodeField;
     private TextView mobNumField;
     private TextView homNumField;
+
+    private TextView countryDesc;
 
     private Spinner countrySpinner;
 
@@ -77,7 +80,6 @@ public class OneCoinRegister extends AppCompatActivity {
 
         //find all textview fields
         emailField = findViewById(R.id.emailField);
-        confEmailField = findViewById(R.id.emailConField);
         fnameField = findViewById(R.id.fnameField);
         lnameField = findViewById(R.id.lnameField);
         usernameField = findViewById(R.id.usernameField);
@@ -105,6 +107,11 @@ public class OneCoinRegister extends AppCompatActivity {
 
         countrySpinner.setAdapter(adapter);
 
+        //for placing the error text if country is not selected.
+        countryDesc = findViewById(R.id.countryDesc);
+
+
+
         addSearchFragment();
 
         initialiseAds();
@@ -128,7 +135,6 @@ public class OneCoinRegister extends AppCompatActivity {
         MenuItem item;
         item = menu.findItem(R.id.menu_refresh);
         item.setVisible(false);
-        menu.findItem(R.id.menu_contact_form).setVisible(false);
 
         return true;
     }
@@ -156,6 +162,11 @@ public class OneCoinRegister extends AppCompatActivity {
                 intent.putExtra("videoPath", FOODVIDEOPATH); //using video path to set the gallery
                 startActivity(intent);
                 return true;
+            case R.id.menu_contact_form:
+                //Proceed to contact form
+                intent = new Intent(OneCoinRegister.this, ContactForm.class);
+                startActivity(intent);
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -179,7 +190,7 @@ public class OneCoinRegister extends AppCompatActivity {
             intent.setData(Uri.parse("package:" + packageName));
             startActivity(intent);
 
-        } catch ( ActivityNotFoundException e ) {
+        } catch (ActivityNotFoundException e) {
             new AlertDialog.Builder(OneCoinRegister.this)
                     .setTitle("Notification Settings Not Available")
                     .setMessage("Unable to open the apps settings screen, please try again later")
@@ -201,7 +212,7 @@ public class OneCoinRegister extends AppCompatActivity {
         transaction.commit();
     }
 
-    private void setUpSearchbar( Menu menu ) {
+    private void setUpSearchbar(Menu menu) {
         // Associate searchable configuration with the SearchView
         SearchManager searchManager =
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
@@ -220,7 +231,7 @@ public class OneCoinRegister extends AppCompatActivity {
         searchFragmentLayout.setVisibility(View.GONE);
 
         MenuItem searchItem = menu.findItem(R.id.search);
-        searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener()  {
+        searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
                 searchFragmentLayout.setVisibility(View.GONE);
@@ -238,7 +249,7 @@ public class OneCoinRegister extends AppCompatActivity {
                 searchView.requestFocusFromTouch();
 
                 //set width of search view
-                searchView.setMaxWidth( Integer.MAX_VALUE );
+                searchView.setMaxWidth(Integer.MAX_VALUE);
 
                 return true;
             }
@@ -289,29 +300,135 @@ public class OneCoinRegister extends AppCompatActivity {
     */
     public boolean validateFields() {
 
-        //TODO set validation for fields
+        boolean allFieldsValid = true;
+
+        //Email Validation.
+        if (emailField.getText().toString().equals(""))
+            allFieldsValid = setErrorMessage(emailField, "Email is Required");
+        else if (!Patterns.EMAIL_ADDRESS.matcher(emailField.getText()).matches())
+            allFieldsValid = setErrorMessage(emailField, "Input needs to be an email");
+        else
+            emailField.setError(null);
+
         //First Name Validation.
         if (fnameField.getText().toString().equals(""))
-            fnameField.setError("Name is Required");
+            allFieldsValid = setErrorMessage(fnameField, "First Name is Required");
         else
             fnameField.setError(null);
+
+        //Last name validation
+        if (lnameField.getText().toString().equals(""))
+            allFieldsValid = setErrorMessage(lnameField, "Last Name is Required");
+        else
+            lnameField.setError(null);
+
+        //username validation
+        if (usernameField.getText().toString().equals(""))
+            allFieldsValid = setErrorMessage(usernameField, "Username is Required");
+        else if (!usernameField.getText().toString().matches("^[a-zA-Z0-9]{2,}$"))
+            allFieldsValid = setErrorMessage(usernameField, "Username must only contain alphanumeric " +
+                    "characters and contain 2 or more letters");
+        else if(!usernameField.getText().toString().matches("^.*[a-zA-Z].*[a-zA-Z].*$"))
+            allFieldsValid = setErrorMessage(usernameField, "Username must only contain alphanumeric " +
+                    "characters and contain 2 or more letters");
+        else
+            usernameField.setError(null);
+
+        //city validation
+        if (cityField.getText().toString().equals(""))
+            allFieldsValid = setErrorMessage(cityField, "City is Required");
+        else
+            cityField.setError(null);
+
+        //country validation
+        if (countrySpinner.getSelectedItem().toString().equals(getString(R.string.text_country)))
+            allFieldsValid = setErrorMessage(countryDesc, "Please select your Country");
+        else
+            countryDesc.setError(null);
 
         //postcode validation
         if (postcodeField.getText().toString().equals(""))
-            fnameField.setError("Postcode is Required");
-        else
-            fnameField.setError(null);
+            allFieldsValid = setErrorMessage(postcodeField, "Postcode is Required");
+        else if (postcodeField.getText().toString().length() < 4) {
+            allFieldsValid = setErrorMessage(postcodeField, "Postcode must be 4 or more characters long");
+        } else
+            postcodeField.setError(null);
 
-        String postcode = postcodeField.getText().toString();
-
-        //TODO Postcode validation.
-        if (postcode.contains("+"))
-            fnameField.setError("Postcode is Required");
-        else
-            fnameField.setError(null);
+        //phone number field validation
+        if (mobNumField.getText().toString().equals("") && homNumField.getText().toString().equals("")) {
+            setErrorMessage(mobNumField, "A least one Mobile or Home number is required");
+            allFieldsValid = setErrorMessage(homNumField, "A least one Mobile or Home number is required");
+        } else {
+            if ((!Patterns.PHONE.matcher(mobNumField.getText()).matches()) && (!mobNumField.getText().toString().equals("")))
+                allFieldsValid = setErrorMessage(mobNumField, "This is not a valid phone number");
+            else
+                mobNumField.setError(null);
+            if ((!Patterns.PHONE.matcher(homNumField.getText()).matches()) && (!homNumField.getText().toString().equals("")))
+                allFieldsValid = setErrorMessage(homNumField, "This is not a valid phone number");
+            else
+                homNumField.setError(null);
+        }
 
         //return true if all fields pass or false if a field fails validation
+        return allFieldsValid;
+    }
+
+    /*Called to set an error message for fields that fail validation. Do not use to set null
+    * use setError on the View directly.*/
+    private boolean setErrorMessage(TextView forView, String message) {
+        forView.setError(message);
+        //boolean indicates that validation failed.
         return false;
+    }
+
+    /*
+    Description:
+        Gathers form data and sends it to email intent
+        intent opens email client chooser
+    */
+    public void sendFeedback(View view) {
+
+        String subject = "One Coin Package Account Registration for " + usernameField.getText();
+        String message = "Email Address: " + emailField.getText().toString() + "\n"
+                + "Email Address: " + emailField.getText().toString() + "\n"
+                + "First Name: " + fnameField.getText().toString() + "\n"
+                + "Last Name: " + lnameField.getText().toString() + "\n"
+                + "User Name: " + usernameField.getText().toString() + "\n"
+                + "Email Address: " + emailField.getText().toString() + "\n"
+                + "Country of Residence: " + countrySpinner.getSelectedItem().toString() + "\n"
+                + "City of Residence: " + cityField.getText().toString() + "\n"
+                + "Postcode: " + postcodeField.getText().toString() + "\n";
+
+        if(!mobNumField.getText().toString().equals("")) {
+            message += "Mobile Phone: " + mobNumField.getText().toString() + "\n";
+        }
+        if(!homNumField.getText().toString().equals("")) {
+            message += "Home Phone: " + homNumField.getText().toString() + "\n";
+        }
+
+        message += "\nSent from the Moa's Ark Natural Android Application\n";
+
+        //intent creates chooser for only email apps
+        Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+        emailIntent.setData(Uri.parse("mailto:" + getString(R.string.sales_email)));
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
+        emailIntent.putExtra(Intent.EXTRA_TEXT, message);
+        try {
+            startActivity(Intent.createChooser(emailIntent, "Send registration form using..."));
+        } catch (android.content.ActivityNotFoundException ex) {
+            Toast.makeText(OneCoinRegister.this, "No email clients installed.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void btnOnClick(View v) {
+        switch (v.getId()) {
+            case R.id.submitBtn:
+                //checks whether there are error messages is set
+                //runs email intent if no errors
+                if(validateFields())
+                    sendFeedback(v);
+                break;
+        }
     }
 
 }

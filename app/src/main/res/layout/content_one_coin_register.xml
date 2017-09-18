@@ -26,6 +26,24 @@
             android:weightSum="1">
 
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/black"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:padding="2dp">
+
+                <TextView
+                    android:id="@+id/warningEmailMessage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/colorBody"
+                    android:gravity="center"
+                    android:textStyle="bold"
+                    android:text="@string/email_warning_message" />
+            </LinearLayout>
+
             <ImageView
                 android:id="@+id/onelifelogo"
                 android:layout_width="match_parent"
@@ -60,15 +78,7 @@
                 android:id="@+id/emailInfo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="(You need to have access to change Passwords etc)" />
-
-            <EditText
-                android:id="@+id/emailConField"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:inputType="textEmailAddress"
-                android:hint="@string/hint_confirm_email_address" />
+                android:text="@string/email_info" />
 
             <EditText
                 android:id="@+id/fnameField"
@@ -90,7 +100,7 @@
                 android:id="@+id/nameInfo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="(Must be the same as the Legal name on your Passport)" />
+                android:text="@string/name_info" />
 
             <EditText
                 android:id="@+id/usernameField"
@@ -104,7 +114,7 @@
                 android:id="@+id/usernameInfo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="(Cannot be changed later)" />
+                android:text="@string/username_info" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -142,6 +152,12 @@
                 android:inputType="text|textNoSuggestions"
                 android:hint="@string/hint_postcode" />
 
+            <TextView
+                android:id="@+id/phoneNumberInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/phone_number_info" />
+
             <EditText
                 android:id="@+id/mobNumField"
                 android:layout_width="match_parent"
@@ -169,6 +185,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:onClick="btnOnClick"
                 android:text="@string/submit_btn_text" />
 
         </LinearLayout>

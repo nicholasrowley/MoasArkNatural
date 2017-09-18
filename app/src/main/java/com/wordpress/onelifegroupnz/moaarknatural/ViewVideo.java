@@ -209,10 +209,6 @@ public class ViewVideo extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu, menu);
 
-        /*//Hide refresh menu item as not required in this activity
-        item = menu.findItem(R.id.menu_refresh);
-        item.setVisible(false);*/
-
         setUpSearchbar(menu);
 
         return true;

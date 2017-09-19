@@ -47,7 +47,8 @@ tools:showIn="@layout/activity_view_video">
                 android:layout_alignBottom="@id/videoContainer"
                 android:layout_alignTop="@id/videoContainer"
                 android:scaleX="0.5"
-                android:scaleY="0.5"/>
+                android:scaleY="0.5"
+                android:indeterminateDrawable="@drawable/gradient_progress_circular"/>
         </RelativeLayout>
 
         <LinearLayout

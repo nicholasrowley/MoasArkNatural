@@ -31,11 +31,11 @@ android:background="@color/colorBody"
 
     <ProgressBar
         android:id="@+id/progressBar1"
-        android:layout_width="110dp"
-        android:layout_height="wrap_content"
+        android:layout_width="110sp"
+        android:layout_height="110sp"
         android:layout_gravity="center"
         android:layout_marginTop="10dp"
-        android:layout_weight="0.21" />
+        android:indeterminateDrawable="@drawable/gradient_progress_circular" />
 
     <TextView
         android:id="@+id/txtLoading"
@@ -43,7 +43,7 @@ android:background="@color/colorBody"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:gravity="center"
-        android:text="Starting"
+        android:text="@string/splash_message"
         android:textSize="24sp"
         android:textStyle="bold" />
 

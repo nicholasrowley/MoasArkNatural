@@ -325,12 +325,12 @@ public class OneCoinRegister extends AppCompatActivity {
         //username validation
         if (usernameField.getText().toString().equals(""))
             allFieldsValid = setErrorMessage(usernameField, "Username is Required");
-        else if (!usernameField.getText().toString().matches("^[a-zA-Z0-9]{2,}$"))
+        else if (!usernameField.getText().toString().matches("^[a-zA-Z0-9]{2,30}$"))
             allFieldsValid = setErrorMessage(usernameField, "Username must only contain alphanumeric " +
-                    "characters and contain 2 or more letters");
+                    "characters and contain at least 2 letters and no more than 30 characters");
         else if(!usernameField.getText().toString().matches("^.*[a-zA-Z].*[a-zA-Z].*$"))
             allFieldsValid = setErrorMessage(usernameField, "Username must only contain alphanumeric " +
-                    "characters and contain 2 or more letters");
+                    "characters and contain at least 2 letters and no more than 30 characters");
         else
             usernameField.setError(null);
 
@@ -390,11 +390,9 @@ public class OneCoinRegister extends AppCompatActivity {
 
         String subject = "One Coin Package Account Registration for " + usernameField.getText();
         String message = "Email Address: " + emailField.getText().toString() + "\n"
-                + "Email Address: " + emailField.getText().toString() + "\n"
                 + "First Name: " + fnameField.getText().toString() + "\n"
                 + "Last Name: " + lnameField.getText().toString() + "\n"
                 + "User Name: " + usernameField.getText().toString() + "\n"
-                + "Email Address: " + emailField.getText().toString() + "\n"
                 + "Country of Residence: " + countrySpinner.getSelectedItem().toString() + "\n"
                 + "City of Residence: " + cityField.getText().toString() + "\n"
                 + "Postcode: " + postcodeField.getText().toString() + "\n";

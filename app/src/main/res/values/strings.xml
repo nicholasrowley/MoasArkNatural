@@ -80,5 +80,6 @@
     <string name="name_info">(Must be the same as the Legal name on your Passport)</string>
     <string name="username_info">(Cannot be changed later)</string>
     <string name="phone_number_info">Phone number - Only one is required.</string>
+    <string name="splash_message">Starting</string>
 
 </resources>

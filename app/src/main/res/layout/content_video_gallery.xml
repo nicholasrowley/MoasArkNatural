@@ -64,7 +64,8 @@
                 style="?android:attr/progressBarStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="visible" />
+                android:visibility="visible"
+                android:indeterminateDrawable="@drawable/gradient_progress_circular"/>
 
             <LinearLayout
                 android:orientation="vertical"

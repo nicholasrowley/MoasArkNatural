@@ -134,7 +134,7 @@ public class CustomSearchFragment extends Fragment {
 
     }
 
-    // You must implements your logic to get data using OrmLite
+    /*Queries for information based on filters and text entered into the search bar*/
     private void populateAdapter(String query, Spinner searchTypeSpinner) {
         cursor = new MatrixCursor(new String[]{ BaseColumns._ID, "videoName" });
         for (int i=0; i<suggestions.size(); i++) {

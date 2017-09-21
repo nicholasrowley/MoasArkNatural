@@ -37,7 +37,7 @@ import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.ALLVIDEOS
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DANCEVIDEOPATH;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.FOODVIDEOPATH;
 
-/* This is the main activity for navigating to different areas of the app.*/
+/** This is the main activity for navigating to different areas of the app.*/
 public class Home extends AppCompatActivity {
 
     private GlobalAppData appData; //singleton instance of globalAppData

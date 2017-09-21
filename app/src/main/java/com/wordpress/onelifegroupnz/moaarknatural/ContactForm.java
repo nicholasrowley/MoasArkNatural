@@ -35,13 +35,13 @@ import com.google.android.gms.ads.MobileAds;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DANCEVIDEOPATH;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.FOODVIDEOPATH;
 
+/**Activity class for the Moa's Ark Contact Form.*/
 public class ContactForm extends AppCompatActivity {
 
     private EditText nameField;
     private EditText subjectField;
     private EditText messageField;
     private SearchView searchView;
-    private CustomSearchFragment searchFragment;
 
 
     @Override
@@ -178,14 +178,16 @@ public class ContactForm extends AppCompatActivity {
         }
     }
 
+    /*Loads search options when search is expanded.*/
     private void addSearchFragment() {
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
-        searchFragment = new CustomSearchFragment();
+        CustomSearchFragment searchFragment = new CustomSearchFragment();
         transaction.add(R.id.search_fragment, searchFragment);
         transaction.commit();
     }
 
+    /*Loads advertisements for the activity*/
     private void initialiseAds() {
         //initialise ads
         MobileAds.initialize(this, getString(R.string.banner_ad_unit_id_live));
@@ -195,6 +197,7 @@ public class ContactForm extends AppCompatActivity {
         mAdView.loadAd(adRequest);
     }
 
+    /*Loads the search bar when search is expanded*/
     private void setUpSearchbar( Menu menu ) {
 
         // Associate searchable configuration with the SearchView

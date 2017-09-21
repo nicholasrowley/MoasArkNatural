@@ -6,7 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 
-/* Loading screen when app is opened. Also can process notification payloads*/
+/** Loading screen when app is opened. Also can process notification payloads*/
 public class SplashScreen extends AppCompatActivity {
 
     private GlobalAppData appData;

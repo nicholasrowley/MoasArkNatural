@@ -51,11 +51,10 @@ import java.util.Locale;
 
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DANCEVIDEOPATH;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.FOODVIDEOPATH;
-
+/** Activity class for the one coin registration form*/
 public class OneCoinRegister extends AppCompatActivity {
 
     private SearchView searchView;
-    private CustomSearchFragment searchFragment;
 
     private TextView emailField;
     private TextView fnameField;
@@ -207,7 +206,7 @@ public class OneCoinRegister extends AppCompatActivity {
     private void addSearchFragment() {
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
-        searchFragment = new CustomSearchFragment();
+        CustomSearchFragment searchFragment = new CustomSearchFragment();
         transaction.add(R.id.search_fragment, searchFragment);
         transaction.commit();
     }

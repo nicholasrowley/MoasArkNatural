@@ -153,6 +153,7 @@ public class GlobalAppData {
         refreshAllVideoLists();
     }
 
+    /*checks the number of videos that have not been fully loaded from dropbox servers*/
     public int loadsRemaining(String folderPath) {
         if (folderPath.equals(DANCEVIDEOPATH)) {
             return danceVideoFileLister.getRemainingLoads();
@@ -162,6 +163,8 @@ public class GlobalAppData {
         return 0;
     }
 
+    /*checks if the previous dropbox connection for a filelister object was successful
+    * String folderPath - target file path on server*/
     public boolean dbSuccess(String folderPath) {
         if (folderPath.equals(DANCEVIDEOPATH)) {
             return danceVideoFileLister.dbConnectionSuccessfull();
@@ -206,6 +209,8 @@ public class GlobalAppData {
         return searchSuggestions;
     }
 
+    /*starts fileLister for dance videos
+    * milliseconds - time in milliseconds allowed to get information from server.*/
     private void waitForDanceVideoFileListerExecution( int milliseconds ) {
         try {
             if (milliseconds > 0)
@@ -221,6 +226,7 @@ public class GlobalAppData {
         }
     }
 
+    /*waits for pdf fileLister until it completes or times out.*/
     private void waitForPdfFileListerExecution() {
         try {
             pdfFileLister.get();
@@ -231,6 +237,8 @@ public class GlobalAppData {
         }
     }
 
+    /*starts fileLister for food health investment videos
+    * milliseconds - time in milliseconds allowed to get information from server.*/
     private void waitForFoodVideoFileListerExecution( int milliseconds ) {
         try {
             if (milliseconds > 0)
@@ -246,6 +254,7 @@ public class GlobalAppData {
         }
     }
 
+    /*lists the search suggestions to list*/
     private void populateSearchSuggestions(Context context) {
         //populate the suggestions
         searchSuggestions = new ArrayList<>();

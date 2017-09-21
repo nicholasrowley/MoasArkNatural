@@ -34,6 +34,7 @@ import com.google.android.gms.ads.MobileAds;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DANCEVIDEOPATH;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.FOODVIDEOPATH;
 
+/**Activity class for the BGP Sign ups*/
 public class BgpSignUp extends AppCompatActivity {
 
     private SearchView searchView;
@@ -108,6 +109,7 @@ public class BgpSignUp extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /*Click events in XML are assigned to this method*/
     public void btnOnClick(View v) {
         Intent intent;
         switch (v.getId()) {
@@ -135,6 +137,7 @@ public class BgpSignUp extends AppCompatActivity {
         }
     }
 
+    /*Loads ads for the page*/
     private void initialiseAds() {
         //initialise ads
         MobileAds.initialize(this, getString(R.string.banner_ad_unit_id_live));
@@ -168,6 +171,7 @@ public class BgpSignUp extends AppCompatActivity {
         }
     }
 
+    /*loads the search options when search is expanded*/
     private void addSearchFragment() {
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
@@ -176,6 +180,7 @@ public class BgpSignUp extends AppCompatActivity {
         transaction.commit();
     }
 
+    /*Loads the search bar when search is expanded*/
     private void setUpSearchbar( Menu menu ) {
         // Associate searchable configuration with the SearchView
         SearchManager searchManager =

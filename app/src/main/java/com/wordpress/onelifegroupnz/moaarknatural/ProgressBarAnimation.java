@@ -1,11 +1,11 @@
 package com.wordpress.onelifegroupnz.moaarknatural;
 
-import android.graphics.PorterDuff;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 import android.widget.ProgressBar;
 
 /**
+ * Animation class for Progress bar
  * Created by Nick on 16/09/2017.
  */
 

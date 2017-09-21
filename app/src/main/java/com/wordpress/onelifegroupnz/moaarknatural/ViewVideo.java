@@ -586,6 +586,7 @@ public class ViewVideo extends AppCompatActivity {
         });
     }
 
+    /* Begins loading for elements in the activity.*/
     public void loadActivity() {
         refreshProgressbar.setProgress(0);
         refreshProgressbar.setVisibility(View.VISIBLE);

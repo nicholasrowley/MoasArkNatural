@@ -112,6 +112,7 @@ public class FileLister extends AsyncTask<Object, Void, Object> {
 
     public int getTotal() { return folderContents.size(); }
 
+    /*dbSuccess - last connection to dropbox servers was successful*/
     public boolean dbConnectionSuccessfull(){
         return dbSuccess;
     }

@@ -56,7 +56,7 @@ public class RssAdapter extends BaseAdapter {
         if (convertView == null) {
             convertView = View.inflate(context, R.layout.rss_item, null);
             holder = new ViewHolder();
-            holder.itemTitle = (TextView) convertView.findViewById(R.id.itemTitle);
+            holder.itemTitle = convertView.findViewById(R.id.itemTitle);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();

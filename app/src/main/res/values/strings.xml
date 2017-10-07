@@ -42,8 +42,6 @@
 
     <!-- BGP sign up and contact form strings -->
     <string name="title_activity_bgp_sign_up">Bgp Sign Up</string>
-    <string name="BGP_Shares_url">https://moasarknaturalnz.com/wp-content/uploads/2017/09/Notice-of-Application-for-BGP-Shares-Form.pdf</string>
-    <string name="BGP_Agreement_url">https://moasarknaturalnz.com/wp-content/uploads/2017/09/Participation-Agreement-in-BGP-One-Life-Trust-Form.pdf</string>
     <string name="bgp_sign_up">BGP Sign up</string>
     <string name="participation_agreement_in_bgp_one_life_trust">Participation Agreement in BGP One Life Trust</string>
     <string name="notice_of_application_for_bgp_shares">Notice of application for BGP Shares</string>
@@ -81,5 +79,12 @@
     <string name="username_info">(Cannot be changed later)</string>
     <string name="phone_number_info">Phone number - Only one is required.</string>
     <string name="splash_message">Starting</string>
+
+    <!--PDF urls-->
+    <string name="BGP_Shares_url">https://moasarknaturalnz.com/wp-content/uploads/2017/10/Notice-of-Application-for-BGP-Shares-Form.pdf</string>
+    <string name="BGP_Shares_shortcodeurl">https://wp.me/a9bNTX-as</string>
+    <string name="BGP_Agreement_url">https://moasarknaturalnz.com/wp-content/uploads/2017/10/Participation-Agreement-in-BGP-One-Life-Trust-Form.pdf</string>
+    <string name="BGP_Agreement_shortcodeurl">https://wp.me/a9bNTX-at</string>
+
 
 </resources>

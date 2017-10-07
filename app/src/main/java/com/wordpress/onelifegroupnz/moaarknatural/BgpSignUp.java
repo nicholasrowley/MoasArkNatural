@@ -11,7 +11,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
@@ -31,6 +30,11 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DANCEVIDEOPATH;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.FOODVIDEOPATH;
 
@@ -38,7 +42,6 @@ import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.FOODVIDEO
 public class BgpSignUp extends AppCompatActivity {
 
     private SearchView searchView;
-    private CustomSearchFragment searchFragment;
     private TextView formEmail;
 
     @Override
@@ -114,14 +117,16 @@ public class BgpSignUp extends AppCompatActivity {
         Intent intent;
         switch (v.getId()) {
             case R.id.paFormBtn:
-                Uri paFormUri = Uri.parse(getString(R.string.BGP_Agreement_url));
-                intent = new Intent(Intent.ACTION_VIEW, paFormUri);
-                startActivity(intent);
+                String paFormUrl = getString(R.string.BGP_Agreement_url);
+                String paFormFallbackUrl = getString(R.string.BGP_Agreement_shortcodeurl);
+
+                loadPdfFile(paFormUrl, paFormFallbackUrl);
                 break;
             case R.id.bgpSharesBtn:
-                Uri bgpSharesUri = Uri.parse(getString(R.string.BGP_Shares_url));
-                intent = new Intent(Intent.ACTION_VIEW, bgpSharesUri);
-                startActivity(intent);
+                String bgpSharesUrl = getString(R.string.BGP_Shares_url);
+                String bgpSharesFallbackUrl = getString(R.string.BGP_Shares_shortcodeurl);
+
+                loadPdfFile(bgpSharesUrl, bgpSharesFallbackUrl);
                 break;
             case R.id.copyBtn:
                 ClipboardManager clipboard = (ClipboardManager) this.getSystemService(Context.CLIPBOARD_SERVICE);
@@ -134,6 +139,65 @@ public class BgpSignUp extends AppCompatActivity {
                 intent = new Intent(BgpSignUp.this, OneCoinRegister.class);
                 startActivity(intent);
                 break;
+        }
+    }
+
+    /*Runs a connection test on another thread before opening*/
+    private void loadPdfFile(final String URLName, final String fallbackURL){
+        //disable pdf button
+        final Thread checkConnection = new Thread() {
+            public void run() {
+                if (urlCanConnect(URLName)){
+                    runOnUiThread(loadPdf);
+                } else {
+                    runOnUiThread(connectFailed);
+                }
+            }
+
+            final Thread loadPdf = new Thread() {
+                public void run() {
+                    Intent intent;
+                    Uri pdfUri = Uri.parse(URLName);
+                    intent = new Intent(Intent.ACTION_VIEW, pdfUri);
+                    startActivity(intent);
+                }
+            };
+
+            final Thread connectFailed = new Thread() {
+                public void run() {
+                    Toast.makeText(getApplicationContext(), "Page not found - loading web page", Toast.LENGTH_SHORT).show();
+                    Intent intent;
+                    Uri pdfUri = Uri.parse(fallbackURL);
+                    intent = new Intent(Intent.ACTION_VIEW, pdfUri);
+                    startActivity(intent);
+                }
+            };
+        };
+
+        checkConnection.start();
+    }
+
+    /*Checks connection (Cannot run in UI Thread)*/
+    private boolean urlCanConnect(String urlString){
+        try
+        {
+            URL url = new URL(urlString);
+            HttpURLConnection urlConnection = (HttpURLConnection) url
+                    .openConnection();
+            int responseCode = urlConnection.getResponseCode();
+            urlConnection.disconnect();
+            return responseCode != 404; //page not found CODE 404
+        } catch (MalformedURLException e)
+        {
+            e.printStackTrace();
+            return false;
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+            return false;
+        } catch (Exception e){
+            e.printStackTrace();
+            return false;
         }
     }
 
@@ -175,7 +239,7 @@ public class BgpSignUp extends AppCompatActivity {
     private void addSearchFragment() {
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
-        searchFragment = new CustomSearchFragment();
+        CustomSearchFragment searchFragment = new CustomSearchFragment();
         transaction.add(R.id.search_fragment, searchFragment);
         transaction.commit();
     }
@@ -262,5 +326,6 @@ public class BgpSignUp extends AppCompatActivity {
             waitForRefresh.start();
         }
     }
+
 
 }

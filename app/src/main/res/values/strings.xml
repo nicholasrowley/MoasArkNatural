@@ -4,14 +4,14 @@
     <string name="title_activity_view_video">ViewVideo</string>
     <string name="app_icon_description">Moa\'s Ark Application icon</string>
     <string name="blurb">Moa\'s Ark for Healthier Living</string>
-    <string name="hm_feature_dance_video_aut_text">Feature Wellbeing Dance Exercise Video</string>
-    <string name="hm_feature_food_video_aut_text">Feature Food Health Investment Video</string>
+    <string name="hm_feature_dance_video_aut_text">Feature Dance &amp; Wellbeing D.I.Y Video</string>
+    <string name="hm_feature_food_video_aut_text">Feature Food &amp; Future Health Video</string>
     <string name="sharing_title">Sharing</string>
     <string name="Sharing_Error_Text">Error Finding Link</string>
     <string name="package_name">"com.wordpress.onelifegroupnz.moaarknatural"</string>
     <string name="title_activity_video_gallery">Video gallery</string>
-    <string name="title_activity_dance_video_gallery">Wellbeing Dance Exercise video gallery</string>
-    <string name="title_activity_food_video_gallery">Food Health Investment video gallery</string>
+    <string name="title_activity_dance_video_gallery">Dance &amp; Wellbeing D.I.Y video gallery</string>
+    <string name="title_activity_food_video_gallery">Food &amp; Future Health video gallery</string>
     <string name="text_video_gallery_desc">Moa\'s Ark</string>
     <string name="loadBtnName">Load more videos</string>
     <string name="title_activity_search_results">SearchResults</string>
@@ -24,27 +24,27 @@
     <string name="server_connection_error_title">Can not connect</string>
     <string name="server_connection_error">Please check your wifi and try again.</string>
     <string name="ACCESS_TOKEN">yX8KtvfFf9AAAAAAAAAAHjju0_x8uz3Z4ZRV7x3n96AlpBsdCWbibprKG7rZHdF7</string>
-    <string name="moa_s_ark_shop">Moa\'s Ark Shop</string>
+    <string name="moa_s_ark_shop">Moa\'s Ark NZ Shop</string>
     <string name="website_shop_url">https://moasarknaturalnz.com/shop/</string>
-    <string name="stepsheet_not_found">No step sheet could be found for this wellbeing dance exercise.</string>
-    <string name="recipe_not_found">No recipe sheet could be found for this food.</string>
+    <string name="stepsheet_not_found">No step sheet could be found for this dance and wellbeing D.I.Y video.</string>
+    <string name="recipe_not_found">No recipe sheet could be found for this food &amp; future health video.</string>
     <string name="blogs_title">Blogs from Moa\'s Ark</string>
 
     <!-- Search Type spinner suggestions-->
     <string name="search_type_title">Search Type:</string>
     <string name="search_type_all">All</string>
-    <string name="search_type_dance">Wellbeing Dance Exercise</string>
-    <string name="search_type_food">Food Health Investment</string>
+    <string name="search_type_dance">Dance &amp; Wellbeing D.I.Y</string>
+    <string name="search_type_food">Food &amp; Future Health</string>
 
     <!-- This is the advertisement ids for adMob please use the testing one for clicking (Do not click the real ad) -->
     <string name="banner_ad_unit_id_test">ca-app-pub-3940256099942544/6300978111</string>
     <string name="banner_ad_unit_id_live">ca-app-pub-2838047532476449/3742836256</string>
 
     <!-- BGP sign up and contact form strings -->
-    <string name="title_activity_bgp_sign_up">Bgp Sign Up</string>
-    <string name="bgp_sign_up">BGP Sign up</string>
-    <string name="participation_agreement_in_bgp_one_life_trust">Participation Agreement in BGP One Life Trust</string>
-    <string name="notice_of_application_for_bgp_shares">Notice of application for BGP Shares</string>
+    <string name="title_activity_bgp_sign_up">Crypto Share Sign Up</string>
+    <string name="bgp_sign_up">Crypto Share Sign up</string>
+    <string name="participation_agreement_in_bgp_one_life_trust">Participation Agreement in Crypto One Life Trust</string>
+    <string name="notice_of_application_for_bgp_shares">Notice of application for Crypto Shares</string>
     <string name="sales_email">sales@moasarknaturalnz.com</string>
     <string name="sales_email_desc">If you have already completed a form please send it to the following email address:</string>
     <string name="bgp_sign_up_desc">You can view and download the following forms from here.</string>
@@ -56,10 +56,10 @@
     <string name="subject_field_hint">Subject</string>
     <string name="message_field_hint">Message</string>
     <string name="submit_btn_text">Submit</string>
-    <string name="title_activity_one_coin_register">One Coin Account Registration</string>
+    <string name="title_activity_one_coin_register">Crypto Share Package Account Registration</string>
     <string name="one_coin_form_details">In order to complete the “Know Your Customer”(KYC) requirements at a later stage, you will need to supply: \n\nFull Residential Address including Street Number and Suburb, Date of Birth, Country of Birth, Passport Number and Passport Expiry Date. \n\nA copy of your passport identification page plus proof of address (Bank Statement or Utility Bill showing full name and address) matching the details supplied by upload. Upon completion and approval, you will be free to transact in Cryptocurrency and e-currency through your Onelife.eu online account.</string>
     <string name="one_life_logo">one life logo</string>
-    <string name="one_life_form_desc">In order to register your One Coin package with the Onelife.eu website (https://www.onelife.eu/en/#login), we will need the following information completed:</string>
+    <string name="one_life_form_desc">In order to register your Crypto Share package with the chosen network, we will need the following information completed:</string>
     <string name="hint_email_address">Email Address</string>
     <string name="hint_confirm_email_address">Confirm Email Address</string>
     <string name="hint_first_name">First Name(s)</string>

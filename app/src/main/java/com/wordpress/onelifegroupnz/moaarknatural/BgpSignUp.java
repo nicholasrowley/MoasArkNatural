@@ -38,7 +38,7 @@ import java.net.URL;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DANCEVIDEOPATH;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.FOODVIDEOPATH;
 
-/**Activity class for the BGP Sign ups*/
+/**Activity class for the Crypto Sign ups*/
 public class BgpSignUp extends AppCompatActivity {
 
     private SearchView searchView;
@@ -117,21 +117,23 @@ public class BgpSignUp extends AppCompatActivity {
         Intent intent;
         switch (v.getId()) {
             case R.id.paFormBtn:
-                String paFormUrl = getString(R.string.BGP_Agreement_url);
-                String paFormFallbackUrl = getString(R.string.BGP_Agreement_shortcodeurl);
+                String paFormUrl = getString(R.string.Crypto_Agreement_url);
+                //String paFormFallbackUrl = getString(R.string.Crypto_Agreement_shortcodeurl);
 
-                loadPdfFile(paFormUrl, paFormFallbackUrl);
+                loadPdfFile(paFormUrl/*, paFormFallbackUrl*/);
                 break;
             case R.id.bgpSharesBtn:
-                String bgpSharesUrl = getString(R.string.BGP_Shares_url);
-                String bgpSharesFallbackUrl = getString(R.string.BGP_Shares_shortcodeurl);
+                String bgpSharesUrl = getString(R.string.Crypto_Shares_url);
+                //String bgpSharesFallbackUrl = getString(R.string.Crypto_Shares_shortcodeurl);
 
-                loadPdfFile(bgpSharesUrl, bgpSharesFallbackUrl);
+                loadPdfFile(bgpSharesUrl/*, bgpSharesFallbackUrl*/);
                 break;
             case R.id.copyBtn:
                 ClipboardManager clipboard = (ClipboardManager) this.getSystemService(Context.CLIPBOARD_SERVICE);
                 ClipData clip = ClipData.newPlainText("Share Link", formEmail.getText());
-                clipboard.setPrimaryClip(clip);
+                if (clipboard != null) {
+                    clipboard.setPrimaryClip(clip);
+                }
                 Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.oneCoinRegisterBtn:
@@ -143,14 +145,15 @@ public class BgpSignUp extends AppCompatActivity {
     }
 
     /*Runs a connection test on another thread before opening*/
-    private void loadPdfFile(final String URLName, final String fallbackURL){
+    private void loadPdfFile(final String URLName/*, final String fallbackURL*/){
         //disable pdf button
         final Thread checkConnection = new Thread() {
             public void run() {
                 if (urlCanConnect(URLName)){
                     runOnUiThread(loadPdf);
                 } else {
-                    runOnUiThread(connectFailed);
+                    Toast.makeText(getApplicationContext(), "404 - Page not found", Toast.LENGTH_SHORT).show();
+                    //runOnUiThread(connectFailed);
                 }
             }
 
@@ -162,7 +165,7 @@ public class BgpSignUp extends AppCompatActivity {
                     startActivity(intent);
                 }
             };
-
+            /* Disabled as it is useless
             final Thread connectFailed = new Thread() {
                 public void run() {
                     Toast.makeText(getApplicationContext(), "Page not found - loading web page", Toast.LENGTH_SHORT).show();
@@ -172,6 +175,7 @@ public class BgpSignUp extends AppCompatActivity {
                     startActivity(intent);
                 }
             };
+            */
         };
 
         checkConnection.start();
@@ -251,8 +255,10 @@ public class BgpSignUp extends AppCompatActivity {
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         searchView =
                 (android.support.v7.widget.SearchView) menu.findItem(R.id.search).getActionView();
-        searchView.setSearchableInfo(
-                searchManager.getSearchableInfo(getComponentName()));
+        if (searchManager != null) {
+            searchView.setSearchableInfo(
+                    searchManager.getSearchableInfo(getComponentName()));
+        }
 
         //disable default search icon next to search box
         ImageView searchImage = searchView.findViewById(android.support.v7.appcompat.R.id.search_mag_icon);
@@ -276,7 +282,9 @@ public class BgpSignUp extends AppCompatActivity {
             public boolean onMenuItemActionExpand(MenuItem item) {
                 searchFragmentLayout.setVisibility(View.VISIBLE);
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+                if (imm != null) {
+                    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+                }
                 searchView.setIconifiedByDefault(false);
                 searchView.setFocusable(true);
                 searchView.requestFocusFromTouch();

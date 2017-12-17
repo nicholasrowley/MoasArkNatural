@@ -179,7 +179,7 @@
                 android:id="@+id/oneCointFormDetails"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/one_coin_form_details" />
+                android:text="@string/crypto_form_details" />
 
             <Button
                 android:id="@+id/submitBtn"

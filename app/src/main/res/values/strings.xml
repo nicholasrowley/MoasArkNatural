@@ -57,7 +57,7 @@
     <string name="message_field_hint">Message</string>
     <string name="submit_btn_text">Submit</string>
     <string name="title_activity_one_coin_register">Crypto Share Package Account Registration</string>
-    <string name="one_coin_form_details">In order to complete the “Know Your Customer”(KYC) requirements at a later stage, you will need to supply: \n\nFull Residential Address including Street Number and Suburb, Date of Birth, Country of Birth, Passport Number and Passport Expiry Date. \n\nA copy of your passport identification page plus proof of address (Bank Statement or Utility Bill showing full name and address) matching the details supplied by upload. Upon completion and approval, you will be free to transact in Cryptocurrency and e-currency through your Onelife.eu online account.</string>
+    <string name="crypto_form_details">In order to complete the “Know Your Customer”(KYC) requirements at a later stage, you will need to supply: \n\nFull Residential Address including Street Number and Suburb, Date of Birth, Country of Birth, Passport Number and Passport Expiry Date. \n\nA copy of your passport identification page plus proof of address (Bank Statement or Utility Bill showing full name and address) matching the details supplied by upload. Upon completion and approval, you will be free to transact in Cryptocurrency and e-currency through your chosen online account.</string>
     <string name="one_life_logo">one life logo</string>
     <string name="one_life_form_desc">In order to register your Crypto Share package with the chosen network, we will need the following information completed:</string>
     <string name="hint_email_address">Email Address</string>
@@ -81,10 +81,10 @@
     <string name="splash_message">Starting</string>
 
     <!--PDF urls-->
-    <string name="BGP_Shares_url">https://moasarknaturalnz.com/wp-content/uploads/2017/10/Notice-of-Application-for-BGP-Shares-Form.pdf</string>
-    <string name="BGP_Shares_shortcodeurl">https://wp.me/a9bNTX-as</string>
-    <string name="BGP_Agreement_url">https://moasarknaturalnz.com/wp-content/uploads/2017/10/Participation-Agreement-in-BGP-One-Life-Trust-Form.pdf</string>
-    <string name="BGP_Agreement_shortcodeurl">https://wp.me/a9bNTX-at</string>
+    <string name="Crypto_Shares_url">https://moasarknaturalnz.com/wp-content/uploads/moasarkapp/Notice-of-Application-for-BGP-Shares-Form.pdf</string>
+    <string name="Crypto_Shares_shortcodeurl">https://wp.me/a9bNTX-as</string>
+    <string name="Crypto_Agreement_url">https://moasarknaturalnz.com/wp-content/uploads/moasarkapp/Participation-Agreement-in-BGP-One-Life-Trust-FormV3.pdf</string>
+    <string name="Crypto_Agreement_shortcodeurl">https://wp.me/a9bNTX-at</string>
 
 
 </resources>

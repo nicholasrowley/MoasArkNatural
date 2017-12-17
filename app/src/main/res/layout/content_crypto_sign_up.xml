@@ -6,8 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorBody"
-    tools:context="com.wordpress.onelifegroupnz.moaarknatural.BgpSignUp"
-    tools:showIn="@layout/activity_bgp_sign_up">
+    tools:context="com.wordpress.onelifegroupnz.moaarknatural.CryptoSignUp"
+    tools:showIn="@layout/activity_crypto_sign_up">
 
     <ScrollView
         android:id="@+id/ScrollViewHome"
@@ -27,17 +27,17 @@
             android:weightSum="1">
 
             <TextView
-                android:id="@+id/BgpPageTitle"
+                android:id="@+id/cryptoPageTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/bgp_sign_up"
+                android:text="@string/crypto_sign_up"
                 android:textSize="26sp" />
 
             <TextView
                 android:id="@+id/pageDesc"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/bgp_sign_up_desc"
+                android:text="@string/crypto_sign_up_desc"
                 android:textSize="14sp" />
 
             <Button
@@ -48,11 +48,11 @@
                 android:text="@string/participation_agreement_in_bgp_one_life_trust" />
 
             <Button
-                android:id="@+id/bgpSharesBtn"
+                android:id="@+id/cryptoSharesBtn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:onClick="btnOnClick"
-                android:text="@string/notice_of_application_for_bgp_shares" />
+                android:text="@string/notice_of_application_for_crypto_shares" />
 
             <TextView
                 android:id="@+id/textView"
@@ -61,11 +61,11 @@
                 android:text="@string/availiable_forms_desc" />
 
             <Button
-                android:id="@+id/oneCoinRegisterBtn"
+                android:id="@+id/cryptoRegisterBtn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:onClick="btnOnClick"
-                android:text="@string/one_coin_account_form_title" />
+                android:text="@string/crypto_account_form_title" />
 
             <TextView
                 android:id="@+id/emailDesc"
@@ -99,7 +99,7 @@
                         app:flexWrap="wrap">
 
                         <TextView
-                            android:id="@+id/bgpSubmitEmail"
+                            android:id="@+id/cryptoSubmitEmail"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"

@@ -115,7 +115,7 @@
                 android:typeface="normal" />
 
             <Button
-                android:id="@+id/bgpSignUpBtn"
+                android:id="@+id/cryptoSignUpBtn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -126,7 +126,7 @@
                 android:paddingLeft="15dp"
                 android:paddingRight="15dp"
                 android:paddingStart="15dp"
-                android:text="@string/title_activity_bgp_sign_up"
+                android:text="@string/title_activity_crypto_sign_up"
                 android:textSize="@dimen/btn_text_size"
                 android:textStyle="bold"
                 android:typeface="normal" />

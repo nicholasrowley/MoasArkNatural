@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.wordpress.onelifegroupnz.moaarknatural">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -41,7 +42,8 @@
             <intent-filter>
 
                 <!-- Insert your app key after “db-  ...” -->
-                <data android:scheme="db-@string/DROPBOX_APP_KEY" />
+                <data android:scheme="db-@string/DROPBOX_APP_KEY"
+                    tools:ignore="AppLinkUrlError" />
 
                 <action android:name="android.intent.action.VIEW" />
 
@@ -72,15 +74,15 @@
         <!-- [END firebase_iid_service] -->
 
         <activity
-            android:name=".BgpSignUp"
-            android:label="@string/title_activity_bgp_sign_up"
+            android:name=".CryptoSignUp"
+            android:label="@string/title_activity_crypto_sign_up"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ContactForm"
             android:label="@string/title_activity_contact_form"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".OneCoinRegister"
+            android:name=".CryptoRegister"
             android:label="@string/title_activity_one_coin_register"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>

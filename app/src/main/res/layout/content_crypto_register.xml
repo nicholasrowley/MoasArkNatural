@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.wordpress.onelifegroupnz.moaarknatural.OneCoinRegister"
-    tools:showIn="@layout/activity_one_coin_register"
+    tools:context="com.wordpress.onelifegroupnz.moaarknatural.CryptoRegister"
+    tools:showIn="@layout/activity_crypto_register"
     android:background="@color/colorBody">
 
     <ScrollView
@@ -57,11 +57,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="@string/one_coin_account_form_title"
+                android:text="@string/crypto_account_form_title"
                 android:textSize="18sp" />
 
             <TextView
-                android:id="@+id/oneCoinFormDesc"
+                android:id="@+id/cryptoFormDesc"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/one_life_form_desc" />
@@ -176,7 +176,7 @@
                 android:hint="@string/hint_home_phone" />
 
             <TextView
-                android:id="@+id/oneCointFormDetails"
+                android:id="@+id/cryptoFormDetails"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/crypto_form_details" />

@@ -39,7 +39,7 @@ import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DANCEVIDE
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.FOODVIDEOPATH;
 
 /**Activity class for the Crypto Sign ups*/
-public class BgpSignUp extends AppCompatActivity {
+public class CryptoSignUp extends AppCompatActivity {
 
     private SearchView searchView;
     private TextView formEmail;
@@ -47,12 +47,12 @@ public class BgpSignUp extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_bgp_sign_up);
+        setContentView(R.layout.activity_crypto_sign_up);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_home);
 
-        formEmail = findViewById(R.id.bgpSubmitEmail);
+        formEmail = findViewById(R.id.cryptoSubmitEmail);
 
         addSearchFragment();
 
@@ -86,17 +86,17 @@ public class BgpSignUp extends AppCompatActivity {
         switch (item.getItemId()) {
             // Respond to the action bar's Up/Home button
             case android.R.id.home:
-                startActivity(new Intent(BgpSignUp.this, Home.class));
+                startActivity(new Intent(CryptoSignUp.this, Home.class));
                 return true;
             case R.id.menu_dance_video_gallery:
                 //Proceed to Line Dance video gallery
-                intent = new Intent(BgpSignUp.this, VideoGallery.class);
+                intent = new Intent(CryptoSignUp.this, VideoGallery.class);
                 intent.putExtra("videoPath", DANCEVIDEOPATH); //using video path to set the gallery
                 startActivity(intent);
                 return true;
             case R.id.menu_food_video_gallery:
                 //Proceed to Food video gallery
-                intent = new Intent(BgpSignUp.this, VideoGallery.class);
+                intent = new Intent(CryptoSignUp.this, VideoGallery.class);
                 intent.putExtra("videoPath", FOODVIDEOPATH); //using video path to set the gallery
                 startActivity(intent);
                 return true;
@@ -105,7 +105,7 @@ public class BgpSignUp extends AppCompatActivity {
                 return true;
             case R.id.menu_contact_form:
                 //Proceed to contact form
-                intent = new Intent(BgpSignUp.this, ContactForm.class);
+                intent = new Intent(CryptoSignUp.this, ContactForm.class);
                 startActivity(intent);
                 return true;
         }
@@ -122,7 +122,7 @@ public class BgpSignUp extends AppCompatActivity {
 
                 loadPdfFile(paFormUrl/*, paFormFallbackUrl*/);
                 break;
-            case R.id.bgpSharesBtn:
+            case R.id.cryptoSharesBtn:
                 String bgpSharesUrl = getString(R.string.Crypto_Shares_url);
                 //String bgpSharesFallbackUrl = getString(R.string.Crypto_Shares_shortcodeurl);
 
@@ -136,9 +136,9 @@ public class BgpSignUp extends AppCompatActivity {
                 }
                 Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_SHORT).show();
                 break;
-            case R.id.oneCoinRegisterBtn:
+            case R.id.cryptoRegisterBtn:
                 //Proceed to contact form
-                intent = new Intent(BgpSignUp.this, OneCoinRegister.class);
+                intent = new Intent(CryptoSignUp.this, CryptoRegister.class);
                 startActivity(intent);
                 break;
         }
@@ -226,7 +226,7 @@ public class BgpSignUp extends AppCompatActivity {
             startActivity(intent);
 
         } catch ( ActivityNotFoundException e ) {
-            new AlertDialog.Builder(BgpSignUp.this)
+            new AlertDialog.Builder(CryptoSignUp.this)
                     .setTitle("Notification Settings Not Available")
                     .setMessage("Unable to open the apps settings screen, please try again later")
                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {

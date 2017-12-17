@@ -5,31 +5,21 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.telephony.TelephonyManager;
-import android.text.TextUtils;
 import android.util.Patterns;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -41,18 +31,13 @@ import android.widget.Toast;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
 
-import java.util.LinkedList;
 import java.util.Locale;
 
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DANCEVIDEOPATH;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.FOODVIDEOPATH;
 /** Activity class for the one coin registration form*/
-public class OneCoinRegister extends AppCompatActivity {
+public class CryptoRegister extends AppCompatActivity {
 
     private SearchView searchView;
 
@@ -72,7 +57,7 @@ public class OneCoinRegister extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_one_coin_register);
+        setContentView(R.layout.activity_crypto_register);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_home);
@@ -93,8 +78,13 @@ public class OneCoinRegister extends AppCompatActivity {
         if (this.getSystemService(Context.TELEPHONY_SERVICE) != null) {
             TelephonyManager tm = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
 
-            Locale l = new Locale("", tm.getNetworkCountryIso());
-            countryList[0] = l.getDisplayCountry();
+            Locale l = null;
+            if (tm != null) {
+                l = new Locale("", tm.getNetworkCountryIso());
+            }
+            if (l != null) {
+                countryList[0] = l.getDisplayCountry();
+            }
         }
 
         //sets country options
@@ -144,26 +134,26 @@ public class OneCoinRegister extends AppCompatActivity {
         switch (item.getItemId()) {
             // Respond to the action bar's Up/Home button
             case android.R.id.home:
-                startActivity(new Intent(OneCoinRegister.this, Home.class));
+                startActivity(new Intent(CryptoRegister.this, Home.class));
                 return true;
             case R.id.action_notification:
                 openAppSettings();
                 return true;
             case R.id.menu_dance_video_gallery:
                 //Proceed to Line Dance video gallery
-                intent = new Intent(OneCoinRegister.this, VideoGallery.class);
+                intent = new Intent(CryptoRegister.this, VideoGallery.class);
                 intent.putExtra("videoPath", DANCEVIDEOPATH); //using video path to set the gallery
                 startActivity(intent);
                 return true;
             case R.id.menu_food_video_gallery:
                 //Proceed to Food video gallery
-                intent = new Intent(OneCoinRegister.this, VideoGallery.class);
+                intent = new Intent(CryptoRegister.this, VideoGallery.class);
                 intent.putExtra("videoPath", FOODVIDEOPATH); //using video path to set the gallery
                 startActivity(intent);
                 return true;
             case R.id.menu_contact_form:
                 //Proceed to contact form
-                intent = new Intent(OneCoinRegister.this, ContactForm.class);
+                intent = new Intent(CryptoRegister.this, ContactForm.class);
                 startActivity(intent);
                 return true;
         }
@@ -190,7 +180,7 @@ public class OneCoinRegister extends AppCompatActivity {
             startActivity(intent);
 
         } catch (ActivityNotFoundException e) {
-            new AlertDialog.Builder(OneCoinRegister.this)
+            new AlertDialog.Builder(CryptoRegister.this)
                     .setTitle("Notification Settings Not Available")
                     .setMessage("Unable to open the apps settings screen, please try again later")
                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
@@ -217,8 +207,10 @@ public class OneCoinRegister extends AppCompatActivity {
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         searchView =
                 (android.support.v7.widget.SearchView) menu.findItem(R.id.search).getActionView();
-        searchView.setSearchableInfo(
-                searchManager.getSearchableInfo(getComponentName()));
+        if (searchManager != null) {
+            searchView.setSearchableInfo(
+                    searchManager.getSearchableInfo(getComponentName()));
+        }
 
         //disable default search icon next to search box
         ImageView searchImage = searchView.findViewById(android.support.v7.appcompat.R.id.search_mag_icon);
@@ -242,7 +234,9 @@ public class OneCoinRegister extends AppCompatActivity {
             public boolean onMenuItemActionExpand(MenuItem item) {
                 searchFragmentLayout.setVisibility(View.VISIBLE);
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+                if (imm != null) {
+                    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+                }
                 searchView.setIconifiedByDefault(false);
                 searchView.setFocusable(true);
                 searchView.requestFocusFromTouch();
@@ -413,7 +407,7 @@ public class OneCoinRegister extends AppCompatActivity {
         try {
             startActivity(Intent.createChooser(emailIntent, "Send registration form using..."));
         } catch (android.content.ActivityNotFoundException ex) {
-            Toast.makeText(OneCoinRegister.this, "No email clients installed.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(CryptoRegister.this, "No email clients installed.", Toast.LENGTH_SHORT).show();
         }
     }
 

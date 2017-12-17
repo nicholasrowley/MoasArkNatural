@@ -1,7 +1,6 @@
 package com.wordpress.onelifegroupnz.moaarknatural;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -10,7 +9,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -94,7 +92,9 @@ public class Home extends AppCompatActivity {
         InputMethodManager inm = (InputMethodManager) this.getSystemService(Activity.INPUT_METHOD_SERVICE);
         View focusedView = this.getCurrentFocus();
         if (focusedView != null)
-            inm.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), 0);
+            if (inm != null) {
+                inm.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), 0);
+            }
     }
 
     @Override
@@ -402,8 +402,8 @@ public class Home extends AppCompatActivity {
                 intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 break;
-            case R.id.bgpSignUpBtn:
-                intent = new Intent(Home.this, BgpSignUp.class);
+            case R.id.cryptoSignUpBtn:
+                intent = new Intent(Home.this, CryptoSignUp.class);
                 startActivity(intent);
                 break;
         }
@@ -448,8 +448,10 @@ public class Home extends AppCompatActivity {
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         searchView =
                 (android.support.v7.widget.SearchView) menu.findItem(R.id.search).getActionView();
-        searchView.setSearchableInfo(
-                searchManager.getSearchableInfo(getComponentName()));
+        if (searchManager != null) {
+            searchView.setSearchableInfo(
+                    searchManager.getSearchableInfo(getComponentName()));
+        }
 
         //disable default search icon next to search box
         ImageView searchImage = searchView.findViewById(android.support.v7.appcompat.R.id.search_mag_icon);
@@ -473,7 +475,9 @@ public class Home extends AppCompatActivity {
             public boolean onMenuItemActionExpand(MenuItem item) {
                 searchFragmentLayout.setVisibility(View.VISIBLE);
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+                if (imm != null) {
+                    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+                }
                 searchView.setIconifiedByDefault(false);
                 searchView.setFocusable(true);
                 searchView.requestFocusFromTouch();

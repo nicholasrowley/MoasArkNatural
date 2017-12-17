@@ -41,13 +41,13 @@
     <string name="banner_ad_unit_id_live">ca-app-pub-2838047532476449/3742836256</string>
 
     <!-- BGP sign up and contact form strings -->
-    <string name="title_activity_bgp_sign_up">Crypto Share Sign Up</string>
-    <string name="bgp_sign_up">Crypto Share Sign up</string>
-    <string name="participation_agreement_in_bgp_one_life_trust">Participation Agreement in Crypto One Life Trust</string>
-    <string name="notice_of_application_for_bgp_shares">Notice of application for Crypto Shares</string>
+    <string name="title_activity_crypto_sign_up">Crypto Share Sign Up</string>
+    <string name="crypto_sign_up">Crypto Share Sign up</string>
+    <string name="participation_agreement_in_bgp_one_life_trust">Participation Agreement in BGP One Life Trust</string>
+    <string name="notice_of_application_for_crypto_shares">Notice of application for Crypto Shares</string>
     <string name="sales_email">sales@moasarknaturalnz.com</string>
     <string name="sales_email_desc">If you have already completed a form please send it to the following email address:</string>
-    <string name="bgp_sign_up_desc">You can view and download the following forms from here.</string>
+    <string name="crypto_sign_up_desc">You can view and download the following forms from here.</string>
     <string name="copy_text_desc">Copy to clipboard</string>
     <string name="title_activity_contact_form">Contact Form</string>
     <string name="contact_form_title">Contact Moa\'s Ark Natural</string>
@@ -71,7 +71,7 @@
     <string name="hint_mobile_phone">Mobile Phone</string>
     <string name="hint_home_phone">Home Phone</string>
     <string name="availiable_forms_desc">The following registration forms are available here</string>
-    <string name="one_coin_account_form_title">One Coin Package Account Registration</string>
+    <string name="crypto_account_form_title">Crypto Package Account Registration</string>
     <string name="text_country">(Select a Country)</string>
     <string name="email_warning_message">NOTE: A EMAIL CLIENT IS REQUIRED TO SEND THIS FORM!</string>
     <string name="email_info">(You need to have access to change Passwords etc)</string>

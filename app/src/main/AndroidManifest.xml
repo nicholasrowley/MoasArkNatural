@@ -42,7 +42,7 @@
             <intent-filter>
 
                 <!-- Insert your app key after “db-  ...” -->
-                <data android:scheme="db-@string/DROPBOX_APP_KEY"
+                <data android:scheme="db-@string/81qi5h6hqukhn77"
                     tools:ignore="AppLinkUrlError" />
 
                 <action android:name="android.intent.action.VIEW" />
@@ -59,20 +59,13 @@
             android:theme="@style/AppTheme.NoActionBar" />
 
         <!-- [START firebase_service] -->
-        <service android:name=".MyFirebaseMessagingService">
+        <service android:name=".MyFirebaseMessagingService"
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
         <!-- [END firebase_service] -->
-        <!-- [START firebase_iid_service] -->
-        <service android:name=".MyFirebaseInstanceIDService">
-            <intent-filter>
-                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
-            </intent-filter>
-        </service>
-        <!-- [END firebase_iid_service] -->
-
         <activity
             android:name=".CryptoSignUp"
             android:label="@string/title_activity_crypto_sign_up"
@@ -84,7 +77,7 @@
         <activity
             android:name=".CryptoRegister"
             android:label="@string/title_activity_one_coin_register"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar"/>
     </application>
 
 </manifest>

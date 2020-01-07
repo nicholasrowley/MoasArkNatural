@@ -21,10 +21,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.support.v4.app.NotificationCompat;
+import androidx.core.app.NotificationCompat;
 import android.util.Log;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 /**
  * Description:
@@ -96,5 +97,30 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
+    }
+
+    @Override
+    public void onNewToken(String s) {
+        // Get updated InstanceID token.
+        super.onNewToken(s);
+        String refreshedToken = s;
+        Log.d(TAG, "Refreshed token: " + refreshedToken);
+
+        // If you want to send messages to this application instance or
+        // manage this apps subscriptions on the server side, send the
+        // Instance ID token to your app server.
+        sendRegistrationToServer(refreshedToken);
+    }
+
+    /**
+     * Persist token to third-party servers.
+     *
+     * Modify this method to associate the user's FCM InstanceID token with any server-side account
+     * maintained by your application.
+     *
+     * @param token The new token.
+     */
+    private void sendRegistrationToServer(String token) {
+        // TODO: Implement this method to send token to your app server.
     }
 }

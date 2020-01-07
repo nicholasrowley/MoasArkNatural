@@ -7,15 +7,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.MenuItemCompat;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.SearchView;
-import android.support.v7.widget.Toolbar;
+
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -204,12 +202,12 @@ public class ContactForm extends AppCompatActivity {
         SearchManager searchManager =
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         searchView =
-                (android.support.v7.widget.SearchView) menu.findItem(R.id.search).getActionView();
+                (androidx.appcompat.widget.SearchView) menu.findItem(R.id.search).getActionView();
         searchView.setSearchableInfo(
                 searchManager.getSearchableInfo(getComponentName()));
 
         //disable default search icon next to search box
-        ImageView searchImage = searchView.findViewById(android.support.v7.appcompat.R.id.search_mag_icon);
+        ImageView searchImage = searchView.findViewById(androidx.appcompat.R.id.search_mag_icon);
         ViewGroup LayoutSearchView =
                 (ViewGroup) searchImage.getParent();
         LayoutSearchView.removeView(searchImage);

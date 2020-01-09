@@ -4,14 +4,14 @@
     <string name="title_activity_view_video">ViewVideo</string>
     <string name="app_icon_description">Moa\'s Ark Application icon</string>
     <string name="blurb">Moa\'s Ark for Healthier Living</string>
-    <string name="hm_feature_dance_video_aut_text">Feature Dance &amp; Wellbeing D.I.Y Video</string>
-    <string name="hm_feature_food_video_aut_text">Feature Food &amp; Future Health Video</string>
+    <string name="hm_feature_dance_video_aut_text">Feature Exercise Video</string>
+    <string name="hm_feature_food_video_aut_text">Feature Health Food Video</string>
     <string name="sharing_title">Sharing</string>
     <string name="Sharing_Error_Text">Error Finding Link</string>
     <string name="package_name">"com.wordpress.onelifegroupnz.moaarknatural"</string>
     <string name="title_activity_video_gallery">Video gallery</string>
-    <string name="title_activity_dance_video_gallery">Dance &amp; Wellbeing D.I.Y video gallery</string>
-    <string name="title_activity_food_video_gallery">Food &amp; Future Health video gallery</string>
+    <string name="title_activity_dance_video_gallery">Exercise gallery</string>
+    <string name="title_activity_food_video_gallery">Health Food Gallery</string>
     <string name="text_video_gallery_desc">Moa\'s Ark</string>
     <string name="loadBtnName">Load more videos</string>
     <string name="title_activity_search_results">SearchResults</string>
@@ -23,7 +23,7 @@
     <string name="msg_results_found">%1$s results found for %2$s</string>
     <string name="server_connection_error_title">Can not connect</string>
     <string name="server_connection_error">Please check your wifi and try again.</string>
-    <string name="ACCESS_TOKEN">djbvfjkdbvdfjkvndkfjnvjkdsnkfbnlsnblsdjbnldfbndjlsdkfbn</string>
+    <string name="ACCESS_TOKEN">fghnfdgfdgkdjfngijkfdngikjdfngkjdfngkjdfngjkdsngkj</string>
     <string name="moa_s_ark_shop">Moa\'s Ark NZ Shop</string>
     <string name="website_shop_url">https://moasarknaturalnz.com/shop/</string>
     <string name="stepsheet_not_found">No step sheet could be found for this dance and wellbeing D.I.Y video.</string>
@@ -37,8 +37,8 @@
     <string name="search_type_food">Food &amp; Future Health</string>
 
     <!-- This is the advertisement ids for adMob please use the testing one for clicking (Do not click the real ad) -->
-    <string name="banner_ad_unit_id_test">ca-app-pub-3940256099942544/6300978111</string>
-    <string name="banner_ad_unit_id_live">ca-app-pub-2838047532476449/3742836256</string>
+    <string name="banner_ad_unit_id_test">ca-app-pub-2838047532476449/3742836256</string>
+    <string name="banner_ad_unit_id_live">ca-app-pub-3940256099942544/6300978111</string>
 
     <!-- BGP sign up and contact form strings -->
     <string name="title_activity_crypto_sign_up">Crypto Share Sign Up</string>

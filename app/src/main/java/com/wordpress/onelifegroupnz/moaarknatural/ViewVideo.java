@@ -47,6 +47,8 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
+import java.io.IOException;
+
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DANCEVIDEOPATH;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.FOODVIDEOPATH;
@@ -287,7 +289,9 @@ public class ViewVideo extends AppCompatActivity {
             //set up videoView
             mediaController.setAnchorView(videoView);
 
+            //TODO test
             final Uri video = Uri.parse(videoData.getTempUrl());
+            //final Uri video = Uri.parse("https://dl.dropboxusercontent.com/sh/velh8ofxf1htg4o/AACQg5-aHmVwOv7GHnPUCWKYa/Button%20Mushroom%20With%20Moas%20Ark%20Natural%20Garlic%20Butter%20Sauce.mp4?dl=0");
             videoView.setMediaController(mediaController);
             videoView.setVideoURI(video);
             videoView.requestFocus();
@@ -394,7 +398,13 @@ public class ViewVideo extends AppCompatActivity {
         //Check if in portrait or landscape
         if (portraitView) {
             videoTitle = findViewById(R.id.txtVideoTitle);
+            //TODO test2
             videoTitle.setText(videoData.getName());
+            /*try {
+                videoTitle.setText(DropboxShareFolderURLInterpreter.getShareURLFileSystem("https://www.dropbox.com/sh/velh8ofxf1htg4o/AAA4CUgm3jC4v0f67o9ALIODa?dl=0"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }*/
             toolbar.setVisibility(View.VISIBLE);
             decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);

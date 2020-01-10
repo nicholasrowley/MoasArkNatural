@@ -14,6 +14,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
+
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -33,6 +35,8 @@ import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 
+
+import java.io.IOException;
 
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.ALLVIDEOSCODE;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DANCEVIDEOPATH;
@@ -76,6 +80,8 @@ public class Home extends AppCompatActivity {
         refreshProgressbar = findViewById(R.id.refreshProgress);
         rssView = findViewById(R.id.fragment_container);
 
+
+        Log.d("Test", "test");
 
         refreshContent();
 
@@ -283,6 +289,12 @@ public class Home extends AppCompatActivity {
                         e.printStackTrace();
                     }
                     runOnUiThread(setProgressComplete);
+                    //TODO test3
+                    try {
+                        DropboxShareFolderURLInterpreter.getShareURLFileSystem("https://www.dropbox.com/sh/velh8ofxf1htg4o/AAA4CUgm3jC4v0f67o9ALIODa?dl=0");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             };
             refreshTask.start();

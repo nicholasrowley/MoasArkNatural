@@ -35,6 +35,7 @@ public class GlobalAppData {
     public List<SearchSuggestion> searchSuggestions;
     public static final int DROPBOXTIMEOUTLIMIT = 60000; //Milliseconds
 
+
     private GlobalAppData(String ACCESS_TOKEN, Context context, String searchString) {
 
         //checks if access token is not set.

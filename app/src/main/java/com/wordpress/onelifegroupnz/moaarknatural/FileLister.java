@@ -30,6 +30,9 @@ public class FileLister extends AsyncTask<Object, Void, Object> {
     private boolean searchEnabled;
     private static final int LOADAMOUNT = 5; //number of files loaded with a single execution of the class. Less is faster.
 
+    //shoptradenz integration
+    private final String appRootPath = "https://shoptradenz.com/moasapp";
+
     FileLister(DbxClientV2 dbxClient, List<Metadata> dropboxLoadData,
                List<FileData> loadedVideos, String searchInput, String path) {
         this.dbxClient = dbxClient;

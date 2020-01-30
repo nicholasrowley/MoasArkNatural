@@ -291,7 +291,7 @@ public class Home extends AppCompatActivity {
                     runOnUiThread(setProgressComplete);
                     //TODO test3
                     try {
-                        DropboxShareFolderURLInterpreter.getShareURLFileSystem("https://www.dropbox.com/sh/velh8ofxf1htg4o/AAA4CUgm3jC4v0f67o9ALIODa?dl=0");
+                        FolderContent.getShareURLFileSystem("https://shoptradenz.com/moasapp/food videos/");
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

@@ -36,7 +36,15 @@ import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Scanner;
 
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.ALLVIDEOSCODE;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DANCEVIDEOPATH;
@@ -169,9 +177,9 @@ public class Home extends AppCompatActivity {
                 public void run() {
                     try {
                         if (appData == null) {
-                            appData = GlobalAppData.getInstance(getString(R.string.ACCESS_TOKEN), Home.this, "");
+                            appData = GlobalAppData.getInstance(getString(R.string.DIRECTORY_ROOT), Home.this, "");
                         } else {
-                            appData.refreshDropboxVideoFiles(getString(R.string.ACCESS_TOKEN), Home.this, "", ALLVIDEOSCODE);
+                            appData.refreshIISDirectoryVideoFiles(getString(R.string.DIRECTORY_ROOT), Home.this, "", ALLVIDEOSCODE);
 
                             refreshDialog.show();
                         }
@@ -181,13 +189,16 @@ public class Home extends AppCompatActivity {
                                 || appData.getVideoData(FOODVIDEOPATH).size() == 0) {
                             if (appData.getVideoData(DANCEVIDEOPATH).size() == 0
                                     && appData.getVideoData(FOODVIDEOPATH).size() == 0) {
-                                appData.refreshDropboxVideoFiles(getString(R.string.ACCESS_TOKEN), Home.this, "", ALLVIDEOSCODE);
+                                appData.refreshIISDirectoryVideoFiles(getString(R.string.DIRECTORY_ROOT), Home.this, "", ALLVIDEOSCODE);
                             } else if (appData.getVideoData(DANCEVIDEOPATH).size() == 0) {
-                                appData.refreshDropboxVideoFiles(getString(R.string.ACCESS_TOKEN), Home.this, "", DANCEVIDEOPATH);
+                                appData.refreshIISDirectoryVideoFiles(getString(R.string.DIRECTORY_ROOT), Home.this, "", DANCEVIDEOPATH);
                             } else if (appData.getVideoData(FOODVIDEOPATH).size() == 0) {
-                                appData.refreshDropboxVideoFiles(getString(R.string.ACCESS_TOKEN), Home.this, "", FOODVIDEOPATH);
+                                appData.refreshIISDirectoryVideoFiles(getString(R.string.DIRECTORY_ROOT), Home.this, "", FOODVIDEOPATH);
                             }
                         }
+
+                        appData.setFeatureDanceVideo(getString(R.string.DIRECTORY_ROOT));
+                        appData.setFeatureFoodVideo(getString(R.string.DIRECTORY_ROOT));
 
                         sleep(100);
                     } catch (InterruptedException e) {
@@ -289,12 +300,6 @@ public class Home extends AppCompatActivity {
                         e.printStackTrace();
                     }
                     runOnUiThread(setProgressComplete);
-                    //TODO test3
-                    try {
-                        FolderContent.getShareURLFileSystem("https://shoptradenz.com/moasapp/food videos/");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
                 }
             };
             refreshTask.start();
@@ -303,24 +308,37 @@ public class Home extends AppCompatActivity {
     }
 
     public void setFeatureVideoLink() {
-        featureDanceVideo.setVisibility(View.GONE);
-        featureFoodVideo.setVisibility(View.GONE);
-
-        //set the first dance video in the list as the featured video
-        if (appData.getVideoData(DANCEVIDEOPATH).size() != 0) {
-            String buttonText = getString(R.string.hm_feature_dance_video_aut_text) + "\n" +
-                    appData.getVideoData(DANCEVIDEOPATH).get(0).getName().replaceFirst("[.][^.]+$", "");
+        if (appData.getFeatureDanceVideo() == null) {
+            featureDanceVideo.setVisibility(View.GONE);
+        } else {
+            String buttonText = getString(R.string.hm_feature_dance_video_aut_text) + "\n" + appData.getFeatureDanceVideo().getName();
             featureDanceVideo.setText(buttonText);
             featureDanceVideo.setVisibility(View.VISIBLE);
         }
 
+        if (appData.getFeatureFoodVideo() == null) {
+            featureFoodVideo.setVisibility(View.GONE);
+        } else {
+            String buttonText = getString(R.string.hm_feature_food_video_aut_text) + "\n" + appData.getFeatureFoodVideo().getName();
+            featureFoodVideo.setText(buttonText);
+            featureFoodVideo.setVisibility(View.VISIBLE);
+        }
+
+        //set the first dance video in the list as the featured video
+        /*if (appData.getVideoData(DANCEVIDEOPATH).size() != 0) {
+            String buttonText = getString(R.string.hm_feature_dance_video_aut_text) + "\n" +
+                    appData.getVideoData(DANCEVIDEOPATH).get(0).getName().replaceFirst("[.][^.]+$", "");
+            featureDanceVideo.setText(buttonText);
+            featureDanceVideo.setVisibility(View.VISIBLE);
+        }*/
+
         //set the first food video in the list as the featured video
-        if (appData.getVideoData(FOODVIDEOPATH).size() != 0) {
+        /*if (appData.getVideoData(FOODVIDEOPATH).size() != 0) {
             String buttonText = getString(R.string.hm_feature_food_video_aut_text) + "\n" +
                     appData.getVideoData(FOODVIDEOPATH).get(0).getName().replaceFirst("[.][^.]+$", "");
             featureFoodVideo.setText(buttonText);
             featureFoodVideo.setVisibility(View.VISIBLE);
-        }
+        }*/
     }
 
     //Opens the app setting so the user can turn notifications on or off
@@ -383,7 +401,7 @@ public class Home extends AppCompatActivity {
                 } else {
                     //Proceed to ViewVideo
                     intent = new Intent(Home.this, ViewVideo.class);
-                    intent.putExtra("videoIndex", appData.getVideoData(DANCEVIDEOPATH).get(0));
+                    intent.putExtra("videoIndex", appData.getFeatureDanceVideo());
                     startActivity(intent);
                 }
                 break;
@@ -408,7 +426,7 @@ public class Home extends AppCompatActivity {
                 } else {
                     //Proceed to ViewVideo
                     intent = new Intent(Home.this, ViewVideo.class);
-                    intent.putExtra("videoIndex", appData.getVideoData(FOODVIDEOPATH).get(0));
+                    intent.putExtra("videoIndex", appData.getFeatureFoodVideo());
                     startActivity(intent);
                 }
                 break;

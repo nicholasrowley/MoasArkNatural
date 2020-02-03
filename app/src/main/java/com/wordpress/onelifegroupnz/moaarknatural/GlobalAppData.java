@@ -2,10 +2,15 @@ package com.wordpress.onelifegroupnz.moaarknatural;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.util.Log;
+
 import androidx.appcompat.app.AlertDialog;
 
 import com.dropbox.core.v2.files.Metadata;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -20,55 +25,42 @@ import java.util.concurrent.TimeoutException;
 
 public class GlobalAppData {
     private static GlobalAppData instance = null;
-    private FileLister danceVideoFileLister;
-    private FileLister pdfFileLister;
-    private FileLister foodVideoFileLister;
-    private List<FileData> danceVideoInfoList;
-    private List<FileData> foodVideoInfoList;
-    private List<Metadata> dropboxDanceVideoLoadData; //data for loading remaining dropbox dance videos
-    private List<Metadata> dropboxFoodVideoLoadData; //data for loading remaining dropbox dance videos
+    private FolderContent danceVideoFileLister;
+    private FolderContent pdfFileLister;
+    private FolderContent foodVideoFileLister;
+    private List<FileDataListing> danceVideoInfoList;
+    private List<FileDataListing> foodVideoInfoList;
+    private List<FileDataListing> dropboxDanceVideoLoadData; //data for loading remaining dropbox dance videos
+    private List<FileDataListing> dropboxFoodVideoLoadData; //data for loading remaining dropbox dance videos
     public static final String DANCEVIDEOPATH = "/line dance videos/";
     public static final String STEPSHEETPATH = "/steps/";
     public static final String FOODVIDEOPATH = "/food videos/";
     public static final String RECIPEPATH = "/recipes/";
+    public static final String FEATUREDANCETXTPATH = "/feature video/feature dance.txt";
+    public static final String FEATUREFOODTXTPATH = "/feature video/feature food.txt";
     public static final String ALLVIDEOSCODE = "ALLVIDEOS";
     public List<SearchSuggestion> searchSuggestions;
     public static final int DROPBOXTIMEOUTLIMIT = 60000; //Milliseconds
 
+    //name of featured videos & featured video
+    private FileDataListing featureDanceInfo;
+    private FileDataListing featureFoodInfo;
 
-    private GlobalAppData(String ACCESS_TOKEN, Context context, String searchString) {
+    private GlobalAppData(String directoryRoot, Context context, String searchString) {
 
-        //checks if access token is not set.
-        if (ACCESS_TOKEN.equals("ACCESS_TOKEN")) {
-            new AlertDialog.Builder(context)
-                    .setTitle("WARNING: ACCESS TOKEN NOT SET")
-                    .setMessage("Invalid access token detected. Without a valid token this " +
-                            "application will not run properly. If you are a user please reinstall " +
-                            "the app. If you are still experiencing this issue please contact " +
-                            "support.")
-                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            // continue with delete
-                        }
-                    })
-                    .setIcon(android.R.drawable.ic_dialog_alert)
-                    .show();
-        } else {
-            //execute filelisters and get Dropbox content
-            refreshDropboxVideoFiles(ACCESS_TOKEN, context, searchString, ALLVIDEOSCODE);
-
-            populateSearchSuggestions(context);
-        }
+        //execute filelisters and get Dropbox content
+        refreshIISDirectoryVideoFiles(directoryRoot, context, searchString, ALLVIDEOSCODE);
+        populateSearchSuggestions(context);
     }
 
-    public static GlobalAppData getInstance(String ACCESS_TOKEN, Context context, String searchString) {
+    public static GlobalAppData getInstance(String directoryRoot, Context context, String searchString) {
         if (instance == null) {
-            instance = new GlobalAppData(ACCESS_TOKEN, context, searchString);
+            instance = new GlobalAppData(directoryRoot, context, searchString);
         }
         return instance;
     }
 
-    public List<FileData> getVideoData(String videoPath) {
+    public List<FileDataListing> getVideoData(String videoPath) {
         if (videoPath.equals(DANCEVIDEOPATH)) {
             return danceVideoInfoList;
         } else if (videoPath.equals(FOODVIDEOPATH)) {
@@ -93,7 +85,7 @@ public class GlobalAppData {
     * Context - Activity that is currently open
     * searchString - search query
     * videoPath - Path to the folder storing the videos. If a valid one is not specified all videos will load instead*/
-    public void refreshDropboxVideoFiles(String ACCESS_TOKEN, Context context, String searchString, String videoPath) {
+    public void refreshIISDirectoryVideoFiles(String directoryRoot, Context context, String searchString, String videoPath) {
 
         Thread refreshDanceVideoTask = new Thread() {
             public void run() {
@@ -109,7 +101,7 @@ public class GlobalAppData {
         };
 
         if (videoPath.equals(DANCEVIDEOPATH) || videoPath.equals(ALLVIDEOSCODE)) {
-            danceVideoFileLister = new FileLister(DropboxClient.getClient(ACCESS_TOKEN), new ArrayList<Metadata>(), new ArrayList<FileData>(), searchString, DANCEVIDEOPATH);
+            danceVideoFileLister = new FolderContent(directoryRoot, DANCEVIDEOPATH, searchString, new ArrayList<FileDataListing>(), new ArrayList<FileDataListing>());
 
             danceVideoInfoList = new ArrayList<>();
             dropboxDanceVideoLoadData = new ArrayList<>();
@@ -117,7 +109,7 @@ public class GlobalAppData {
         }
 
         if (videoPath.equals(FOODVIDEOPATH) || videoPath.equals(ALLVIDEOSCODE)) {
-            foodVideoFileLister = new FileLister(DropboxClient.getClient(ACCESS_TOKEN), new ArrayList<Metadata>(), new ArrayList<FileData>(), searchString, FOODVIDEOPATH);
+            foodVideoFileLister = new FolderContent(directoryRoot, FOODVIDEOPATH, searchString, new ArrayList<FileDataListing>(), new ArrayList<FileDataListing>());
 
             foodVideoInfoList = new ArrayList<>();
             dropboxFoodVideoLoadData = new ArrayList<>();
@@ -138,14 +130,14 @@ public class GlobalAppData {
 
     /*This method is for loading dropbox files in the background until fully loaded. This method
     * uses partially loaded files and doesn't load new files stored on dropbox servers*/
-    public void loadDropboxFiles(String ACCESS_TOKEN, String searchString, String videoPath) {
+    public void loadIISDirectoryFiles(String directoryRoot, String searchString, String videoPath) {
         if (videoPath.equals(DANCEVIDEOPATH)) {
-            danceVideoFileLister = new FileLister(DropboxClient.getClient(ACCESS_TOKEN), dropboxDanceVideoLoadData, danceVideoInfoList, searchString, DANCEVIDEOPATH);
+            danceVideoFileLister = new FolderContent(directoryRoot, DANCEVIDEOPATH, searchString, dropboxDanceVideoLoadData, danceVideoInfoList);
             danceVideoFileLister.execute();
 
             waitForDanceVideoFileListerExecution(0);
         } else if (videoPath.equals(FOODVIDEOPATH)) {
-            foodVideoFileLister = new FileLister(DropboxClient.getClient(ACCESS_TOKEN), dropboxFoodVideoLoadData, foodVideoInfoList, searchString, FOODVIDEOPATH);
+            foodVideoFileLister = new FolderContent(directoryRoot, FOODVIDEOPATH, searchString, dropboxFoodVideoLoadData, foodVideoInfoList);
             foodVideoFileLister.execute();
 
             waitForFoodVideoFileListerExecution(0);
@@ -154,6 +146,7 @@ public class GlobalAppData {
         refreshAllVideoLists();
     }
 
+    //TODO Needs to be fixed.
     /*checks the number of videos that have not been fully loaded from dropbox servers*/
     public int loadsRemaining(String folderPath) {
         if (folderPath.equals(DANCEVIDEOPATH)) {
@@ -181,17 +174,19 @@ public class GlobalAppData {
 
     /*method which returns the single latest version of the step sheet which contains the given
      name. (if one exists otherwise null)*/
-    public FileData getPdfContent(String ACCESS_TOKEN, String pdfName, String pdfPath) {
+    public FileDataListing getPdfContent(String directoryRoot, String pdfName, String pdfPath) {
 
-        List<FileData> pdfInfoList;
+        Log.d("PDFPATH: ", pdfPath);
+
+        List<FileDataListing> pdfInfoList;
 
         //Identify whether a Stepsheet or Recipe is needed.
-        if (pdfPath.equals(DANCEVIDEOPATH))
+        if (pdfPath.equals(directoryRoot + DANCEVIDEOPATH))
         {
-            pdfFileLister = new FileLister(DropboxClient.getClient(ACCESS_TOKEN), new ArrayList<Metadata>(), new ArrayList<FileData>(), pdfName, STEPSHEETPATH);
+            pdfFileLister = new FolderContent(directoryRoot, STEPSHEETPATH, pdfName, new ArrayList<FileDataListing>(), new ArrayList<FileDataListing>());
         } else
-            if (pdfPath.equals(FOODVIDEOPATH)) {
-                pdfFileLister = new FileLister(DropboxClient.getClient(ACCESS_TOKEN), new ArrayList<Metadata>(), new ArrayList<FileData>(), pdfName, RECIPEPATH);
+            if (pdfPath.equals(directoryRoot + FOODVIDEOPATH)) {
+                pdfFileLister = new FolderContent(directoryRoot, RECIPEPATH, pdfName, new ArrayList<FileDataListing>(), new ArrayList<FileDataListing>());
             }
         pdfFileLister.execute();
 
@@ -201,7 +196,7 @@ public class GlobalAppData {
 
         //if no result. declare with empty fields
         if (pdfInfoList.size() == 0)
-            pdfInfoList.add(new FileData("", "", ""));
+            pdfInfoList.add(new FileDataListing("", "", "", ""));
 
         return pdfInfoList.get(0); //returns the latest step sheet
     }
@@ -259,11 +254,62 @@ public class GlobalAppData {
     private void populateSearchSuggestions(Context context) {
         //populate the suggestions
         searchSuggestions = new ArrayList<>();
-        for (Metadata content : dropboxDanceVideoLoadData) {
-            searchSuggestions.add(new SearchSuggestion(context.getString(R.string.search_type_dance), content.getName().replaceFirst("[.][^.]+$", "")));
+        for (FileDataListing content : dropboxDanceVideoLoadData) {
+            searchSuggestions.add(new SearchSuggestion(context.getString(R.string.search_type_dance), content.getName()));
         }
-        for (Metadata content : dropboxFoodVideoLoadData) {
-            searchSuggestions.add(new SearchSuggestion(context.getString(R.string.search_type_food), content.getName().replaceFirst("[.][^.]+$", "")));
+        for (FileDataListing content : dropboxFoodVideoLoadData) {
+            searchSuggestions.add(new SearchSuggestion(context.getString(R.string.search_type_food), content.getName()));
         }
+    }
+
+    public void setFeatureDanceVideo(String directoryRoot) {
+        //TODO set feature videos based on what is specified in the text file
+        String featureDance;
+        try {
+            BufferedReader danceBr = new BufferedReader(new InputStreamReader(new URL(directoryRoot + GlobalAppData.FEATUREDANCETXTPATH).openStream()));
+
+            if ((featureDance = danceBr.readLine()) == null) {
+                featureDance = "";
+            }
+            Log.d("feature dance value",featureDance);
+            danceBr.close();
+            for (FileDataListing video : danceVideoInfoList) {
+                if (featureDance.equals(video.getName())) {
+                    featureDanceInfo = video;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d("error", "something went wrong with setting the feature dance.");
+        }
+    }
+
+    public void setFeatureFoodVideo(String directoryRoot) {
+        String featureFood;
+        try {
+            BufferedReader foodBr = new BufferedReader(new InputStreamReader(new URL(directoryRoot + GlobalAppData.FEATUREFOODTXTPATH).openStream()));
+
+            if ((featureFood = foodBr.readLine()) == null) {
+                featureFood = "";
+            }
+            Log.d("feature dance value",featureFood);
+            foodBr.close();
+            for (FileDataListing video : foodVideoInfoList) {
+                if (featureFood.equals(video.getName())) {
+                    featureFoodInfo = video;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d("error", "something went wrong with setting the feature food.");
+        }
+    }
+
+    public FileDataListing getFeatureFoodVideo() {
+        return featureFoodInfo;
+    }
+
+    public FileDataListing getFeatureDanceVideo() {
+        return featureDanceInfo;
     }
 }

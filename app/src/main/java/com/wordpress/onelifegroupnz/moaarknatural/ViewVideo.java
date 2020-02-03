@@ -59,8 +59,8 @@ import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.FOODVIDEO
 public class ViewVideo extends AppCompatActivity {
 
     private GlobalAppData appData; //singleton instance of globalAppData
-    private FileData videoData; //single video data object
-    private FileData pdfData; //single stepsheet data object
+    private FileDataListing videoData; //single video data object
+    private FileDataListing pdfData; //single stepsheet data object
     private Boolean dialogIsOpen; //ensure that only one video/wifi error dialog is displayed
     private Toolbar toolbar;
 
@@ -101,7 +101,7 @@ public class ViewVideo extends AppCompatActivity {
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            videoData = (FileData) extras.getSerializable("videoIndex");
+            videoData = (FileDataListing) extras.getSerializable("videoIndex");
         }
 
         //check if activity refreshed
@@ -156,7 +156,7 @@ public class ViewVideo extends AppCompatActivity {
             }
         });
 
-        appData = GlobalAppData.getInstance(getString(R.string.ACCESS_TOKEN),
+        appData = GlobalAppData.getInstance(getString(R.string.DIRECTORY_ROOT),
                 ViewVideo.this, "");
 
         addSearchFragment();
@@ -290,7 +290,7 @@ public class ViewVideo extends AppCompatActivity {
             mediaController.setAnchorView(videoView);
 
             //TODO test
-            final Uri video = Uri.parse(videoData.getTempUrl());
+            final Uri video = Uri.parse(videoData.getfilePathURL());
             //final Uri video = Uri.parse("https://dl.dropboxusercontent.com/sh/velh8ofxf1htg4o/AACQg5-aHmVwOv7GHnPUCWKYa/Button%20Mushroom%20With%20Moas%20Ark%20Natural%20Garlic%20Butter%20Sauce.mp4?dl=0");
             videoView.setMediaController(mediaController);
             videoView.setVideoURI(video);
@@ -442,7 +442,7 @@ public class ViewVideo extends AppCompatActivity {
             public void run() {
                 try {
                     //check for pdf data
-                    pdfData = appData.getPdfContent(getString(R.string.ACCESS_TOKEN), videoData.getName(), videoData.getFolderPath());
+                    pdfData = appData.getPdfContent(getString(R.string.DIRECTORY_ROOT), videoData.getName(), videoData.getFolderPath());
                     //refreshDialog.show(); //generally bad to show a toast with something that can be executed repetitively
                     sleep(100);
                 } catch (InterruptedException e) {
@@ -468,7 +468,7 @@ public class ViewVideo extends AppCompatActivity {
                     //display pdf
                     webview.getSettings().setJavaScriptEnabled(true);
 
-                    final String pdf = pdfData.getTempUrl();
+                    final String pdf = pdfData.getfilePathURL();
                     webview.setVisibility(View.GONE);
                     webview.loadUrl("https://docs.google.com/viewer?url=" + pdf);
                     webview.reload();

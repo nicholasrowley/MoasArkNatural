@@ -49,9 +49,9 @@ public class SearchResults extends AppCompatActivity {
     private GlobalAppData appData;
     private boolean refreshing;
     private Button loadMore;
-    private FileLister searchVideoLister; //can be either dance or food lister
-    private List<FileData> videoInfoResults;
-    private List<Metadata> dropboxSearchData; //data for loading remaining dropbox videos
+    private FolderContent searchVideoLister; //can be either dance or food lister
+    private List<FileDataListing> videoInfoResults;
+    private List<FileDataListing> dropboxSearchData; //data for loading remaining dropbox videos
     private String searchInput;
     private String folderPathCode;
     private SearchView searchView;
@@ -216,7 +216,7 @@ public class SearchResults extends AppCompatActivity {
             loadMore.setVisibility(View.VISIBLE);
         }
 
-        for (FileData link : videoInfoResults) {
+        for (FileDataListing link : videoInfoResults) {
             //create the button for the video link
             resultLinks.add(new Button(this));
 
@@ -273,11 +273,10 @@ public class SearchResults extends AppCompatActivity {
                 public void run() {
                     try {
                         if (appData == null)
-                            appData = GlobalAppData.getInstance(getString(R.string.ACCESS_TOKEN), SearchResults.this, "");
+                            appData = GlobalAppData.getInstance(getString(R.string.DIRECTORY_ROOT), SearchResults.this, "");
 
-                        searchVideoLister = new FileLister(DropboxClient.getClient(getString(R.string.ACCESS_TOKEN)),
-                                new ArrayList<Metadata>(), new ArrayList<FileData>(),
-                                searchInput, folderPathCode);
+                        searchVideoLister = new FolderContent(getString(R.string.DIRECTORY_ROOT), folderPathCode, searchInput,
+                                new ArrayList<FileDataListing>(), new ArrayList<FileDataListing>());
 
                         searchVideoLister.execute();
                         try {
@@ -388,10 +387,9 @@ public class SearchResults extends AppCompatActivity {
             public void run() {
                 try {
                     if (appData == null)
-                        appData = GlobalAppData.getInstance(getString(R.string.ACCESS_TOKEN), SearchResults.this, "");
+                        appData = GlobalAppData.getInstance(getString(R.string.DIRECTORY_ROOT), SearchResults.this, "");
 
-                    searchVideoLister = new FileLister(DropboxClient.getClient(getString(R.string.ACCESS_TOKEN)), dropboxSearchData, videoInfoResults,
-                            searchInput, folderPathCode);
+                    searchVideoLister = new FolderContent(getString(R.string.DIRECTORY_ROOT), folderPathCode, searchInput, dropboxSearchData, videoInfoResults);
 
                     searchVideoLister.execute();
                     try {

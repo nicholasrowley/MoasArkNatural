@@ -1,6 +1,8 @@
 package com.wordpress.onelifegroupnz.moaarknatural;
 
-public class FileDataListing {
+import java.io.Serializable;
+
+public class FileDataListing implements Serializable {
     private String name;
     private String filePath;
     private String folderPath;

@@ -45,7 +45,7 @@ public class CustomSearchFragment extends Fragment {
             view = inflater.inflate(R.layout.search_fragment, container, false);
 
             if (appData == null)
-                appData = GlobalAppData.getInstance(getString(R.string.ACCESS_TOKEN), getContext(), "");
+                appData = GlobalAppData.getInstance(getString(R.string.DIRECTORY_ROOT), getContext(), "");
 
             final String[] from = new String[] {"videoName"};
             final int[] to = new int[] {android.R.id.text1};

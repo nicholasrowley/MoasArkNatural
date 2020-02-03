@@ -38,7 +38,7 @@ public class SplashScreen extends AppCompatActivity {
                 try{
                     warningThread.start();
                     sleep(100);
-                    appData = GlobalAppData.getInstance(getString(R.string.ACCESS_TOKEN), SplashScreen.this, "");
+                    appData = GlobalAppData.getInstance(getString(R.string.DIRECTORY_ROOT), SplashScreen.this, "");
                     sleep(100);
                 }catch(InterruptedException e){
                     e.printStackTrace();
@@ -61,7 +61,7 @@ public class SplashScreen extends AppCompatActivity {
 
     //checks the notification for any readable data.
     public void checkNotification() {
-        FileData video = null;
+        FileDataListing video = null;
         // If a notification message is tapped, any data accompanying the notification
         // message is available in the intent extras. In this sample the launcher
         // intent is fired when the notification is tapped, so any accompanying data would
@@ -75,7 +75,7 @@ public class SplashScreen extends AppCompatActivity {
             for (String key : getIntent().getExtras().keySet()) {
                 Object value = getIntent().getExtras().get(key);
                 Log.d(TAG, "Key: " + key + " Value: " + value);
-                for ( FileData fileData : appData.getVideoData(GlobalAppData.DANCEVIDEOPATH)) {
+                for ( FileDataListing fileData : appData.getVideoData(GlobalAppData.DANCEVIDEOPATH)) {
                     if (value != null)
                         if (key.toLowerCase().equals("LDVIDEO".toLowerCase()) &&
                                 value.toString().toLowerCase()
@@ -84,7 +84,7 @@ public class SplashScreen extends AppCompatActivity {
                             video = fileData;
                         }
                 }
-                for ( FileData fileData : appData.getVideoData(GlobalAppData.FOODVIDEOPATH)) {
+                for ( FileDataListing fileData : appData.getVideoData(GlobalAppData.FOODVIDEOPATH)) {
                     if (value != null)
                         if (key.toLowerCase().equals("FVIDEO".toLowerCase()) &&
                                 value.toString().toLowerCase()

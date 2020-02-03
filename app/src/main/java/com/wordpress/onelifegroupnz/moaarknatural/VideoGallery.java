@@ -182,7 +182,7 @@ public class VideoGallery extends AppCompatActivity {
         galleryLinks = new ArrayList<>();
         int i = 0;
 
-        for (FileData link : appData.getVideoData(targetFolder)) {
+        for (FileDataListing link : appData.getVideoData(targetFolder)) {
             //create the button for the video link
             galleryLinks.add(new Button(this));
 
@@ -254,9 +254,9 @@ public class VideoGallery extends AppCompatActivity {
                 public void run() {
                     try {
                         if (appData == null)
-                            appData = GlobalAppData.getInstance(getString(R.string.ACCESS_TOKEN), VideoGallery.this, "");
+                            appData = GlobalAppData.getInstance(getString(R.string.DIRECTORY_ROOT), VideoGallery.this, "");
                         else {
-                            appData.refreshDropboxVideoFiles(getString(R.string.ACCESS_TOKEN), VideoGallery.this, "", targetFolder);
+                            appData.refreshIISDirectoryVideoFiles(getString(R.string.DIRECTORY_ROOT), VideoGallery.this, "", targetFolder);
                             refreshDialog.show();
                         }
                         //if data failed to load attempt to reload it.
@@ -264,11 +264,11 @@ public class VideoGallery extends AppCompatActivity {
                                 || appData.getVideoData(FOODVIDEOPATH).size() == 0) {
                             if (appData.getVideoData(DANCEVIDEOPATH).size() == 0
                                     && appData.getVideoData(FOODVIDEOPATH).size() == 0)
-                                appData.refreshDropboxVideoFiles(getString(R.string.ACCESS_TOKEN), VideoGallery.this, "", ALLVIDEOSCODE);
+                                appData.refreshIISDirectoryVideoFiles(getString(R.string.DIRECTORY_ROOT), VideoGallery.this, "", ALLVIDEOSCODE);
                             else if (appData.getVideoData(DANCEVIDEOPATH).size() == 0)
-                                appData.refreshDropboxVideoFiles(getString(R.string.ACCESS_TOKEN), VideoGallery.this, "", DANCEVIDEOPATH);
+                                appData.refreshIISDirectoryVideoFiles(getString(R.string.DIRECTORY_ROOT), VideoGallery.this, "", DANCEVIDEOPATH);
                             else if (appData.getVideoData(FOODVIDEOPATH).size() == 0)
-                                appData.refreshDropboxVideoFiles(getString(R.string.ACCESS_TOKEN), VideoGallery.this, "", FOODVIDEOPATH);
+                                appData.refreshIISDirectoryVideoFiles(getString(R.string.DIRECTORY_ROOT), VideoGallery.this, "", FOODVIDEOPATH);
                         }
                         sleep(100);
                     } catch (InterruptedException e) {
@@ -398,9 +398,9 @@ public class VideoGallery extends AppCompatActivity {
             public void run() {
                 try {
                     if (appData == null)
-                        appData = GlobalAppData.getInstance(getString(R.string.ACCESS_TOKEN), VideoGallery.this, "");
+                        appData = GlobalAppData.getInstance(getString(R.string.DIRECTORY_ROOT), VideoGallery.this, "");
                     else {
-                        appData.loadDropboxFiles(getString(R.string.ACCESS_TOKEN), "", targetFolder);
+                        appData.loadIISDirectoryFiles(getString(R.string.DIRECTORY_ROOT), "", targetFolder);
                         refreshDialog.show();
                     }
                     sleep(100);

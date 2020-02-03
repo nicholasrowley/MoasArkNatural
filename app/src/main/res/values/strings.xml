@@ -23,7 +23,7 @@
     <string name="msg_results_found">%1$s results found for %2$s</string>
     <string name="server_connection_error_title">Can not connect</string>
     <string name="server_connection_error">Please check your wifi and try again.</string>
-    <string name="ACCESS_TOKEN">yX8KtvfFf9AAAAAAAAAAzulfNHawGzCTMwAw68mGbu_0E3Q5IXZh4lIbcTzUSgup</string>
+    <string name="DIRECTORY_ROOT">https://shoptradenz.com/moasapp/</string>
     <string name="moa_s_ark_shop">Moa\'s Ark NZ Shop</string>
     <string name="website_shop_url">https://moasarknaturalnz.com/shop/</string>
     <string name="stepsheet_not_found">No step sheet could be found for this dance and wellbeing D.I.Y video.</string>
@@ -41,10 +41,10 @@
     <string name="banner_ad_unit_id_live">ca-app-pub-3940256099942544/6300978111</string>
 
     <!-- BGP sign up and contact form strings -->
-    <string name="title_activity_crypto_sign_up">Crypto Share Sign Up</string>
-    <string name="crypto_sign_up">Crypto Share Sign up</string>
+    <string name="title_activity_crypto_sign_up">Beneficial Group Purchase</string>
+    <string name="crypto_sign_up">Beneficial Group Purchase</string>
     <string name="participation_agreement_in_bgp_one_life_trust">Participation Agreement in BGP One Life Trust</string>
-    <string name="notice_of_application_for_crypto_shares">Notice of application for Crypto Shares</string>
+    <string name="notice_of_application_for_crypto_shares">Notice of application for BGP Shares</string>
     <string name="sales_email">sales@moasarknaturalnz.com</string>
     <string name="sales_email_desc">If you have already completed a form please send it to the following email address:</string>
     <string name="crypto_sign_up_desc">You can view and download the following forms from here.</string>
@@ -56,10 +56,10 @@
     <string name="subject_field_hint">Subject</string>
     <string name="message_field_hint">Message</string>
     <string name="submit_btn_text">Submit</string>
-    <string name="title_activity_one_coin_register">Crypto Share Package Account Registration</string>
+    <string name="title_activity_one_coin_register">BGP Share Package Account Registration</string>
     <string name="crypto_form_details">In order to complete the “Know Your Customer”(KYC) requirements at a later stage, you will need to supply: \n\nFull Residential Address including Street Number and Suburb, Date of Birth, Country of Birth, Passport Number and Passport Expiry Date. \n\nA copy of your passport identification page plus proof of address (Bank Statement or Utility Bill showing full name and address) matching the details supplied by upload. Upon completion and approval, you will be free to transact in Cryptocurrency and e-currency through your chosen online account.</string>
     <string name="one_life_logo">one life logo</string>
-    <string name="one_life_form_desc">In order to register your Crypto Share package with the chosen network, we will need the following information completed:</string>
+    <string name="one_life_form_desc">In order to register your BGP Share package with the chosen network, we will need the following information completed:</string>
     <string name="hint_email_address">Email Address</string>
     <string name="hint_confirm_email_address">Confirm Email Address</string>
     <string name="hint_first_name">First Name(s)</string>
@@ -71,7 +71,7 @@
     <string name="hint_mobile_phone">Mobile Phone</string>
     <string name="hint_home_phone">Home Phone</string>
     <string name="availiable_forms_desc">The following registration forms are available here</string>
-    <string name="crypto_account_form_title">Crypto Package Account Registration</string>
+    <string name="crypto_account_form_title">BGP Package Account Registration</string>
     <string name="text_country">(Select a Country)</string>
     <string name="email_warning_message">NOTE: A EMAIL CLIENT IS REQUIRED TO SEND THIS FORM!</string>
     <string name="email_info">(You need to have access to change Passwords etc)</string>

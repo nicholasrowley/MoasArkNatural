@@ -28,7 +28,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.dropbox.core.v2.files.Metadata;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
@@ -49,7 +48,7 @@ public class SearchResults extends AppCompatActivity {
     private GlobalAppData appData;
     private boolean refreshing;
     private Button loadMore;
-    private FolderContent searchVideoLister; //can be either dance or food lister
+    private FolderContentLister searchVideoLister; //can be either dance or food lister
     private List<FileDataListing> videoInfoResults;
     private List<FileDataListing> dropboxSearchData; //data for loading remaining dropbox videos
     private String searchInput;
@@ -275,7 +274,7 @@ public class SearchResults extends AppCompatActivity {
                         if (appData == null)
                             appData = GlobalAppData.getInstance(getString(R.string.DIRECTORY_ROOT), SearchResults.this, "");
 
-                        searchVideoLister = new FolderContent(getString(R.string.DIRECTORY_ROOT), folderPathCode, searchInput,
+                        searchVideoLister = new FolderContentLister(getString(R.string.DIRECTORY_ROOT), folderPathCode, searchInput,
                                 new ArrayList<FileDataListing>(), new ArrayList<FileDataListing>());
 
                         searchVideoLister.execute();
@@ -389,7 +388,7 @@ public class SearchResults extends AppCompatActivity {
                     if (appData == null)
                         appData = GlobalAppData.getInstance(getString(R.string.DIRECTORY_ROOT), SearchResults.this, "");
 
-                    searchVideoLister = new FolderContent(getString(R.string.DIRECTORY_ROOT), folderPathCode, searchInput, dropboxSearchData, videoInfoResults);
+                    searchVideoLister = new FolderContentLister(getString(R.string.DIRECTORY_ROOT), folderPathCode, searchInput, dropboxSearchData, videoInfoResults);
 
                     searchVideoLister.execute();
                     try {

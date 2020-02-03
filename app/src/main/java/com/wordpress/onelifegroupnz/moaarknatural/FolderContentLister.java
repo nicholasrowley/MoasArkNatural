@@ -1,30 +1,25 @@
 package com.wordpress.onelifegroupnz.moaarknatural;
 
 import android.os.AsyncTask;
-import android.os.Debug;
-import android.util.Log;
-
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-
-//TODO Sort FileDataListing "currentDirectoryListing" list so that the list is sorted by date
-public class FolderContent extends AsyncTask<Object, Void, Object> {
+/**
+ * Async class used to fetch metadata on files stored on the IIS web server's directory listing by reading html source code.
+ *  * Used for the following:
+ *  * -Fetching application videos
+ *  * -Fetching pdfs for videos
+ * Created by Nicholas Rowley on  03/02/2020.
+ */
+public class FolderContentLister extends AsyncTask<Object, Void, Object> {
 
     private String folderPathRoot;
     private String searchString;
@@ -35,7 +30,8 @@ public class FolderContent extends AsyncTask<Object, Void, Object> {
     private int remainingLoads; //remaining number of times new items will be available through the load button.
     private static final int LOADAMOUNT = 5; //number of files loaded with a single execution of the class. Less is faster.
 
-    public FolderContent(String urlDirectoryRoot, String folderPath, String searchInput, List<FileDataListing> loadedVideos, List<FileDataListing> sourceDirectoryData){
+    /* Initialises the FolderContentLister so that it is ready to be executed. Must be run before each time the Lister is executed */
+    public FolderContentLister(String urlDirectoryRoot, String folderPath, String searchInput, List<FileDataListing> loadedVideos, List<FileDataListing> sourceDirectoryData){
         folderPathRoot = urlDirectoryRoot + folderPath;
         searchString = searchInput;
         currentDirectoryListingLoaded = loadedVideos;
@@ -45,8 +41,14 @@ public class FolderContent extends AsyncTask<Object, Void, Object> {
 
     @Override
     protected Object doInBackground(Object[] params) {
+
         try {
-            getShareURLFileSystem();
+            //if (currentDirectoryListingLoaded.isEmpty()) {
+                getShareURLFileSystem();
+            //}
+            isValid = true;
+            //TODO Fix bad index when loading with a non empty list
+            loadItemsFromCurrentList();
         } catch (IOException e) {
             isValid = false;
         }
@@ -58,7 +60,8 @@ public class FolderContent extends AsyncTask<Object, Void, Object> {
         super.onPostExecute(o);
     }
 
-    public void getShareURLFileSystem() throws IOException {
+    /* Gets the HTML source code and writes it to string then executes loadItemsFromSourceCode */
+    private void getShareURLFileSystem() throws IOException {
         // Build and set timeout values for the request.
         URLConnection connection = (new URL(folderPathRoot)).openConnection();
         connection.setConnectTimeout(5000);
@@ -79,9 +82,14 @@ public class FolderContent extends AsyncTask<Object, Void, Object> {
         sourceToParse = sourceToParse.replaceFirst(".+?(?:<br><br>)", "");
 
         loadItemsFromSourceCode();
-        isValid = true;
     }
 
+    /* reads relevant data from source code and discards irrelevant information.
+    * The following information is collected from source code:
+    *   File Name
+    *   File Date modified
+    *   File Time modified
+    *   File URL */
     private void loadItemsFromSourceCode() throws IOException{
         List<FileDataListing> fileDataListing = new ArrayList<>();
         String currentlistingDate;
@@ -125,35 +133,8 @@ public class FolderContent extends AsyncTask<Object, Void, Object> {
 
             //save the currently found listing to the file data list
             fileDataListing.add(new FileDataListing(currentlistingName, folderPathRoot, currentlistingDate, currentlistingTime));
-
-
-            /*if(sourceToParse.startsWith("</pre>")) {
-                sourceToParse = "";
-            }*/
-
-        }
-        /*for (FileDataListing item:fileDataListing
-        ) {
-            Log.d("listing item name:", item.getName());
-            Log.d("listing item date:", item.getDate());
-            Log.d("listing item time:", item.getTime());
-            Log.d("listing item urlpath:", item.getfilePathURL());
-        }*/
-        // regex to select everything before "> : .+?(?:">)
-        // regex to select everything before and excluding </ : .+?(?=</)
-        // regex to select 10 characters : .{10}
-        /*String result = html.toString().replaceFirst(".+?(?:\\[To Parent Directory\\])", "");
-        Pattern p = Pattern.compile(".+?(?=</)");
-        Matcher m = p.matcher(result);
-        if (m.find()){
-            Log.d("source code length:", m.group());
         }
 
-
-        Log.d("source code length:", String.valueOf(html.toString().length()));
-        //Log.d("source code indexed:", result.replaceFirst("\",(.*)", ""));
-        Log.d("source code:", result);
-        return html.toString();*/
         currentDirectoryListing = fileDataListing;
 
         //go through and delete all irrelevant results based on the search string
@@ -161,15 +142,13 @@ public class FolderContent extends AsyncTask<Object, Void, Object> {
         CharSequence searchSequence = searchString.toLowerCase();
         for(FileDataListing file : currentDirectoryListing){
             if (file.getName().toLowerCase().contains(searchSequence)){
-                //for stepsheet pdfs the name must be exactly the same as the video
                 resultsList.add(file);
             }
         }
         currentDirectoryListing = resultsList;
-
-        loadItemsFromCurrentList();
     }
 
+    /* Ensures that only a set number of files are displayed by the app per execution*/
     public void loadItemsFromCurrentList() {
         int itemsToLoad = LOADAMOUNT;
         while (itemsToLoad != 0 && currentDirectoryListing.size() != currentDirectoryListingLoaded.size()){
@@ -190,7 +169,7 @@ public class FolderContent extends AsyncTask<Object, Void, Object> {
 
     public int getTotal() { return currentDirectoryListing.size(); }
 
-    /*dbSuccess - last connection to dropbox servers was successful*/
+    /* returns the result of the last connection to web server directory listing*/
     public boolean dbConnectionSuccessfull(){
         return isValid;
     }

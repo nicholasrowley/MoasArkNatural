@@ -2,6 +2,10 @@ package com.wordpress.onelifegroupnz.moaarknatural;
 
 import java.io.Serializable;
 
+/**
+ * This object is for storing information on Files that have been fetched from web server.
+ * Created by Nicholas Rowley on 03/02/2020.
+ */
 public class FileDataListing implements Serializable {
     private String name;
     private String filePath;

@@ -30,14 +30,14 @@
                 android:id="@+id/cryptoPageTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/crypto_sign_up"
+                android:text="@string/sign_up_page_title"
                 android:textSize="26sp" />
 
             <TextView
                 android:id="@+id/pageDesc"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/crypto_sign_up_desc"
+                android:text="@string/bgp_sign_up_desc"
                 android:textSize="14sp" />
 
             <Button
@@ -52,7 +52,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:onClick="btnOnClick"
-                android:text="@string/notice_of_application_for_crypto_shares" />
+                android:text="@string/notice_of_application_for_bgp_shares" />
 
             <TextView
                 android:id="@+id/textView"
@@ -65,7 +65,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:onClick="btnOnClick"
-                android:text="@string/crypto_account_form_title" />
+                android:text="@string/bgp_account_form_title" />
 
             <TextView
                 android:id="@+id/emailDesc"

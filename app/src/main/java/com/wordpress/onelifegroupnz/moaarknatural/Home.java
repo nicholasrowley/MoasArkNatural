@@ -197,9 +197,6 @@ public class Home extends AppCompatActivity {
                             }
                         }
 
-                        appData.setFeatureDanceVideo(getString(R.string.DIRECTORY_ROOT));
-                        appData.setFeatureFoodVideo(getString(R.string.DIRECTORY_ROOT));
-
                         sleep(100);
                     } catch (InterruptedException e) {
                         e.printStackTrace();

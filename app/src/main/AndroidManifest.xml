@@ -74,7 +74,7 @@
         <!-- [END firebase_service] -->
         <activity
             android:name=".CryptoSignUp"
-            android:label="@string/title_activity_crypto_sign_up"
+            android:label="@string/title_activity_sign_up"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ContactForm"

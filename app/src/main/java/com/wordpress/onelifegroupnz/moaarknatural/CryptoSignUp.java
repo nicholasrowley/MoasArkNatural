@@ -117,13 +117,13 @@ public class CryptoSignUp extends AppCompatActivity {
         Intent intent;
         switch (v.getId()) {
             case R.id.paFormBtn:
-                String paFormUrl = getString(R.string.Crypto_Agreement_url);
+                String paFormUrl = getString(R.string.bgp_agreement_url);
                 //String paFormFallbackUrl = getString(R.string.Crypto_Agreement_shortcodeurl);
 
                 loadPdfFile(paFormUrl/*, paFormFallbackUrl*/);
                 break;
             case R.id.cryptoSharesBtn:
-                String bgpSharesUrl = getString(R.string.Crypto_Shares_url);
+                String bgpSharesUrl = getString(R.string.BGP_Shares_url);
                 //String bgpSharesFallbackUrl = getString(R.string.Crypto_Shares_shortcodeurl);
 
                 loadPdfFile(bgpSharesUrl/*, bgpSharesFallbackUrl*/);

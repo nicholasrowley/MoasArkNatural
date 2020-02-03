@@ -1,12 +1,7 @@
 package com.wordpress.onelifegroupnz.moaarknatural;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.util.Log;
-
-import androidx.appcompat.app.AlertDialog;
-
-import com.dropbox.core.v2.files.Metadata;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -25,9 +20,9 @@ import java.util.concurrent.TimeoutException;
 
 public class GlobalAppData {
     private static GlobalAppData instance = null;
-    private FolderContent danceVideoFileLister;
-    private FolderContent pdfFileLister;
-    private FolderContent foodVideoFileLister;
+    private FolderContentLister danceVideoFileLister;
+    private FolderContentLister pdfFileLister;
+    private FolderContentLister foodVideoFileLister;
     private List<FileDataListing> danceVideoInfoList;
     private List<FileDataListing> foodVideoInfoList;
     private List<FileDataListing> dropboxDanceVideoLoadData; //data for loading remaining dropbox dance videos
@@ -48,7 +43,7 @@ public class GlobalAppData {
 
     private GlobalAppData(String directoryRoot, Context context, String searchString) {
 
-        //execute filelisters and get Dropbox content
+        //execute FolderContentLister and get web server directory listing content over https
         refreshIISDirectoryVideoFiles(directoryRoot, context, searchString, ALLVIDEOSCODE);
         populateSearchSuggestions(context);
     }
@@ -79,12 +74,12 @@ public class GlobalAppData {
             dropboxFoodVideoLoadData = foodVideoFileLister.getLoadData();
     }
 
-    /*This method connects to the dropbox servers to get video data. This method should be run in
+    /*This method connects to a IIS web server to get video data. This method should be run in
     * a separate thread. Note: This method loads the videos from scratch
-    * ACCESS_TOKEN - unique token for connecting to dropbox for the videos
+    * directoryRoot - url to the root folder accessible by the app.
     * Context - Activity that is currently open
     * searchString - search query
-    * videoPath - Path to the folder storing the videos. If a valid one is not specified all videos will load instead*/
+    * videoPath - Path to the folder storing the videos.*/
     public void refreshIISDirectoryVideoFiles(String directoryRoot, Context context, String searchString, String videoPath) {
 
         Thread refreshDanceVideoTask = new Thread() {
@@ -101,7 +96,7 @@ public class GlobalAppData {
         };
 
         if (videoPath.equals(DANCEVIDEOPATH) || videoPath.equals(ALLVIDEOSCODE)) {
-            danceVideoFileLister = new FolderContent(directoryRoot, DANCEVIDEOPATH, searchString, new ArrayList<FileDataListing>(), new ArrayList<FileDataListing>());
+            danceVideoFileLister = new FolderContentLister(directoryRoot, DANCEVIDEOPATH, searchString, new ArrayList<FileDataListing>(), new ArrayList<FileDataListing>());
 
             danceVideoInfoList = new ArrayList<>();
             dropboxDanceVideoLoadData = new ArrayList<>();
@@ -109,12 +104,16 @@ public class GlobalAppData {
         }
 
         if (videoPath.equals(FOODVIDEOPATH) || videoPath.equals(ALLVIDEOSCODE)) {
-            foodVideoFileLister = new FolderContent(directoryRoot, FOODVIDEOPATH, searchString, new ArrayList<FileDataListing>(), new ArrayList<FileDataListing>());
+            foodVideoFileLister = new FolderContentLister(directoryRoot, FOODVIDEOPATH, searchString, new ArrayList<FileDataListing>(), new ArrayList<FileDataListing>());
 
             foodVideoInfoList = new ArrayList<>();
             dropboxFoodVideoLoadData = new ArrayList<>();
             refreshFoodVideoTask.run();
         }
+        refreshAllVideoLists();
+
+        setFeatureDanceVideo(directoryRoot);
+        setFeatureFoodVideo(directoryRoot);
 
             try {
                 refreshDanceVideoTask.join();
@@ -123,21 +122,19 @@ public class GlobalAppData {
                 e.printStackTrace();
             }
 
-        refreshAllVideoLists();
-
         populateSearchSuggestions(context);
     }
 
-    /*This method is for loading dropbox files in the background until fully loaded. This method
-    * uses partially loaded files and doesn't load new files stored on dropbox servers*/
+    /*This method is for loading web server files in the background until fully loaded. This method
+    * uses partially loaded files and is run when more results need to be loaded into the app display.*/
     public void loadIISDirectoryFiles(String directoryRoot, String searchString, String videoPath) {
         if (videoPath.equals(DANCEVIDEOPATH)) {
-            danceVideoFileLister = new FolderContent(directoryRoot, DANCEVIDEOPATH, searchString, dropboxDanceVideoLoadData, danceVideoInfoList);
+            danceVideoFileLister = new FolderContentLister(directoryRoot, DANCEVIDEOPATH, searchString, dropboxDanceVideoLoadData, danceVideoInfoList);
             danceVideoFileLister.execute();
 
             waitForDanceVideoFileListerExecution(0);
         } else if (videoPath.equals(FOODVIDEOPATH)) {
-            foodVideoFileLister = new FolderContent(directoryRoot, FOODVIDEOPATH, searchString, dropboxFoodVideoLoadData, foodVideoInfoList);
+            foodVideoFileLister = new FolderContentLister(directoryRoot, FOODVIDEOPATH, searchString, dropboxFoodVideoLoadData, foodVideoInfoList);
             foodVideoFileLister.execute();
 
             waitForFoodVideoFileListerExecution(0);
@@ -146,8 +143,7 @@ public class GlobalAppData {
         refreshAllVideoLists();
     }
 
-    //TODO Needs to be fixed.
-    /*checks the number of videos that have not been fully loaded from dropbox servers*/
+    /*checks if any videos have not been fully loaded from the web server*/
     public int loadsRemaining(String folderPath) {
         if (folderPath.equals(DANCEVIDEOPATH)) {
             return danceVideoFileLister.getRemainingLoads();
@@ -157,8 +153,8 @@ public class GlobalAppData {
         return 0;
     }
 
-    /*checks if the previous dropbox connection for a filelister object was successful
-    * String folderPath - target file path on server*/
+    /*checks if the previous web server connection for a FolderContentLister object was successful
+    * String folderPath - target file path on server without root directory mentioned. e.g. /food videos/ */
     public boolean dbSuccess(String folderPath) {
         if (folderPath.equals(DANCEVIDEOPATH)) {
             return danceVideoFileLister.dbConnectionSuccessfull();
@@ -183,10 +179,10 @@ public class GlobalAppData {
         //Identify whether a Stepsheet or Recipe is needed.
         if (pdfPath.equals(directoryRoot + DANCEVIDEOPATH))
         {
-            pdfFileLister = new FolderContent(directoryRoot, STEPSHEETPATH, pdfName, new ArrayList<FileDataListing>(), new ArrayList<FileDataListing>());
+            pdfFileLister = new FolderContentLister(directoryRoot, STEPSHEETPATH, pdfName, new ArrayList<FileDataListing>(), new ArrayList<FileDataListing>());
         } else
             if (pdfPath.equals(directoryRoot + FOODVIDEOPATH)) {
-                pdfFileLister = new FolderContent(directoryRoot, RECIPEPATH, pdfName, new ArrayList<FileDataListing>(), new ArrayList<FileDataListing>());
+                pdfFileLister = new FolderContentLister(directoryRoot, RECIPEPATH, pdfName, new ArrayList<FileDataListing>(), new ArrayList<FileDataListing>());
             }
         pdfFileLister.execute();
 
@@ -205,7 +201,7 @@ public class GlobalAppData {
         return searchSuggestions;
     }
 
-    /*starts fileLister for dance videos
+    /*starts FolderContentLister for dance videos
     * milliseconds - time in milliseconds allowed to get information from server.*/
     private void waitForDanceVideoFileListerExecution( int milliseconds ) {
         try {
@@ -222,7 +218,7 @@ public class GlobalAppData {
         }
     }
 
-    /*waits for pdf fileLister until it completes or times out.*/
+    /*waits for pdf FolderContentLister until it completes or times out.*/
     private void waitForPdfFileListerExecution() {
         try {
             pdfFileLister.get();
@@ -233,7 +229,7 @@ public class GlobalAppData {
         }
     }
 
-    /*starts fileLister for food health investment videos
+    /*starts FolderContentLister for food health investment videos
     * milliseconds - time in milliseconds allowed to get information from server.*/
     private void waitForFoodVideoFileListerExecution( int milliseconds ) {
         try {
@@ -262,8 +258,8 @@ public class GlobalAppData {
         }
     }
 
+    /* Sets the feature dance video based on what is specified on the server side text file */
     public void setFeatureDanceVideo(String directoryRoot) {
-        //TODO set feature videos based on what is specified in the text file
         String featureDance;
         try {
             BufferedReader danceBr = new BufferedReader(new InputStreamReader(new URL(directoryRoot + GlobalAppData.FEATUREDANCETXTPATH).openStream()));
@@ -271,7 +267,6 @@ public class GlobalAppData {
             if ((featureDance = danceBr.readLine()) == null) {
                 featureDance = "";
             }
-            Log.d("feature dance value",featureDance);
             danceBr.close();
             for (FileDataListing video : danceVideoInfoList) {
                 if (featureDance.equals(video.getName())) {
@@ -280,10 +275,11 @@ public class GlobalAppData {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Log.d("error", "something went wrong with setting the feature dance.");
+            Log.d("error", "something went wrong with setting the feature dance video.");
         }
     }
 
+    /* Sets the feature food video based on what is specified on the server side text file */
     public void setFeatureFoodVideo(String directoryRoot) {
         String featureFood;
         try {
@@ -292,7 +288,6 @@ public class GlobalAppData {
             if ((featureFood = foodBr.readLine()) == null) {
                 featureFood = "";
             }
-            Log.d("feature dance value",featureFood);
             foodBr.close();
             for (FileDataListing video : foodVideoInfoList) {
                 if (featureFood.equals(video.getName())) {
@@ -301,14 +296,16 @@ public class GlobalAppData {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Log.d("error", "something went wrong with setting the feature food.");
+            Log.d("error", "something went wrong with setting the feature food video.");
         }
     }
 
+    /* returns the data for the feature food video */
     public FileDataListing getFeatureFoodVideo() {
         return featureFoodInfo;
     }
 
+    /* returns the data for the feature dance video */
     public FileDataListing getFeatureDanceVideo() {
         return featureDanceInfo;
     }

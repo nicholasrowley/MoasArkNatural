@@ -57,7 +57,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="@string/crypto_account_form_title"
+                android:text="@string/bgp_account_form_title"
                 android:textSize="18sp" />
 
             <TextView
@@ -179,7 +179,7 @@
                 android:id="@+id/cryptoFormDetails"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/crypto_form_details" />
+                android:text="@string/bgp_form_details" />
 
             <Button
                 android:id="@+id/submitBtn"

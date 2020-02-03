@@ -126,7 +126,7 @@
                 android:paddingLeft="15dp"
                 android:paddingRight="15dp"
                 android:paddingStart="15dp"
-                android:text="@string/title_activity_crypto_sign_up"
+                android:text="@string/title_activity_sign_up"
                 android:textSize="@dimen/btn_text_size"
                 android:textStyle="bold"
                 android:typeface="normal" />

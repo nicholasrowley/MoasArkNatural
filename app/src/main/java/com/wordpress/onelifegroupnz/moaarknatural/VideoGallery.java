@@ -16,6 +16,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
+
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -58,6 +60,7 @@ public class VideoGallery extends AppCompatActivity {
     private CustomSearchFragment searchFragment;
     private String targetFolder;
     private ProgressBar refreshProgressbar;
+    private int galleryViewButtonsLoaded;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +87,8 @@ public class VideoGallery extends AppCompatActivity {
             if (targetFolder.equals(FOODVIDEOPATH))
                 galleryTitle.setText(getString(R.string.title_activity_food_video_gallery));
 
+        galleryViewButtonsLoaded = 0;
+
         addSearchFragment();
 
         refreshProgressbar = findViewById(R.id.refreshProgress);
@@ -99,13 +104,16 @@ public class VideoGallery extends AppCompatActivity {
         InputMethodManager inm = (InputMethodManager) this.getSystemService(Activity.INPUT_METHOD_SERVICE);
         View focusedView = this.getCurrentFocus();
         if (focusedView != null)
-            inm.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), 0);
+            if (inm != null) {
+                inm.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), 0);
+            }
     }
 
     @Override
     protected void onResume(){
         super.onResume();
-        loadGallery();
+
+        //loadGallery(false);
     }
 
     @Override
@@ -171,29 +179,49 @@ public class VideoGallery extends AppCompatActivity {
     }
 
     //This method loads the buttons for the Video Gallery after video data is found.
-    public void loadGallery() {
+    public void loadGallery(boolean loadFromScratch) {
         List<Button> galleryLinks;
         LinearLayout galleryView;
+        Log.d("load gallery", "functin called");
 
         //create video gallery buttons
         galleryView = findViewById(R.id.gallery);
-        //clears the linearlayout for the video buttons
-        galleryView.removeAllViews();
-        galleryLinks = new ArrayList<>();
-        int i = 0;
 
-        for (FileDataListing link : appData.getVideoData(targetFolder)) {
+        if (loadFromScratch) {
+            //clears the linearlayout for the video buttons
+            galleryView.removeAllViews();
+            galleryViewButtonsLoaded = 0;
+        }
+        //int i = 0;
+
+        galleryLinks = new ArrayList<>();
+        int buttonsToBeLoaded;
+        //Log.d("GBTBNL :", Integer.toString(galleryViewButtonsLoaded));
+        //Log.d("appdata loads remaining", Integer.toString(appData.loadsRemaining(targetFolder)));
+        if (galleryViewButtonsLoaded + FolderContentLister.LOADAMOUNT > appData.getVideoData(targetFolder).size()) {
+            buttonsToBeLoaded = appData.getVideoData(targetFolder).size();
+        } else {
+            buttonsToBeLoaded = galleryViewButtonsLoaded + FolderContentLister.LOADAMOUNT;
+        }
+
+        /*for (int i = 0; i < buttonsToBeLoaded % FolderContentLister.LOADAMOUNT; i++) {
+
+        }*/
+
+        //Log.d("buttons to be loaded", Integer.toString(buttonsToBeLoaded));
+
+        for (int i = galleryViewButtonsLoaded; i < buttonsToBeLoaded; i++) {
             //create the button for the video link
             galleryLinks.add(new Button(this));
 
-            String buttonText = link.getName();
-            galleryLinks.get(i).setText(buttonText);
-            galleryLinks.get(i).setId(i);
+            String buttonText = appData.getVideoData(targetFolder).get(i).getName();
+            galleryLinks.get(i % FolderContentLister.LOADAMOUNT).setText(buttonText);
+            galleryLinks.get(i % FolderContentLister.LOADAMOUNT).setId(i);
 
             //use this for pre v21 devices
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
                 //noinspection deprecation
-                galleryLinks.get(i).setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                galleryLinks.get(i % FolderContentLister.LOADAMOUNT).setBackgroundColor(getResources().getColor(R.color.colorPrimary));
             }
 
             //set button size
@@ -201,12 +229,14 @@ public class VideoGallery extends AppCompatActivity {
                     new LinearLayout.LayoutParams(MATCH_PARENT,
                             MATCH_PARENT);
             layoutParams.setMargins(0, 0, 0, 20);
-            galleryLinks.get(i).setLayoutParams(layoutParams);
+            galleryLinks.get(i % FolderContentLister.LOADAMOUNT).setLayoutParams(layoutParams);
 
-            galleryView.addView(galleryLinks.get(i));
+            //Log.d("value of i:", Integer.toString(i));
+            //Log.d("galleryview has parent:", galleryView.getParent().toString());
+            galleryView.addView(galleryLinks.get(i % FolderContentLister.LOADAMOUNT));
 
             //set the link for the video button
-            galleryLinks.get(i).setOnClickListener(new View.OnClickListener() {
+            galleryLinks.get(i % FolderContentLister.LOADAMOUNT).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     //Proceed to View_Video
@@ -215,14 +245,14 @@ public class VideoGallery extends AppCompatActivity {
                     startActivity(intent);
                 }
             });
-            i++;
+            galleryViewButtonsLoaded++;
         }
 
         //end of loading
         progressBar.setVisibility(View.GONE);
 
         //if there are no more videos left to load.
-        if (appData.loadsRemaining(targetFolder) == 0) {
+        if (appData.getVideoData(targetFolder).size() == galleryViewButtonsLoaded) {
             loadMore.setVisibility(View.GONE);
         } else {
             loadMore.setVisibility(View.VISIBLE);
@@ -280,7 +310,7 @@ public class VideoGallery extends AppCompatActivity {
             //Loading UI Elements in this thread
             final Thread setTask = new Thread() {
                 public void run() {
-                    loadGallery();
+                    loadGallery(true);
                     findViewById(R.id.gallery).setVisibility(View.VISIBLE);
                     progressBar.setVisibility(View.GONE);
 
@@ -413,7 +443,7 @@ public class VideoGallery extends AppCompatActivity {
         //Loading UI Elements in this thread
         final Thread setTask = new Thread() {
             public void run() {
-                loadGallery();
+                loadGallery(false);
             }
         };
 
@@ -473,8 +503,10 @@ public class VideoGallery extends AppCompatActivity {
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         searchView =
                 (androidx.appcompat.widget.SearchView) menu.findItem(R.id.search).getActionView();
-        searchView.setSearchableInfo(
-                searchManager.getSearchableInfo(getComponentName()));
+        if (searchManager != null) {
+            searchView.setSearchableInfo(
+                    searchManager.getSearchableInfo(getComponentName()));
+        }
 
         //disable default search icon next to search box
         ImageView searchImage = searchView.findViewById(androidx.appcompat.R.id.search_mag_icon);
@@ -498,7 +530,9 @@ public class VideoGallery extends AppCompatActivity {
             public boolean onMenuItemActionExpand(MenuItem item) {
                 searchFragmentLayout.setVisibility(View.VISIBLE);
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+                if (imm != null) {
+                    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+                }
                 searchView.setIconifiedByDefault(false);
                 searchView.setFocusable(true);
                 searchView.requestFocusFromTouch();

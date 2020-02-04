@@ -50,7 +50,8 @@ public class SearchResults extends AppCompatActivity {
     private Button loadMore;
     private FolderContentLister searchVideoLister; //can be either dance or food lister
     private List<FileDataListing> videoInfoResults;
-    private List<FileDataListing> dropboxSearchData; //data for loading remaining dropbox videos
+    //private List<FileDataListing> dropboxSearchData; //data for loading remaining dropbox videos
+    private int searchResultsLoaded;
     private String searchInput;
     private String folderPathCode;
     private SearchView searchView;
@@ -58,6 +59,8 @@ public class SearchResults extends AppCompatActivity {
     private CustomSearchFragment searchFragment;
 
     private ProgressBar refreshProgressbar;
+
+    private int searchResultsDisplayed;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +88,7 @@ public class SearchResults extends AppCompatActivity {
                 folderPathCode = FOODVIDEOPATH;
             }
         }
+        searchResultsDisplayed = 0;
 
         //load more button
         loadMore = findViewById(R.id.loadMoreBtn);
@@ -108,7 +112,9 @@ public class SearchResults extends AppCompatActivity {
         InputMethodManager inm = (InputMethodManager)  this.getSystemService(Activity.INPUT_METHOD_SERVICE);
         View focusedView = this.getCurrentFocus();
         if(focusedView != null)
-            inm.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), 0);
+            if (inm != null) {
+                inm.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), 0);
+            }
     }
 
     @Override
@@ -184,60 +190,58 @@ public class SearchResults extends AppCompatActivity {
     }
 
     //This method loads the buttons for the Video Gallery after video data is found.
-    public void loadResults() {
+    public void loadResults(boolean loadFromScratch) {
         List<Button> resultLinks;
         LinearLayout resultsView;
 
         //create video gallery buttons
         resultsView = findViewById(R.id.resultsView);
-        //clears the linearlayout for the video buttons
-        resultsView.removeAllViews();
+        if (loadFromScratch) {
+            //clears the linearlayout for the video buttons
+            resultsView.removeAllViews();
+            searchResultsDisplayed = 0;
+        }
         resultLinks = new ArrayList<>();
-        int i = 0;
+        //int i = 0;
 
         TextView title = findViewById(R.id.resultsDescription);
 
-        Integer numResults;
+        int numResults;
 
         numResults = searchVideoLister.getTotal();
 
-        title.setText(getString(R.string.msg_results_found, numResults.toString(), searchInput));
+        title.setText(getString(R.string.msg_results_found, Integer.toString(numResults), searchInput));
 
-        //if there are no more videos left to load.
-        if(searchVideoLister.getRemainingLoads() == 0 && videoInfoResults.size() != 0)
-        {
-            loadMore.setVisibility(View.GONE);
-        } else if (searchVideoLister.getRemainingLoads() == 0) {
-            //if there are no results or loads
-            title.setText(getString(R.string.msg_no_results, searchInput));
-        }
-        else {
-            loadMore.setVisibility(View.VISIBLE);
+        int buttonsToBeLoaded;
+        if (searchResultsDisplayed + FolderContentLister.LOADAMOUNT > videoInfoResults.size()) {
+            buttonsToBeLoaded = videoInfoResults.size();
+        } else {
+            buttonsToBeLoaded = searchResultsDisplayed + FolderContentLister.LOADAMOUNT;
         }
 
-        for (FileDataListing link : videoInfoResults) {
+        for (int i = searchResultsDisplayed; i < buttonsToBeLoaded; i++) {
             //create the button for the video link
             resultLinks.add(new Button(this));
 
-            String buttonText = link.getName();
-            resultLinks.get(i).setText(buttonText);
-            resultLinks.get(i).setId(i);
+            String buttonText = videoInfoResults.get(i).getName();
+            resultLinks.get(i % FolderContentLister.LOADAMOUNT).setText(buttonText);
+            resultLinks.get(i % FolderContentLister.LOADAMOUNT).setId(i);
 
             //set button size
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
             layoutParams.setMargins(0, 0, 0, 20);
-            resultLinks.get(i).setLayoutParams(layoutParams);
+            resultLinks.get(i % FolderContentLister.LOADAMOUNT).setLayoutParams(layoutParams);
 
             //use this for pre v21 devices
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
                 //noinspection deprecation
-                resultLinks.get(i).setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                resultLinks.get(i % FolderContentLister.LOADAMOUNT).setBackgroundColor(getResources().getColor(R.color.colorPrimary));
             }
 
-            resultsView.addView(resultLinks.get(i));
+            resultsView.addView(resultLinks.get(i % FolderContentLister.LOADAMOUNT));
 
             //set the link for the video button
-            resultLinks.get(i).setOnClickListener(new View.OnClickListener() {
+            resultLinks.get(i % FolderContentLister.LOADAMOUNT).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     //Proceed to View_Video
@@ -246,7 +250,19 @@ public class SearchResults extends AppCompatActivity {
                     startActivity(intent);
                 }
             });
-            i++;
+            searchResultsDisplayed++;
+        }
+
+        //if there are no more videos left to load.
+        if(videoInfoResults.size() == searchResultsDisplayed && videoInfoResults.size() != 0)
+        {
+            loadMore.setVisibility(View.GONE);
+        } else if (videoInfoResults.size() == 0) {
+            //if there are no results or loads
+            title.setText(getString(R.string.msg_no_results, searchInput));
+        }
+        else {
+            loadMore.setVisibility(View.VISIBLE);
         }
 
         progressBar.setVisibility(View.GONE);
@@ -275,7 +291,7 @@ public class SearchResults extends AppCompatActivity {
                             appData = GlobalAppData.getInstance(getString(R.string.DIRECTORY_ROOT), SearchResults.this, "");
 
                         searchVideoLister = new FolderContentLister(getString(R.string.DIRECTORY_ROOT), folderPathCode, searchInput,
-                                new ArrayList<FileDataListing>(), new ArrayList<FileDataListing>());
+                                0, new ArrayList<FileDataListing>());
 
                         searchVideoLister.execute();
                         try {
@@ -289,10 +305,11 @@ public class SearchResults extends AppCompatActivity {
                         }
 
                         videoInfoResults = new ArrayList<>();
-                        dropboxSearchData = new ArrayList<>();
+                        //dropboxSearchData = new ArrayList<>();
 
-                        videoInfoResults = searchVideoLister.getFileDatas();
-                        dropboxSearchData = searchVideoLister.getLoadData();
+                        videoInfoResults = searchVideoLister.getLoadData();
+                        //dropboxSearchData = searchVideoLister.getLoadData();
+                        searchResultsLoaded = searchVideoLister.getLoadData().size() - searchVideoLister.getRemainingLoads();
 
                         refreshDialog.show();
                         sleep(100);
@@ -305,9 +322,9 @@ public class SearchResults extends AppCompatActivity {
             //Loading UI Elements in this thread
             final Thread setTask = new Thread() {
                 public void run() {
-                    loadResults();
+                    loadResults(true);
                     //if Dropbox connection has failed.
-                    if(!searchVideoLister.dbConnectionSuccessfull())
+                    if(!searchVideoLister.httpConnectionSuccessful())
                     {
                         new AlertDialog.Builder(SearchResults.this)
                                 .setTitle(getString(R.string.server_connection_error_title))
@@ -388,7 +405,7 @@ public class SearchResults extends AppCompatActivity {
                     if (appData == null)
                         appData = GlobalAppData.getInstance(getString(R.string.DIRECTORY_ROOT), SearchResults.this, "");
 
-                    searchVideoLister = new FolderContentLister(getString(R.string.DIRECTORY_ROOT), folderPathCode, searchInput, dropboxSearchData, videoInfoResults);
+                    searchVideoLister = new FolderContentLister(getString(R.string.DIRECTORY_ROOT), folderPathCode, searchInput, searchResultsLoaded, videoInfoResults);
 
                     searchVideoLister.execute();
                     try {
@@ -402,10 +419,11 @@ public class SearchResults extends AppCompatActivity {
                     }
 
                     videoInfoResults = new ArrayList<>();
-                    dropboxSearchData = new ArrayList<>();
+                    //dropboxSearchData = new ArrayList<>();
 
-                    videoInfoResults = searchVideoLister.getFileDatas();
-                    dropboxSearchData = searchVideoLister.getLoadData();
+                    videoInfoResults = searchVideoLister.getLoadData();
+                    //dropboxSearchData = searchVideoLister.getLoadData();
+                    searchResultsLoaded = searchVideoLister.getLoadData().size() - searchVideoLister.getRemainingLoads();
 
                     sleep(100);
                 } catch (InterruptedException e) {
@@ -417,9 +435,9 @@ public class SearchResults extends AppCompatActivity {
         //Loading UI Elements in this thread
         final Thread setTask = new Thread() {
             public void run() {
-                loadResults();
+                loadResults(false);
                 //if Dropbox connection has failed.
-                if(!searchVideoLister.dbConnectionSuccessfull())
+                if(!searchVideoLister.httpConnectionSuccessful())
                 {
                     new AlertDialog.Builder(SearchResults.this)
                             .setTitle(getString(R.string.server_connection_error_title))
@@ -497,8 +515,10 @@ public class SearchResults extends AppCompatActivity {
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         searchView =
                 (androidx.appcompat.widget.SearchView) menu.findItem(R.id.search).getActionView();
-        searchView.setSearchableInfo(
-                searchManager.getSearchableInfo(getComponentName()));
+        if (searchManager != null) {
+            searchView.setSearchableInfo(
+                    searchManager.getSearchableInfo(getComponentName()));
+        }
 
         //disable default search icon next to search box
         ImageView searchImage = searchView.findViewById(androidx.appcompat.R.id.search_mag_icon);
@@ -522,7 +542,9 @@ public class SearchResults extends AppCompatActivity {
             public boolean onMenuItemActionExpand(MenuItem item) {
                 searchFragmentLayout.setVisibility(View.VISIBLE);
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+                if (imm != null) {
+                    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+                }
                 searchView.setIconifiedByDefault(false);
                 searchView.setFocusable(true);
                 searchView.requestFocusFromTouch();

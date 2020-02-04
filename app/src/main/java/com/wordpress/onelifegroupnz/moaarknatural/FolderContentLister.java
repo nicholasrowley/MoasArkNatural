@@ -24,28 +24,28 @@ public class FolderContentLister extends AsyncTask<Object, Void, Object> {
     private String folderPathRoot;
     private String searchString;
     private List<FileDataListing> currentDirectoryListing;
-    private List<FileDataListing> currentDirectoryListingLoaded;
+    //private List<FileDataListing> currentDirectoryListingLoaded;
     private boolean isValid; //checks if the url source was loaded properly
     private String sourceToParse; //remaining string to interpret.
-    private int remainingLoads; //remaining number of times new items will be available through the load button.
-    private static final int LOADAMOUNT = 5; //number of files loaded with a single execution of the class. Less is faster.
+    private int loadedFiles; //videos that have already been loaded
+    public static final int LOADAMOUNT = 5; //number of files loaded with a single execution of the class. Less is faster.
 
     /* Initialises the FolderContentLister so that it is ready to be executed. Must be run before each time the Lister is executed */
-    public FolderContentLister(String urlDirectoryRoot, String folderPath, String searchInput, List<FileDataListing> loadedVideos, List<FileDataListing> sourceDirectoryData){
+    public FolderContentLister(String urlDirectoryRoot, String folderPath, String searchInput, int filesLoaded, List<FileDataListing> sourceDirectoryData){
         folderPathRoot = urlDirectoryRoot + folderPath;
         searchString = searchInput;
-        currentDirectoryListingLoaded = loadedVideos;
+        //currentDirectoryListingLoaded = loadedVideos;
         currentDirectoryListing = sourceDirectoryData;
-        remainingLoads = (int) Math.ceil((currentDirectoryListing.size() - currentDirectoryListingLoaded.size()) / (float) LOADAMOUNT);
+        loadedFiles = filesLoaded;
     }
 
     @Override
     protected Object doInBackground(Object[] params) {
 
         try {
-            //if (currentDirectoryListingLoaded.isEmpty()) {
+            if (currentDirectoryListing.isEmpty()) {
                 getShareURLFileSystem();
-            //}
+            }
             isValid = true;
             //TODO Fix bad index when loading with a non empty list
             loadItemsFromCurrentList();
@@ -150,27 +150,33 @@ public class FolderContentLister extends AsyncTask<Object, Void, Object> {
 
     /* Ensures that only a set number of files are displayed by the app per execution*/
     public void loadItemsFromCurrentList() {
-        int itemsToLoad = LOADAMOUNT;
+        /*int itemsToLoad = LOADAMOUNT;
         while (itemsToLoad != 0 && currentDirectoryListing.size() != currentDirectoryListingLoaded.size()){
             int loadPosition = currentDirectoryListingLoaded.size();
             currentDirectoryListingLoaded.add(currentDirectoryListing.get(loadPosition));
             itemsToLoad--;
+        }*/
+
+        if ((loadedFiles + LOADAMOUNT) > currentDirectoryListing.size() ) {
+            loadedFiles = currentDirectoryListing.size();
+        } else {
+            loadedFiles += LOADAMOUNT;
         }
-        remainingLoads = (int) Math.ceil((currentDirectoryListing.size() - currentDirectoryListingLoaded.size()) / (float) LOADAMOUNT);
     }
 
-    public List<FileDataListing> getFileDatas() {
+    /*public List<FileDataListing> getFileDatas() {
         return currentDirectoryListingLoaded;
-    }
+    }*/
 
     public List<FileDataListing> getLoadData() { return currentDirectoryListing; }
 
-    public int getRemainingLoads() { return remainingLoads; }
+    //get the remaining number of files that will be available through the load button.
+    public int getRemainingLoads() { return loadedFiles - currentDirectoryListing.size(); }
 
     public int getTotal() { return currentDirectoryListing.size(); }
 
     /* returns the result of the last connection to web server directory listing*/
-    public boolean dbConnectionSuccessfull(){
+    public boolean httpConnectionSuccessful(){
         return isValid;
     }
 }

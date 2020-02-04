@@ -34,7 +34,6 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -112,8 +111,6 @@ public class VideoGallery extends AppCompatActivity {
     @Override
     protected void onResume(){
         super.onResume();
-
-        //loadGallery(false);
     }
 
     @Override
@@ -121,7 +118,7 @@ public class VideoGallery extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu, menu);
 
-        setUpSearchbar(menu);
+        setUpSearchBar(menu);
 
         return true;
     }
@@ -182,7 +179,6 @@ public class VideoGallery extends AppCompatActivity {
     public void loadGallery(boolean loadFromScratch) {
         List<Button> galleryLinks;
         LinearLayout galleryView;
-        Log.d("load gallery", "functin called");
 
         //create video gallery buttons
         galleryView = findViewById(R.id.gallery);
@@ -192,23 +188,16 @@ public class VideoGallery extends AppCompatActivity {
             galleryView.removeAllViews();
             galleryViewButtonsLoaded = 0;
         }
-        //int i = 0;
 
         galleryLinks = new ArrayList<>();
         int buttonsToBeLoaded;
-        //Log.d("GBTBNL :", Integer.toString(galleryViewButtonsLoaded));
-        //Log.d("appdata loads remaining", Integer.toString(appData.loadsRemaining(targetFolder)));
+
+        //checks how many buttons need to be loaded up to the LOADAMOUNT specified by FolderContentLister
         if (galleryViewButtonsLoaded + FolderContentLister.LOADAMOUNT > appData.getVideoData(targetFolder).size()) {
             buttonsToBeLoaded = appData.getVideoData(targetFolder).size();
         } else {
             buttonsToBeLoaded = galleryViewButtonsLoaded + FolderContentLister.LOADAMOUNT;
         }
-
-        /*for (int i = 0; i < buttonsToBeLoaded % FolderContentLister.LOADAMOUNT; i++) {
-
-        }*/
-
-        //Log.d("buttons to be loaded", Integer.toString(buttonsToBeLoaded));
 
         for (int i = galleryViewButtonsLoaded; i < buttonsToBeLoaded; i++) {
             //create the button for the video link
@@ -231,8 +220,6 @@ public class VideoGallery extends AppCompatActivity {
             layoutParams.setMargins(0, 0, 0, 20);
             galleryLinks.get(i % FolderContentLister.LOADAMOUNT).setLayoutParams(layoutParams);
 
-            //Log.d("value of i:", Integer.toString(i));
-            //Log.d("galleryview has parent:", galleryView.getParent().toString());
             galleryView.addView(galleryLinks.get(i % FolderContentLister.LOADAMOUNT));
 
             //set the link for the video button
@@ -259,7 +246,7 @@ public class VideoGallery extends AppCompatActivity {
         }
     }
 
-    /*Checks Dropbox for videos in another thread and shows a progress bar.
+    /*Checks server side for videos in another thread and shows a progress bar.
     * Run when tbe activity needs to be loaded from scratch when opened or by refresh button. */
     public void refreshContent() {
         if (!refreshing) {
@@ -314,7 +301,7 @@ public class VideoGallery extends AppCompatActivity {
                     findViewById(R.id.gallery).setVisibility(View.VISIBLE);
                     progressBar.setVisibility(View.GONE);
 
-                    //if Dropbox connection has failed.
+                    //if server side connection has failed.
                     if (!appData.dbSuccess(targetFolder)) {
                         new AlertDialog.Builder(VideoGallery.this)
                                 .setTitle(getString(R.string.server_connection_error_title))
@@ -497,7 +484,7 @@ public class VideoGallery extends AppCompatActivity {
         transaction.commit();
     }
 
-    private void setUpSearchbar( Menu menu ) {
+    private void setUpSearchBar(Menu menu ) {
         // Associate searchable configuration with the SearchView
         SearchManager searchManager =
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);

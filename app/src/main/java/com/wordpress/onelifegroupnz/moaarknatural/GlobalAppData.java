@@ -25,8 +25,6 @@ public class GlobalAppData {
     private FolderContentLister foodVideoFileLister;
     private List<FileDataListing> danceVideoInfoList;
     private List<FileDataListing> foodVideoInfoList;
-    //private List<FileDataListing> dropboxDanceVideoLoadData; //data for loading remaining dropbox dance videos
-    //private List<FileDataListing> dropboxFoodVideoLoadData; //data for loading remaining dropbox dance videos
     private int danceVideosLoaded;
     private int foodVideosLoaded;
     public static final String DANCEVIDEOPATH = "/line dance videos/";
@@ -36,7 +34,7 @@ public class GlobalAppData {
     public static final String FEATUREDANCETXTPATH = "/feature video/feature dance.txt";
     public static final String FEATUREFOODTXTPATH = "/feature video/feature food.txt";
     public static final String ALLVIDEOSCODE = "ALLVIDEOS";
-    public List<SearchSuggestion> searchSuggestions;
+    private List<SearchSuggestion> searchSuggestions;
     public static final int DROPBOXTIMEOUTLIMIT = 60000; //Milliseconds
 
     //name of featured videos & featured video
@@ -68,13 +66,11 @@ public class GlobalAppData {
 
     private void refreshAllVideoLists() {
         //store dance videos as fileData
-            danceVideoInfoList = danceVideoFileLister.getLoadData();
-            //dropboxDanceVideoLoadData = danceVideoFileLister.getLoadData();
+        danceVideoInfoList = danceVideoFileLister.getLoadData();
         danceVideosLoaded = danceVideoFileLister.getLoadData().size() - danceVideoFileLister.getRemainingLoads();
 
         //store food videos as fileData
-            foodVideoInfoList = foodVideoFileLister.getLoadData();
-            //dropboxFoodVideoLoadData = foodVideoFileLister.getLoadData();
+        foodVideoInfoList = foodVideoFileLister.getLoadData();
         foodVideosLoaded = foodVideoFileLister.getLoadData().size() - foodVideoFileLister.getRemainingLoads();
     }
 
@@ -103,7 +99,6 @@ public class GlobalAppData {
             danceVideoFileLister = new FolderContentLister(directoryRoot, DANCEVIDEOPATH, searchString, 0, new ArrayList<FileDataListing>());
 
             danceVideoInfoList = new ArrayList<>();
-            //dropboxDanceVideoLoadData = new ArrayList<>();
             refreshDanceVideoTask.run();
         }
 
@@ -111,7 +106,6 @@ public class GlobalAppData {
             foodVideoFileLister = new FolderContentLister(directoryRoot, FOODVIDEOPATH, searchString, 0, new ArrayList<FileDataListing>());
 
             foodVideoInfoList = new ArrayList<>();
-            //dropboxFoodVideoLoadData = new ArrayList<>();
             refreshFoodVideoTask.run();
         }
         refreshAllVideoLists();
@@ -145,16 +139,6 @@ public class GlobalAppData {
         }
 
         refreshAllVideoLists();
-    }
-
-    /*checks if any videos have not been fully loaded from the web server*/
-    public int loadsRemaining(String folderPath) {
-        if (folderPath.equals(DANCEVIDEOPATH)) {
-            return danceVideoFileLister.getRemainingLoads();
-        } else if (folderPath.equals(FOODVIDEOPATH)) {
-            return foodVideoFileLister.getRemainingLoads();
-        }
-        return 0;
     }
 
     /*checks if the previous web server connection for a FolderContentLister object was successful

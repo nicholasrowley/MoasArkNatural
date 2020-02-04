@@ -47,8 +47,6 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
-import java.io.IOException;
-
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DANCEVIDEOPATH;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.FOODVIDEOPATH;
@@ -64,7 +62,6 @@ public class ViewVideo extends AppCompatActivity {
     private Boolean dialogIsOpen; //ensure that only one video/wifi error dialog is displayed
     private Toolbar toolbar;
 
-    //private static ProgressDialog progressDialog; progress bar will replace dialog
     private ProgressBar progressBar;
     private VideoView videoView;
     private Integer savedVideoPosition; //the current position of the video
@@ -181,7 +178,9 @@ public class ViewVideo extends AppCompatActivity {
         InputMethodManager inm = (InputMethodManager) this.getSystemService(Activity.INPUT_METHOD_SERVICE);
         View focusedView = this.getCurrentFocus();
         if (focusedView != null)
-            inm.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), 0);
+            if (inm != null) {
+                inm.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), 0);
+            }
     }
 
     @Override
@@ -210,7 +209,7 @@ public class ViewVideo extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu, menu);
 
-        setUpSearchbar(menu);
+        setUpSearchBar(menu);
 
         return true;
     }
@@ -289,9 +288,7 @@ public class ViewVideo extends AppCompatActivity {
             //set up videoView
             mediaController.setAnchorView(videoView);
 
-            //TODO test
             final Uri video = Uri.parse(videoData.getfilePathURL());
-            //final Uri video = Uri.parse("https://dl.dropboxusercontent.com/sh/velh8ofxf1htg4o/AACQg5-aHmVwOv7GHnPUCWKYa/Button%20Mushroom%20With%20Moas%20Ark%20Natural%20Garlic%20Butter%20Sauce.mp4?dl=0");
             videoView.setMediaController(mediaController);
             videoView.setVideoURI(video);
             videoView.requestFocus();
@@ -398,13 +395,7 @@ public class ViewVideo extends AppCompatActivity {
         //Check if in portrait or landscape
         if (portraitView) {
             videoTitle = findViewById(R.id.txtVideoTitle);
-            //TODO test2
             videoTitle.setText(videoData.getName());
-            /*try {
-                videoTitle.setText(DropboxShareFolderURLInterpreter.getShareURLFileSystem("https://www.dropbox.com/sh/velh8ofxf1htg4o/AAA4CUgm3jC4v0f67o9ALIODa?dl=0"));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }*/
             toolbar.setVisibility(View.VISIBLE);
             decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -550,14 +541,16 @@ public class ViewVideo extends AppCompatActivity {
         transaction.commit();
     }
 
-    private void setUpSearchbar(Menu menu) {
+    private void setUpSearchBar(Menu menu) {
         // Associate searchable configuration with the SearchView
         SearchManager searchManager =
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         searchView =
                 (androidx.appcompat.widget.SearchView) menu.findItem(R.id.search).getActionView();
-        searchView.setSearchableInfo(
-                searchManager.getSearchableInfo(getComponentName()));
+        if (searchManager != null) {
+            searchView.setSearchableInfo(
+                    searchManager.getSearchableInfo(getComponentName()));
+        }
 
         //disable default search icon next to search box
         ImageView searchImage = searchView.findViewById(androidx.appcompat.R.id.search_mag_icon);
@@ -582,7 +575,9 @@ public class ViewVideo extends AppCompatActivity {
             public boolean onMenuItemActionExpand(MenuItem item) {
                 searchFragmentLayout.setVisibility(View.VISIBLE);
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+                if (imm != null) {
+                    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+                }
                 searchView.setIconifiedByDefault(false);
                 searchView.setFocusable(true);
                 searchView.requestFocusFromTouch();

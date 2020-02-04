@@ -24,7 +24,6 @@ public class FolderContentLister extends AsyncTask<Object, Void, Object> {
     private String folderPathRoot;
     private String searchString;
     private List<FileDataListing> currentDirectoryListing;
-    //private List<FileDataListing> currentDirectoryListingLoaded;
     private boolean isValid; //checks if the url source was loaded properly
     private String sourceToParse; //remaining string to interpret.
     private int loadedFiles; //videos that have already been loaded
@@ -34,7 +33,6 @@ public class FolderContentLister extends AsyncTask<Object, Void, Object> {
     public FolderContentLister(String urlDirectoryRoot, String folderPath, String searchInput, int filesLoaded, List<FileDataListing> sourceDirectoryData){
         folderPathRoot = urlDirectoryRoot + folderPath;
         searchString = searchInput;
-        //currentDirectoryListingLoaded = loadedVideos;
         currentDirectoryListing = sourceDirectoryData;
         loadedFiles = filesLoaded;
     }
@@ -47,7 +45,6 @@ public class FolderContentLister extends AsyncTask<Object, Void, Object> {
                 getShareURLFileSystem();
             }
             isValid = true;
-            //TODO Fix bad index when loading with a non empty list
             loadItemsFromCurrentList();
         } catch (IOException e) {
             isValid = false;
@@ -92,9 +89,9 @@ public class FolderContentLister extends AsyncTask<Object, Void, Object> {
     *   File URL */
     private void loadItemsFromSourceCode() throws IOException{
         List<FileDataListing> fileDataListing = new ArrayList<>();
-        String currentlistingDate;
-        String currentlistingTime;
-        String currentlistingName;
+        String currentListingDate;
+        String currentListingTime;
+        String currentListingName;
 
         //check loop condition and if more listings are available and if the end is reached </pre> then there is no more source to parse.
         while (!sourceToParse.startsWith("</pre>")) {
@@ -104,9 +101,9 @@ public class FolderContentLister extends AsyncTask<Object, Void, Object> {
             Pattern pd = Pattern.compile(".{10}");
             Matcher md = pd.matcher(sourceToParse);
             if (md.find()){
-                currentlistingDate = md.group();
+                currentListingDate = md.group();
             } else {
-                throw new IOException("currentlistingDate returned nothing while a value was expected.");
+                throw new IOException("currentListingDate returned nothing while a value was expected.");
             }
             //Trim off the string up to the next item in directory listing
             sourceToParse = sourceToParse.replaceFirst(".{11}", "");
@@ -114,9 +111,9 @@ public class FolderContentLister extends AsyncTask<Object, Void, Object> {
             Pattern pt = Pattern.compile(".{8}");
             Matcher mt = pt.matcher(sourceToParse);
             if (mt.find()){
-                currentlistingTime = mt.group();
+                currentListingTime = mt.group();
             } else {
-                throw new IOException("currentlistingTime returned nothing while a value was expected.");
+                throw new IOException("currentListingTime returned nothing while a value was expected.");
             }
             //Trim off the string up to the next item in directory listing
             sourceToParse = sourceToParse.replaceFirst(".+?(?:\">)", "");
@@ -124,15 +121,15 @@ public class FolderContentLister extends AsyncTask<Object, Void, Object> {
             Pattern pn = Pattern.compile(".+?(?=</)");
             Matcher mn = pn.matcher(sourceToParse);
             if (mn.find()){
-                currentlistingName = mn.group();
+                currentListingName = mn.group();
             } else {
-                throw new IOException("currentlistingName returned nothing while a value was expected.");
+                throw new IOException("currentListingName returned nothing while a value was expected.");
             }
             //Trim off the string up to the next item in directory listing
             sourceToParse = sourceToParse.replaceFirst(".+?(?:<br>)", "");
 
             //save the currently found listing to the file data list
-            fileDataListing.add(new FileDataListing(currentlistingName, folderPathRoot, currentlistingDate, currentlistingTime));
+            fileDataListing.add(new FileDataListing(currentListingName, folderPathRoot, currentListingDate, currentListingTime));
         }
 
         currentDirectoryListing = fileDataListing;
@@ -150,13 +147,6 @@ public class FolderContentLister extends AsyncTask<Object, Void, Object> {
 
     /* Ensures that only a set number of files are displayed by the app per execution*/
     public void loadItemsFromCurrentList() {
-        /*int itemsToLoad = LOADAMOUNT;
-        while (itemsToLoad != 0 && currentDirectoryListing.size() != currentDirectoryListingLoaded.size()){
-            int loadPosition = currentDirectoryListingLoaded.size();
-            currentDirectoryListingLoaded.add(currentDirectoryListing.get(loadPosition));
-            itemsToLoad--;
-        }*/
-
         if ((loadedFiles + LOADAMOUNT) > currentDirectoryListing.size() ) {
             loadedFiles = currentDirectoryListing.size();
         } else {
@@ -164,15 +154,13 @@ public class FolderContentLister extends AsyncTask<Object, Void, Object> {
         }
     }
 
-    /*public List<FileDataListing> getFileDatas() {
-        return currentDirectoryListingLoaded;
-    }*/
-
+    //gets the directory listing data collected over http
     public List<FileDataListing> getLoadData() { return currentDirectoryListing; }
 
     //get the remaining number of files that will be available through the load button.
     public int getRemainingLoads() { return loadedFiles - currentDirectoryListing.size(); }
 
+    //get the number of files found on http side.
     public int getTotal() { return currentDirectoryListing.size(); }
 
     /* returns the result of the last connection to web server directory listing*/

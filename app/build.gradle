@@ -7,8 +7,8 @@ android {
         applicationId "com.wordpress.onelifegroupnz.moaarknatural"
         minSdkVersion 16
         targetSdkVersion 29
-        versionCode 5
-        versionName "1.2"
+        versionCode 6
+        versionName "2.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
@@ -31,14 +31,13 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-core-utils:1.0.0'
     implementation 'com.dropbox.core:dropbox-core-sdk:3.1.3'
     implementation 'com.google.firebase:firebase-ads:18.3.0'
-    implementation 'com.google.firebase:firebase-analytics:17.2.1'
+    implementation 'com.google.firebase:firebase-analytics:17.2.2'
     implementation 'com.firebase:firebase-jobdispatcher:0.5.2'
     implementation 'com.google.android.gms:play-services-location:17.0.0'
     implementation 'com.google.firebase:firebase-messaging:20.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'com.google.android:flexbox:0.3.0'
     implementation 'com.android.support:multidex:1.0.3'
-    implementation 'org.jsoup:jsoup:1.12.1'
     testImplementation 'junit:junit:4.13'
 }
 

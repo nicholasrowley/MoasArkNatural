@@ -50,7 +50,6 @@ public class SearchResults extends AppCompatActivity {
     private Button loadMore;
     private FolderContentLister searchVideoLister; //can be either dance or food lister
     private List<FileDataListing> videoInfoResults;
-    //private List<FileDataListing> dropboxSearchData; //data for loading remaining dropbox videos
     private int searchResultsLoaded;
     private String searchInput;
     private String folderPathCode;
@@ -122,7 +121,7 @@ public class SearchResults extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu, menu);
 
-        setUpSearchbar(menu);
+        setUpSearchBar(menu);
 
         return true;
     }
@@ -202,7 +201,6 @@ public class SearchResults extends AppCompatActivity {
             searchResultsDisplayed = 0;
         }
         resultLinks = new ArrayList<>();
-        //int i = 0;
 
         TextView title = findViewById(R.id.resultsDescription);
 
@@ -212,6 +210,7 @@ public class SearchResults extends AppCompatActivity {
 
         title.setText(getString(R.string.msg_results_found, Integer.toString(numResults), searchInput));
 
+        //check how many videos need to be loaded up to the LOADAMOUNT specified in FolderContentLister
         int buttonsToBeLoaded;
         if (searchResultsDisplayed + FolderContentLister.LOADAMOUNT > videoInfoResults.size()) {
             buttonsToBeLoaded = videoInfoResults.size();
@@ -268,7 +267,7 @@ public class SearchResults extends AppCompatActivity {
         progressBar.setVisibility(View.GONE);
     }
 
-    /*Checks Dropbox for videos in another thread and shows a progress bar
+    /*Checks server side for videos in another thread and shows a progress bar
     * Run when tbe activity needs to be loaded from scratch when opened or by refresh button. */
     public void refreshContent() {
         if (!refreshing) {
@@ -305,10 +304,8 @@ public class SearchResults extends AppCompatActivity {
                         }
 
                         videoInfoResults = new ArrayList<>();
-                        //dropboxSearchData = new ArrayList<>();
 
                         videoInfoResults = searchVideoLister.getLoadData();
-                        //dropboxSearchData = searchVideoLister.getLoadData();
                         searchResultsLoaded = searchVideoLister.getLoadData().size() - searchVideoLister.getRemainingLoads();
 
                         refreshDialog.show();
@@ -323,7 +320,7 @@ public class SearchResults extends AppCompatActivity {
             final Thread setTask = new Thread() {
                 public void run() {
                     loadResults(true);
-                    //if Dropbox connection has failed.
+                    //if server side connection has failed.
                     if(!searchVideoLister.httpConnectionSuccessful())
                     {
                         new AlertDialog.Builder(SearchResults.this)
@@ -509,7 +506,7 @@ public class SearchResults extends AppCompatActivity {
         transaction.commit();
     }
 
-    private void setUpSearchbar( Menu menu ) {
+    private void setUpSearchBar(Menu menu ) {
         // Associate searchable configuration with the SearchView
         SearchManager searchManager =
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);

@@ -416,10 +416,8 @@ public class SearchResults extends AppCompatActivity {
                     }
 
                     videoInfoResults = new ArrayList<>();
-                    //dropboxSearchData = new ArrayList<>();
 
                     videoInfoResults = searchVideoLister.getLoadData();
-                    //dropboxSearchData = searchVideoLister.getLoadData();
                     searchResultsLoaded = searchVideoLister.getLoadData().size() - searchVideoLister.getRemainingLoads();
 
                     sleep(100);

@@ -45,12 +45,13 @@
             </LinearLayout>
 
             <ImageView
-                android:id="@+id/onelifelogo"
+                android:id="@+id/formlogo"
                 android:layout_width="match_parent"
                 android:layout_height="100sp"
                 android:layout_gravity="center"
-                android:contentDescription="@string/one_life_logo"
-                app:srcCompat="@drawable/onelifelogo" />
+                android:contentDescription="@string/form_logo"
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/moasarklogo_png_convert" />
 
             <TextView
                 android:id="@+id/textView2"
@@ -61,10 +62,10 @@
                 android:textSize="18sp" />
 
             <TextView
-                android:id="@+id/cryptoFormDesc"
+                android:id="@+id/formDesc"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/one_life_form_desc" />
+                android:text="@string/form_desc" />
 
             <EditText
                 android:id="@+id/emailField"
@@ -72,7 +73,8 @@
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:inputType="textEmailAddress"
-                android:hint="@string/hint_email_address" />
+                android:hint="@string/hint_email_address"
+                android:importantForAutofill="no" />
 
             <TextView
                 android:id="@+id/emailInfo"
@@ -86,7 +88,8 @@
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:inputType="textPersonName"
-                android:hint="@string/hint_first_name" />
+                android:hint="@string/hint_first_name"
+                android:importantForAutofill="no" />
 
             <EditText
                 android:id="@+id/lnameField"
@@ -94,7 +97,8 @@
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:inputType="textPersonName"
-                android:hint="@string/hint_last_name" />
+                android:hint="@string/hint_last_name"
+                android:importantForAutofill="no" />
 
             <TextView
                 android:id="@+id/nameInfo"
@@ -108,7 +112,8 @@
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:inputType="text"
-                android:hint="@string/hint_user_name" />
+                android:hint="@string/hint_user_name"
+                android:importantForAutofill="no" />
 
             <TextView
                 android:id="@+id/usernameInfo"
@@ -143,7 +148,8 @@
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:inputType="textPersonName|textNoSuggestions"
-                android:hint="@string/hint_city_of_residence" />
+                android:hint="@string/hint_city_of_residence"
+                android:importantForAutofill="no" />
 
             <EditText
                 android:id="@+id/postCodeField"
@@ -151,7 +157,8 @@
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:inputType="text|textNoSuggestions"
-                android:hint="@string/hint_postcode" />
+                android:hint="@string/hint_postcode"
+                android:importantForAutofill="no" />
 
             <TextView
                 android:id="@+id/phoneNumberInfo"
@@ -165,7 +172,8 @@
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:inputType="phone"
-                android:hint="@string/hint_mobile_phone" />
+                android:hint="@string/hint_mobile_phone"
+                android:importantForAutofill="no" />
 
             <EditText
                 android:id="@+id/homNumField"
@@ -173,10 +181,11 @@
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:inputType="phone"
-                android:hint="@string/hint_home_phone" />
+                android:hint="@string/hint_home_phone"
+                android:importantForAutofill="no" />
 
             <TextView
-                android:id="@+id/cryptoFormDetails"
+                android:id="@+id/finalFormDetails"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/bgp_form_details" />

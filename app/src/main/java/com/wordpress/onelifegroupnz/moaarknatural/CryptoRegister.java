@@ -114,7 +114,7 @@ public class CryptoRegister extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu, menu);
 
-        setUpSearchbar(menu);
+        setUpSearchBar(menu);
 
         return true;
     }
@@ -201,7 +201,7 @@ public class CryptoRegister extends AppCompatActivity {
         transaction.commit();
     }
 
-    private void setUpSearchbar(Menu menu) {
+    private void setUpSearchBar(Menu menu) {
         // Associate searchable configuration with the SearchView
         SearchManager searchManager =
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);

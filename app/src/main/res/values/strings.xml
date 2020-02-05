@@ -33,8 +33,8 @@
     <!-- Search Type spinner suggestions-->
     <string name="search_type_title">Search Type:</string>
     <string name="search_type_all">All</string>
-    <string name="search_type_dance">Dance &amp; Wellbeing D.I.Y</string>
-    <string name="search_type_food">Food &amp; Future Health</string>
+    <string name="search_type_dance">Exercise</string>
+    <string name="search_type_food">Health Food</string>
 
     <!-- This is the advertisement ids for adMob please use the testing one for clicking (Do not click the real ad) -->
     <string name="banner_ad_unit_id_test">ca-app-pub-2838047532476449/3742836256</string>
@@ -57,9 +57,9 @@
     <string name="message_field_hint">Message</string>
     <string name="submit_btn_text">Submit</string>
     <string name="title_activity_one_coin_register">BGP Share Package Account Registration</string>
-    <string name="bgp_form_details">In order to complete the “Know Your Customer”(KYC) requirements at a later stage, you will need to supply: \n\nFull Residential Address including Street Number and Suburb, Date of Birth, Country of Birth, Passport Number and Passport Expiry Date. \n\nA copy of your passport identification page plus proof of address (Bank Statement or Utility Bill showing full name and address) matching the details supplied by upload. Upon completion and approval, you will be free to transact in Cryptocurrency and e-currency through your chosen online account.</string>
-    <string name="one_life_logo">one life logo</string>
-    <string name="one_life_form_desc">In order to register your BGP Share package with the chosen network, we will need the following information completed:</string>
+    <string name="bgp_form_details"></string>
+    <string name="form_logo">Moas Ark logo</string>
+    <string name="form_desc">In order to register your BGP Share package, we will need the following information completed:</string>
     <string name="hint_email_address">Email Address</string>
     <string name="hint_confirm_email_address">Confirm Email Address</string>
     <string name="hint_first_name">First Name(s)</string>
@@ -81,10 +81,10 @@
     <string name="splash_message">Starting</string>
 
     <!--PDF urls-->
-    <string name="BGP_Shares_url">https://moasarknaturalnz.com/wp-content/uploads/moasarkapp/Notice-of-Application-for-BGP-Shares-Form.pdf</string>
-    <string name="bgp_shares_shortcodeurl">https://wp.me/a9bNTX-as</string>
-    <string name="bgp_agreement_url">https://moasarknaturalnz.com/wp-content/uploads/moasarkapp/Participation-Agreement-in-BGP-One-Life-Trust-FormV3.pdf</string>
-    <string name="bgp_agreement_shortcodeurl">https://wp.me/a9bNTX-at</string>
+    <string name="BGP_Shares_url">https://shoptradenz.com/moasapp/forms/Notice-of-Application-for-BGP-Shares-Form.pdf</string>
+    <string name="bgp_shares_shortcodeurl">https://shoptradenz.com/moasapp/forms/Notice-of-Application-for-BGP-Shares-Form.pdf</string>
+    <string name="bgp_agreement_url">https://shoptradenz.com/moasapp/forms/Participation-Agreement-in-BGP-One-Life-Trust-Digital-Exchange-Form.pdf</string>
+    <string name="bgp_agreement_shortcodeurl">https://shoptradenz.com/moasapp/forms/Participation-Agreement-in-BGP-One-Life-Trust-Digital-Exchange-Form.pdf</string>
 
 
 </resources>

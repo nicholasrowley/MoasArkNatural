@@ -26,8 +26,8 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
-    implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'androidx.appcompat:appcompat:1.0.2' //appcompat 1.1.0 breaks webview in API 22
+    implementation 'com.google.android.material:material:1.0.0' //android material 1.1.0 breaks webview in API 22
     implementation 'androidx.legacy:legacy-support-core-utils:1.0.0'
     implementation 'com.dropbox.core:dropbox-core-sdk:3.1.3'
     implementation 'com.google.firebase:firebase-ads:18.3.0'

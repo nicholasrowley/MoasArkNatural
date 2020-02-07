@@ -131,12 +131,12 @@ public class ViewVideo extends AppCompatActivity {
                             .setNegativeButton("Return to Gallery", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialogIsOpen = false;
-                                    if (videoData.getFolderPath().equals(DANCEVIDEOPATH)) {
+                                    if (videoData.getFolderPath().equals(getString(R.string.DIRECTORY_ROOT) + DANCEVIDEOPATH)) {
                                         //Proceed to Line Dance video gallery
                                         Intent intent = new Intent(ViewVideo.this, VideoGallery.class);
                                         intent.putExtra("videoPath", DANCEVIDEOPATH); //using video path to set the gallery
                                         startActivity(intent);
-                                    } else if (videoData.getFolderPath().equals(FOODVIDEOPATH)) {
+                                    } else if (videoData.getFolderPath().equals(getString(R.string.DIRECTORY_ROOT) + FOODVIDEOPATH)) {
                                         //Proceed to Food video gallery
                                         Intent intent = new Intent(ViewVideo.this, VideoGallery.class);
                                         intent.putExtra("videoPath", FOODVIDEOPATH); //using video path to set the gallery

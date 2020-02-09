@@ -244,8 +244,9 @@ public class ViewVideo extends AppCompatActivity {
                 }
                 return true;
             case R.id.menu_contact_form:
-                //Proceed to contact form
-                intent = new Intent(ViewVideo.this, ContactForm.class);
+                //Proceed to contact form on Moa's Ark website
+                Uri uri = Uri.parse(getString(R.string.website_contact_form_url));
+                intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 return true;
         }

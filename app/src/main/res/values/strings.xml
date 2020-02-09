@@ -3,15 +3,15 @@
     <string name="title_activity_splash_screen">SplashScreen</string>
     <string name="title_activity_view_video">ViewVideo</string>
     <string name="app_icon_description">Moa\'s Ark Application icon</string>
-    <string name="blurb">Moa\'s Ark for Healthier Living</string>
+    <string name="blurb">There was a problem connecting to the server. Please refresh the page or try again later.</string>
     <string name="hm_feature_dance_video_aut_text">Feature Exercise Video</string>
-    <string name="hm_feature_food_video_aut_text">Feature Health Food Video</string>
+    <string name="hm_feature_food_video_aut_text">Feature Food Video</string>
     <string name="sharing_title">Sharing</string>
     <string name="Sharing_Error_Text">Error Finding Link</string>
     <string name="package_name">"com.wordpress.onelifegroupnz.moaarknatural"</string>
-    <string name="title_activity_video_gallery">Video gallery</string>
-    <string name="title_activity_dance_video_gallery">Exercise gallery</string>
-    <string name="title_activity_food_video_gallery">Health Food Gallery</string>
+    <string name="title_activity_video_gallery">Video Gallery</string>
+    <string name="title_activity_dance_video_gallery">Exercise Gallery</string>
+    <string name="title_activity_food_video_gallery">Food Gallery</string>
     <string name="text_video_gallery_desc">Moa\'s Ark</string>
     <string name="loadBtnName">Load more videos</string>
     <string name="title_activity_search_results">SearchResults</string>
@@ -26,15 +26,16 @@
     <string name="DIRECTORY_ROOT">https://shoptradenz.com/moasapp/</string>
     <string name="moa_s_ark_shop">Moa\'s Ark NZ Shop</string>
     <string name="website_shop_url">https://moasarknaturalnz.com/shop/</string>
+    <string name="website_contact_form_url">https://moasarknaturalnz.com/contact/</string>
     <string name="stepsheet_not_found">No step sheet could be found for this exercise video.</string>
-    <string name="recipe_not_found">No recipe sheet could be found for this health food video.</string>
+    <string name="recipe_not_found">No recipe sheet could be found for this food video.</string>
     <string name="blogs_title">Blogs from Moa\'s Ark</string>
 
     <!-- Search Type spinner suggestions-->
     <string name="search_type_title">Search Type:</string>
     <string name="search_type_all">All</string>
     <string name="search_type_dance">Exercise</string>
-    <string name="search_type_food">Health Food</string>
+    <string name="search_type_food">Food</string>
 
     <!-- This is the advertisement ids for adMob please use the testing one for clicking (Do not click the real ad) -->
     <string name="banner_ad_unit_id_test">ca-app-pub-2838047532476449/3742836256</string>
@@ -70,7 +71,7 @@
     <string name="hint_postcode">Postcode</string>
     <string name="hint_mobile_phone">Mobile Phone</string>
     <string name="hint_home_phone">Home Phone</string>
-    <string name="availiable_forms_desc">The following registration forms are available here</string>
+    <string name="availiable_forms_desc">Provide your registration details by clicking the button below</string>
     <string name="bgp_account_form_title">BGP Package Account Registration</string>
     <string name="text_country">(Select a Country)</string>
     <string name="email_warning_message">NOTE: A EMAIL CLIENT IS REQUIRED TO SEND THIS FORM!</string>

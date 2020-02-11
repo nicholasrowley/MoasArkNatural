@@ -33,6 +33,7 @@ public class GlobalAppData {
     public static final String RECIPEPATH = "/recipes/";
     public static final String FEATUREDANCETXTPATH = "/feature video/feature dance.txt";
     public static final String FEATUREFOODTXTPATH = "/feature video/feature food.txt";
+    public static final String TAGLINETXTPATH = "/tagline/tagline.txt";
     public static final String ALLVIDEOSCODE = "ALLVIDEOS";
     private List<SearchSuggestion> searchSuggestions;
     public static final int DROPBOXTIMEOUTLIMIT = 60000; //Milliseconds

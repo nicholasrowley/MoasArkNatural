@@ -15,6 +15,7 @@ import android.os.Bundle;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -34,6 +35,10 @@ import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
+
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.ALLVIDEOSCODE;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DANCEVIDEOPATH;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.FOODVIDEOPATH;
@@ -45,10 +50,12 @@ public class Home extends AppCompatActivity {
     private Button featureDanceVideo;
     private Button featureFoodVideo;
     private TextView blogsTitleText;
+    private TextView tagLineText;
     private boolean refreshing;
     private SearchView searchView;
     private RssFragment fragment;
     private boolean savedInstanceExists;
+    String tagline;
 
     private CustomSearchFragment searchFragment;
 
@@ -68,6 +75,7 @@ public class Home extends AppCompatActivity {
         featureDanceVideo = findViewById(R.id.featureDanceVideoBtn);
         featureFoodVideo = findViewById(R.id.featureFoodVideoBtn);
         blogsTitleText = findViewById(R.id.textBlogsTitle);
+        tagLineText = findViewById(R.id.textBlurb);
 
         //For fragment implementation
         savedInstanceExists = savedInstanceState != null;
@@ -182,6 +190,7 @@ public class Home extends AppCompatActivity {
                                 appData.refreshIISDirectoryVideoFiles(getString(R.string.DIRECTORY_ROOT), Home.this, "", FOODVIDEOPATH);
                             }
                         }
+                        loadTagLine();
 
                         sleep(100);
                     } catch (InterruptedException e) {
@@ -201,6 +210,7 @@ public class Home extends AppCompatActivity {
             final Thread setProgressComplete = new Thread() {
                 public void run() {
                     refreshProgressbar.setVisibility(View.GONE);
+                    findViewById(R.id.homeLayout).requestLayout(); //refresh the layout after changes have been made to it.
                     refreshing = false;
                 }
             };
@@ -244,6 +254,7 @@ public class Home extends AppCompatActivity {
                             e.printStackTrace();
                         }
                     }
+                    setTagLine();
                 }
             };
 
@@ -492,5 +503,30 @@ public class Home extends AppCompatActivity {
                 return true;
             }
         });
+    }
+
+    //TODO fix button viewing bug
+    private void loadTagLine() {
+        try {
+            BufferedReader taglineBr = new BufferedReader(new InputStreamReader(new URL(getString(R.string.DIRECTORY_ROOT) + GlobalAppData.TAGLINETXTPATH).openStream()));
+
+            if ((tagline = taglineBr.readLine()) == null) {
+                tagline = "";
+            }
+            taglineBr.close();
+
+            //tagLineText.setText(tagline);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d("error", "something went wrong with setting the tagline.");
+        }
+    }
+
+    private void setTagLine() {
+        if (tagline != null) {
+            tagLineText.setText(tagline);
+        } else {
+            tagLineText.setText(getString(R.string.blurb));
+        }
     }
 }

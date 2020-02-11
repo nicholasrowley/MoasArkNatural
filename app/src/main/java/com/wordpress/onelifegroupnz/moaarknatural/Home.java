@@ -505,7 +505,6 @@ public class Home extends AppCompatActivity {
         });
     }
 
-    //TODO fix button viewing bug
     private void loadTagLine() {
         try {
             BufferedReader taglineBr = new BufferedReader(new InputStreamReader(new URL(getString(R.string.DIRECTORY_ROOT) + GlobalAppData.TAGLINETXTPATH).openStream()));
@@ -515,7 +514,6 @@ public class Home extends AppCompatActivity {
             }
             taglineBr.close();
 
-            //tagLineText.setText(tagline);
         } catch (Exception e) {
             e.printStackTrace();
             Log.d("error", "something went wrong with setting the tagline.");

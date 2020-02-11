@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.Spinner;
 
 import java.util.List;
@@ -79,12 +80,20 @@ public class CustomSearchFragment extends Fragment {
 
         //populate spinner and filter tools
         final Spinner spinner = view.findViewById(R.id.videoTypeSpinner);
+        final ImageView spinnerArrow = view.findViewById(R.id.spinnerArrow);
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(view.getContext(), R.layout.spinner_item,
                 getResources().getStringArray(R.array.search_video_options));
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         spinner.setAdapter(adapter);
+
+        //allows the custom spinner image to click the spinner
+        spinnerArrow.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                spinner.performClick();
+            }
+        });
 
         final SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
 

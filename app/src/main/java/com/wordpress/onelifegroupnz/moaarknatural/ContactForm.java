@@ -48,7 +48,7 @@ public class ContactForm extends AppCompatActivity {
         setContentView(R.layout.activity_contact_form);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        toolbar.setNavigationIcon(R.drawable.ic_home);
+        toolbar.setNavigationIcon(R.drawable.ic_home_green);
 
         nameField = findViewById(R.id.nameField);
         subjectField = findViewById(R.id.subjectField);

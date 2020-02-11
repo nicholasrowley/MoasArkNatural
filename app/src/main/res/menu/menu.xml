@@ -5,7 +5,7 @@
 
     <item android:id="@+id/search"
         android:title="@string/search_title"
-        android:icon="@drawable/ic_search"
+        android:icon="@drawable/ic_search_green"
         android:orderInCategory="2"
         app:showAsAction="always|collapseActionView"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
@@ -14,13 +14,13 @@
     <item
         android:id="@+id/menu_refresh"
         android:title="@string/menu_refresh"
-        android:icon="@drawable/ic_refresh"
+        android:icon="@drawable/ic_refresh_green"
         android:orderInCategory="4"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/overflow"
-        android:icon="@drawable/ic_menu"
+        android:icon="@drawable/ic_menu_green"
         android:orderInCategory="201"
         android:title=""
         app:showAsAction="always">
@@ -30,25 +30,25 @@
             <item
                 android:id="@+id/action_notification"
                 android:title="@string/action_notification"
-                android:icon="@drawable/ic_notifications"
+                android:icon="@drawable/ic_notifications_green"
                 android:orderInCategory="5"
                 app:showAsAction="never" />
             <item
                 android:id="@+id/menu_dance_video_gallery"
                 android:title="@string/title_activity_dance_video_gallery"
-                android:icon="@drawable/ic_line_dance"
+                android:icon="@drawable/ic_line_dance_green"
                 android:orderInCategory="6"
                 app:showAsAction="never" />
             <item
                 android:id="@+id/menu_food_video_gallery"
                 android:title="@string/title_activity_food_video_gallery"
-                android:icon="@drawable/ic_food_gallery"
+                android:icon="@drawable/ic_food_gallery_green"
                 android:orderInCategory="7"
                 app:showAsAction="never" />
             <item
                 android:id="@+id/menu_contact_form"
                 android:title="@string/title_activity_contact_form"
-                android:icon="@mipmap/ic_contact_form"
+                android:icon="@drawable/ic_contact_form_green"
                 android:orderInCategory="7"
                 app:showAsAction="never" />
         </menu>

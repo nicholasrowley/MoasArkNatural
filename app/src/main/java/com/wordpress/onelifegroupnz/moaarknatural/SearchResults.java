@@ -68,7 +68,7 @@ public class SearchResults extends AppCompatActivity {
         setTitle(R.string.app_name);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        toolbar.setNavigationIcon(R.drawable.ic_home);
+        toolbar.setNavigationIcon(R.drawable.ic_home_green);
 
         searchInput = "";
         String searchType = "";

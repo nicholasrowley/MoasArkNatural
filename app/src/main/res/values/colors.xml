@@ -3,8 +3,10 @@
     <color name="colorPrimary">#329932</color>
     <color name="colorPrimaryDark">#006521</color>
     <color name="colorAccent">#fb5858</color>
-    <color name="colorBody">#d4ffc9</color>
+    <color name="colorBody">#FFFFFF</color>
     <color name="black">#000000</color>
     <color name="progress_start">#e65c00</color>
     <color name="progress_end">#F9D423</color>
+    <color name="colorToolbar">#FFFFFF</color>
+    <color name="themeShader">#CECECE</color>
 </resources>

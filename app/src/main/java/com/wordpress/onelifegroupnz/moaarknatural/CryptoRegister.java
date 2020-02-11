@@ -60,7 +60,7 @@ public class CryptoRegister extends AppCompatActivity {
         setContentView(R.layout.activity_crypto_register);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        toolbar.setNavigationIcon(R.drawable.ic_home);
+        toolbar.setNavigationIcon(R.drawable.ic_home_green);
 
         //find all textview fields
         emailField = findViewById(R.id.emailField);

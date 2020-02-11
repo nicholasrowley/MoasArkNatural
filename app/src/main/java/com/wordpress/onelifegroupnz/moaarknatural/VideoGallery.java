@@ -67,7 +67,7 @@ public class VideoGallery extends AppCompatActivity {
         setContentView(R.layout.activity_video_gallery);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        toolbar.setNavigationIcon(R.drawable.ic_home);
+        toolbar.setNavigationIcon(R.drawable.ic_home_green);
         refreshing = false;
         //load more button
         loadMore = findViewById(R.id.loadMoreBtn);

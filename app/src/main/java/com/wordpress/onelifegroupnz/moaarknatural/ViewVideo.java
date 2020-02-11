@@ -86,7 +86,7 @@ public class ViewVideo extends AppCompatActivity {
         setTitle(R.string.app_name);
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        toolbar.setNavigationIcon(R.drawable.ic_home);
+        toolbar.setNavigationIcon(R.drawable.ic_home_green);
 
         portraitItems = findViewById(R.id.portraitItems);
         videoContainer = findViewById(R.id.videoContainer);

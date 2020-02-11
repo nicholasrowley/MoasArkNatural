@@ -50,7 +50,7 @@ public class CryptoSignUp extends AppCompatActivity {
         setContentView(R.layout.activity_crypto_sign_up);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        toolbar.setNavigationIcon(R.drawable.ic_home);
+        toolbar.setNavigationIcon(R.drawable.ic_home_green);
 
         formEmail = findViewById(R.id.cryptoSubmitEmail);
 

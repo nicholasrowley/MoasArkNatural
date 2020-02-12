@@ -10,41 +10,52 @@ android:background="@color/colorBody"
     android:orientation="vertical"
     android:weightSum="1">
 
-<TextView
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:id="@+id/txtSplashTitle"
-    android:text="@string/app_name"
-    android:textSize="32sp"
-    android:gravity="center"
-    android:textStyle="bold"
-    android:layout_marginTop="50dp" />
+    <TextView
+        android:id="@+id/txtSplashTitle"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.15"
+        android:gravity="center"
+        android:text="@string/app_name"
+        app:autoSizeTextType="uniform"
+        app:autoSizeMinTextSize="12sp"
+        app:autoSizeMaxTextSize="100sp"
+        app:autoSizeStepGranularity="2sp"
+        android:textStyle="bold"
+        android:layout_marginTop="25dp"/>
 
-<ImageView
-    android:contentDescription="@string/app_icon_description"
-    android:layout_width="250dp"
-    android:layout_height="250dp"
-    android:layout_gravity="center"
-    android:id="@+id/imgSplash"
-    android:layout_marginTop="10dp"
-    android:src="@mipmap/ic_launcher" />
+    <ImageView
+        android:id="@+id/imgSplash"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:contentDescription="@string/app_icon_description"
+        android:src="@drawable/moasarklogo_notext_hd"
+        android:layout_weight="0.6"/>
 
     <ProgressBar
         android:id="@+id/progressBar1"
-        android:layout_width="110sp"
-        android:layout_height="110sp"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
         android:layout_gravity="center"
         android:layout_marginTop="10dp"
-        android:indeterminateDrawable="@drawable/gradient_progress_circular" />
+        android:indeterminateDrawable="@drawable/gradient_progress_circular"
+        android:layout_weight="0.2"/>
 
     <TextView
         android:id="@+id/txtLoading"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_marginTop="10dp"
         android:gravity="center"
         android:text="@string/splash_message"
-        android:textSize="24sp"
-        android:textStyle="bold" />
+        app:autoSizeTextType="uniform"
+        app:autoSizeMinTextSize="8sp"
+        app:autoSizeMaxTextSize="64sp"
+        app:autoSizeStepGranularity="2sp"
+        android:textStyle="bold"
+        android:layout_weight="0.05"
+        android:layout_marginBottom="25dp"/>
 
 </LinearLayout>

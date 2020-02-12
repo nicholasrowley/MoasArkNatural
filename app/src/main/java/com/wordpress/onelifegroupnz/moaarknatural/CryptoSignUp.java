@@ -138,8 +138,9 @@ public class CryptoSignUp extends AppCompatActivity {
                 Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.cryptoRegisterBtn:
-                //Proceed to contact form
-                intent = new Intent(CryptoSignUp.this, CryptoRegister.class);
+                //Proceed to register form online
+                Uri uri = Uri.parse(getString(R.string.website_bgp_register_url));
+                intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 break;
         }

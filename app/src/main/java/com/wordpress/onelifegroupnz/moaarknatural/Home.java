@@ -69,6 +69,7 @@ public class Home extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setLogo(R.mipmap.ic_launcher);
+        findViewById(R.id.search_fragment).setVisibility(View.GONE);
 
         refreshing = false;
 

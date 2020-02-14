@@ -30,6 +30,9 @@
     <string name="stepsheet_not_found">No step sheet could be found for this exercise video.</string>
     <string name="recipe_not_found">No recipe sheet could be found for this food video.</string>
     <string name="blogs_title">Blogs from Moa\'s Ark</string>
+    <string name="pdf_reload_text_generic">There was an error getting additional data from the server. Try reloading it.</string>
+    <string name="pdf_reload_text_stepsheet">There was an error getting stepsheet data from the server. Try reloading it.</string>
+    <string name="pdf_reload_text_recipe">There was an error getting recipe data from the server. Try reloading it.</string>
 
     <!-- Search Type spinner suggestions-->
     <string name="search_type_title">Search Type:</string>
@@ -71,7 +74,7 @@
     <string name="hint_postcode">Postcode</string>
     <string name="hint_mobile_phone">Mobile Phone</string>
     <string name="hint_home_phone">Home Phone</string>
-    <string name="availiable_forms_desc">Provide your registration details by clicking the button below</string>
+    <string name="available_forms_desc">Provide your registration details by clicking the button below</string>
     <string name="bgp_account_form_title">BGP Package Account Registration</string>
     <string name="text_country">(Select a Country)</string>
     <string name="email_warning_message">NOTE: A EMAIL CLIENT IS REQUIRED TO SEND THIS FORM!</string>
@@ -89,6 +92,5 @@
 
     <!--BGP Register URL-->
     <string name="website_bgp_register_url">https://moasarknaturalnz.com/bgp/</string>
-
-
+    <string name="reload_pdf_button">Reload PDF button</string>
 </resources>

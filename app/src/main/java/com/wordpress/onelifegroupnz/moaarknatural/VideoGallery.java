@@ -10,6 +10,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.appcompat.app.AlertDialog;
@@ -27,6 +29,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -68,6 +71,7 @@ public class VideoGallery extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_home_green);
+        findViewById(R.id.search_fragment).setVisibility(View.GONE);
         refreshing = false;
         //load more button
         loadMore = findViewById(R.id.loadMoreBtn);
@@ -201,8 +205,20 @@ public class VideoGallery extends AppCompatActivity {
         }
 
         for (int i = galleryViewButtonsLoaded; i < buttonsToBeLoaded; i++) {
-            //create the button for the video link
-            galleryLinks.add(new Button(this));
+            //create the button for the video link with the correct characteristics
+            Button newButton = new Button(this);
+            final int sdk = android.os.Build.VERSION.SDK_INT;
+            if(sdk < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+                //noinspection deprecation
+                newButton.setBackgroundDrawable(ContextCompat.getDrawable(this, R.drawable.rounded_button) );
+            } else {
+                newButton.setBackground(ContextCompat.getDrawable(this, R.drawable.rounded_button));
+            }
+            LinearLayout.LayoutParams parameter =  (LinearLayout.LayoutParams) galleryView.getLayoutParams();
+            parameter.setMargins(5, 5, 5, 5); // left, top, right, bottom margins
+            newButton.setLayoutParams(parameter);
+
+            galleryLinks.add(newButton);
 
             String buttonText = appData.getVideoData(targetFolder).get(i).getName();
             galleryLinks.get(i % FolderContentLister.LOADAMOUNT).setText(buttonText);

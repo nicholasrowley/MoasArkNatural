@@ -45,27 +45,42 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:onClick="btnOnClick"
-                android:text="@string/participation_agreement_in_bgp_one_life_trust" />
+                android:text="@string/participation_agreement_in_bgp_one_life_trust"
+                android:background="@drawable/rounded_button"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp" />
 
             <Button
                 android:id="@+id/cryptoSharesBtn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:onClick="btnOnClick"
-                android:text="@string/notice_of_application_for_bgp_shares" />
+                android:text="@string/notice_of_application_for_bgp_shares"
+                android:background="@drawable/rounded_button"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp" />
 
             <TextView
                 android:id="@+id/textView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/availiable_forms_desc" />
+                android:text="@string/available_forms_desc" />
 
             <Button
                 android:id="@+id/cryptoRegisterBtn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:onClick="btnOnClick"
-                android:text="@string/bgp_account_form_title" />
+                android:text="@string/bgp_account_form_title"
+                android:background="@drawable/rounded_button"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp" />
 
             <TextView
                 android:id="@+id/emailDesc"

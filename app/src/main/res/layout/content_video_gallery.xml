@@ -78,7 +78,12 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/loadMoreBtn"
                     android:layout_width="200dp"
-                    android:onClick="galleryOnClick" />
+                    android:onClick="galleryOnClick"
+                    android:background="@drawable/rounded_button"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp" />
 
                 <!--ScrollView padding space for ad @ BANNER size-->
                 <LinearLayout

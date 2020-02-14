@@ -51,6 +51,7 @@ public class CryptoSignUp extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_home_green);
+        findViewById(R.id.search_fragment).setVisibility(View.GONE);
 
         formEmail = findViewById(R.id.cryptoSubmitEmail);
 

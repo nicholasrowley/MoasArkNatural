@@ -73,31 +73,73 @@ tools:showIn="@layout/activity_view_video">
                 android:visibility="visible"
                 tools:text="@string/stepsheet_not_found" />
 
-            <WebView
+            <LinearLayout
+                android:id="@+id/pdfReloadMessage"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:id="@+id/webview" />
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
-            <!--height is for ad @ BANNER size (320px x 50px)-->
-            <RelativeLayout
+                <TextView
+                    android:id="@+id/pdfReloadText"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.8"
+                    android:text="@string/pdf_reload_text_generic" />
+
+                <ImageButton
+                    android:id="@+id/pdfReloadBtn"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.2"
+                    android:onClick="onClickPDFRefresh"
+                    ads:srcCompat="@drawable/ic_refresh"
+                    android:background="@drawable/rounded_button"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:contentDescription="@string/reload_pdf_button" />
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="50dp">
+                android:layout_height="match_parent"
+                android:gravity="bottom"
+                android:orientation="vertical">
 
-                <com.google.android.gms.ads.AdView
-                    xmlns:ads="http://schemas.android.com/apk/res-auto"
-                    android:id="@+id/adView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
-                    android:layout_alignParentBottom="true"
-                    ads:adSize="BANNER"
-                    ads:adUnitId="@string/banner_ad_unit_id_live">
-                </com.google.android.gms.ads.AdView>
-            </RelativeLayout>
+                <!--height is for ad @ BANNER size (320px x 50px)-->
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <WebView
+                        android:id="@+id/webview"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                    </WebView>
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp">
+
+                    <com.google.android.gms.ads.AdView xmlns:ads="http://schemas.android.com/apk/res-auto"
+                        android:id="@+id/adView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:layout_centerHorizontal="true"
+                        ads:adSize="BANNER"
+                        ads:adUnitId="@string/banner_ad_unit_id_live"></com.google.android.gms.ads.AdView>
+                </RelativeLayout>
+
+            </LinearLayout>
 
         </LinearLayout>
 
-</LinearLayout>
+    </LinearLayout>
 
 </RelativeLayout>

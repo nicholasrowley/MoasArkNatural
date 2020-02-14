@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.appcompat.app.AlertDialog;
@@ -69,6 +70,7 @@ public class SearchResults extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_home_green);
+        findViewById(R.id.search_fragment).setVisibility(View.GONE);
 
         searchInput = "";
         String searchType = "";
@@ -220,8 +222,20 @@ public class SearchResults extends AppCompatActivity {
         }
 
         for (int i = searchResultsDisplayed; i < buttonsToBeLoaded; i++) {
-            //create the button for the video link
-            resultLinks.add(new Button(this));
+            //create the button for the video link with the correct characteristics
+            Button newButton = new Button(this);
+            final int sdk = android.os.Build.VERSION.SDK_INT;
+            if(sdk < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+                //noinspection deprecation
+                newButton.setBackgroundDrawable(ContextCompat.getDrawable(this, R.drawable.rounded_button) );
+            } else {
+                newButton.setBackground(ContextCompat.getDrawable(this, R.drawable.rounded_button));
+            }
+            LinearLayout.LayoutParams parameter =  (LinearLayout.LayoutParams) resultsView.getLayoutParams();
+            parameter.setMargins(5, 5, 5, 5); // left, top, right, bottom margins
+            newButton.setLayoutParams(parameter);
+
+            resultLinks.add(newButton);
 
             String buttonText = videoInfoResults.get(i).getName();
             resultLinks.get(i % FolderContentLister.LOADAMOUNT).setText(buttonText);

@@ -149,11 +149,14 @@ public class GlobalAppData {
             return danceVideoFileLister.httpConnectionSuccessful();
         } else if (folderPath.equals(FOODVIDEOPATH)) {
             return foodVideoFileLister.httpConnectionSuccessful();
+        } else if (folderPath.equals(STEPSHEETPATH) || folderPath.equals(RECIPEPATH)) {
+            if (pdfFileLister.httpConnectionSuccessful())
+                Log.d("PDFDATA CHECK: ", "True");
+            else
+                Log.d("PDFDATA CHECK: ", "False");
+            return pdfFileLister.httpConnectionSuccessful();
         } else {
-            if (danceVideoFileLister.httpConnectionSuccessful() && foodVideoFileLister.httpConnectionSuccessful()) {
-                return true;
-            } else
-                return false;
+            return false;
         }
     }
 
@@ -176,6 +179,8 @@ public class GlobalAppData {
         pdfFileLister.execute();
 
         waitForPdfFileListerExecution();
+
+        Log.d("PDFDATA: ", "EXECUTION COMPLETE");
 
         pdfInfoList = pdfFileLister.getLoadData();
 

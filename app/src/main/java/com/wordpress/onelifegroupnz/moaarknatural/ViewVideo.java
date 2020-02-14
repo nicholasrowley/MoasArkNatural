@@ -22,6 +22,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -50,6 +51,8 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DANCEVIDEOPATH;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.FOODVIDEOPATH;
+import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.RECIPEPATH;
+import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.STEPSHEETPATH;
 
 /*- Plays dropbox videos in Android videoview (Note: all videos must be encoded in H.264 Baseline to guarantee
 * playability in Android 5.0 or lower.)
@@ -87,6 +90,9 @@ public class ViewVideo extends AppCompatActivity {
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_home_green);
+        findViewById(R.id.search_fragment).setVisibility(View.GONE);
+
+        findViewById(R.id.pdfReloadMessage).setVisibility(View.GONE);
 
         portraitItems = findViewById(R.id.portraitItems);
         videoContainer = findViewById(R.id.videoContainer);
@@ -395,9 +401,11 @@ public class ViewVideo extends AppCompatActivity {
         TextView videoTitle;
         //Check if in portrait or landscape
         if (portraitView) {
+
             videoTitle = findViewById(R.id.txtVideoTitle);
             videoTitle.setText(videoData.getName());
             toolbar.setVisibility(View.VISIBLE);
+            findViewById(R.id.toolbarUnderline).setVisibility(View.VISIBLE);
             decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
@@ -412,6 +420,7 @@ public class ViewVideo extends AppCompatActivity {
         } else {
             //hide toolbar and status bar
             toolbar.setVisibility(View.GONE);
+            findViewById(R.id.toolbarUnderline).setVisibility(View.GONE);
             decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
@@ -448,20 +457,25 @@ public class ViewVideo extends AppCompatActivity {
             @SuppressLint("SetJavaScriptEnabled")
             public void run() {
                 TextView noPdfMsg = findViewById(R.id.noSheetMsg);
-                if (videoData.getFolderPath().equals(DANCEVIDEOPATH)) {
+                noPdfMsg.setVisibility(View.GONE);
+                if (videoData.getFolderPath().equals(getString(R.string.DIRECTORY_ROOT) + DANCEVIDEOPATH)) {
                     noPdfMsg.setText(R.string.stepsheet_not_found);
-                } else if (videoData.getFolderPath().equals(FOODVIDEOPATH)) {
+                    Log.d("PDF TEXT:", "STEPSHEET");
+                } else if (videoData.getFolderPath().equals(getString(R.string.DIRECTORY_ROOT) + FOODVIDEOPATH)) {
                     noPdfMsg.setText(R.string.recipe_not_found);
+                    Log.d("PDF TEXT:", "RECIPE");
                 }
 
                 //if a matching pdf is found
                 if (!pdfData.getName().equals("")) {
+                    Log.d("PDF WEBVIEW START:", "EXECUTED");
+                    findViewById(R.id.pdfReloadMessage).setVisibility(View.GONE);
                     noPdfMsg.setVisibility(View.GONE);
                     //display pdf
                     webview.getSettings().setJavaScriptEnabled(true);
 
                     final String pdf = pdfData.getfilePathURL();
-                    webview.setVisibility(View.GONE);
+                    //webview.setVisibility(View.GONE);
                     webview.loadUrl("https://docs.google.com/viewer?url=" + pdf);
                     webview.reload();
                     webview.setVisibility(View.VISIBLE);
@@ -499,11 +513,40 @@ public class ViewVideo extends AppCompatActivity {
                             }
                             return true;
                         }
+
+                        @Override
+                        public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                            // Make a note about the failed load.
+                            webview.setVisibility(View.GONE);
+                            findViewById(R.id.pdfReloadMessage).setVisibility(View.VISIBLE);
+                        }
                     });
+                    Log.d("PDF WEBVIEW FINISHED:", "END OF CODE");
                 } else {
+                    Log.d("PDF WEBVIEW NOSTRING:", "NO PDF ON SERVER");
                     //hide pdf view and display appropriate message.
                     webview.setVisibility(View.GONE);
-                    noPdfMsg.setVisibility(View.VISIBLE);
+                    /*if (videoData.getFolderPath().equals(getString(R.string.DIRECTORY_ROOT) + STEPSHEETPATH))
+                        Log.d("pdf check video data", "true");
+                    else
+                        Log.d("pdf check video data", "false");
+                        Log.d("pdf check folder", videoData.getFolderPath());*/
+                    boolean requireStepsheet = videoData.getFolderPath().equals(getString(R.string.DIRECTORY_ROOT) + DANCEVIDEOPATH);
+                    boolean requireRecipe = videoData.getFolderPath().equals(getString(R.string.DIRECTORY_ROOT) + FOODVIDEOPATH);
+
+                    if ((!appData.dbSuccess(GlobalAppData.STEPSHEETPATH) && requireStepsheet)
+                            || (!appData.dbSuccess(GlobalAppData.RECIPEPATH) && requireRecipe) ) {
+                        findViewById(R.id.pdfReloadMessage).setVisibility(View.VISIBLE);
+                        TextView pdfReloadText = findViewById(R.id.pdfReloadText);
+                        if (requireStepsheet)
+                            pdfReloadText.setText(getString(R.string.pdf_reload_text_stepsheet));
+                        else if (requireRecipe)
+                            pdfReloadText.setText(getString(R.string.pdf_reload_text_recipe));
+                    }
+                    else {
+                        noPdfMsg.setVisibility(View.VISIBLE);
+                        findViewById(R.id.pdfReloadMessage).setVisibility(View.GONE);
+                    }
                 }
             }
         };
@@ -640,5 +683,10 @@ public class ViewVideo extends AppCompatActivity {
             }
         };
         waitForRefresh.start();
+    }
+
+    public void onClickPDFRefresh(View v) {
+        findViewById(R.id.pdfReloadMessage).setVisibility(View.GONE);
+        loadPdf();
     }
 }

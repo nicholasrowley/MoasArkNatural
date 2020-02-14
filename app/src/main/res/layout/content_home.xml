@@ -31,9 +31,9 @@
                 android:id="@+id/textBlurb"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="30dp"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
+                android:layout_marginBottom="10dp"
                 android:text="@string/blurb"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textSize="@dimen/description_text_size" />
@@ -43,6 +43,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
+                android:background="@drawable/rounded_button"
                 android:gravity="center"
                 android:onClick="btnOnClick"
                 android:scaleType="fitXY"
@@ -61,7 +62,8 @@
                 android:scaleType="fitXY"
                 android:text="@string/hm_feature_food_video_aut_text"
                 android:textSize="@dimen/btn_feature_vid_text_size"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:background="@drawable/rounded_button" />
 
             <Button
                 android:id="@+id/danceVideoGalleryBtn"
@@ -78,7 +80,8 @@
                 android:text="@string/title_activity_dance_video_gallery"
                 android:textSize="@dimen/btn_text_size"
                 android:textStyle="bold"
-                android:typeface="normal" />
+                android:typeface="normal"
+                android:background="@drawable/rounded_button" />
 
             <Button
                 android:id="@+id/foodVideoGalleryBtn"
@@ -95,7 +98,8 @@
                 android:text="@string/title_activity_food_video_gallery"
                 android:textSize="@dimen/btn_text_size"
                 android:textStyle="bold"
-                android:typeface="normal" />
+                android:typeface="normal"
+                android:background="@drawable/rounded_button" />
 
             <Button
                 android:id="@+id/productLinkBtn"
@@ -112,7 +116,8 @@
                 android:text="@string/moa_s_ark_shop"
                 android:textSize="@dimen/btn_text_size"
                 android:textStyle="bold"
-                android:typeface="normal" />
+                android:typeface="normal"
+                android:background="@drawable/rounded_button" />
 
             <Button
                 android:id="@+id/cryptoSignUpBtn"
@@ -129,7 +134,8 @@
                 android:text="@string/title_activity_sign_up"
                 android:textSize="@dimen/btn_text_size"
                 android:textStyle="bold"
-                android:typeface="normal" />
+                android:typeface="normal"
+                android:background="@drawable/rounded_button" />
 
             <TextView
                 android:id="@+id/textBlogsTitle"

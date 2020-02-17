@@ -8,8 +8,6 @@ import androidx.fragment.app.Fragment;
 import androidx.cursoradapter.widget.CursorAdapter;
 import androidx.cursoradapter.widget.SimpleCursorAdapter;
 import androidx.appcompat.widget.SearchView;
-
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
@@ -109,9 +107,6 @@ public class CustomSearchFragment extends Fragment {
                 {
                     //Proceed to Search Results
                     Intent intent = new Intent(getContext(), SearchResults.class);
-                    Log.d("click position", ((Integer) position).toString());
-                    Log.d("cursor position", cursor.getString(position));
-                    Log.d("suggestions array size", ((Integer) suggestions.size()).toString());
                     intent.putExtra("searchInput", suggestions.get(cursor.getInt(position)).getFileName());
                     intent.putExtra("searchType", spinner.getSelectedItem().toString());
                     searchView.clearFocus();

@@ -107,7 +107,7 @@ public class CustomSearchFragment extends Fragment {
                 {
                     //Proceed to Search Results
                     Intent intent = new Intent(getContext(), SearchResults.class);
-                    intent.putExtra("searchInput", suggestions.get(cursor.getInt(position)).getFileName());
+                    intent.putExtra("searchInput", suggestions.get(cursor.getInt(0)).getFileName());
                     intent.putExtra("searchType", spinner.getSelectedItem().toString());
                     searchView.clearFocus();
                     startActivity(intent);

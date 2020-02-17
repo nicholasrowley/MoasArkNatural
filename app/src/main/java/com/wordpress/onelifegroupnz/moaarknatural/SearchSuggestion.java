@@ -9,9 +9,9 @@ public class SearchSuggestion {
     private String searchType;
     private String fileName;
 
-    public SearchSuggestion(String type, String sugestion) {
+    public SearchSuggestion(String type, String suggestion) {
         searchType = type;
-        fileName = sugestion;
+        fileName = suggestion;
     }
 
     public String getSearchType() {

@@ -143,7 +143,8 @@ public class GlobalAppData {
     }
 
     /*checks if the previous web server connection for a FolderContentLister object was successful
-    * String folderPath - target file path on server without root directory mentioned. e.g. /food videos/ */
+    * String folderPath - target file path on server without root directory mentioned. e.g. /food videos/
+    * NOTE: if STEPSHEETPATH or RECIPEPATH are to have different outcomes then the dbsuccess code should be revised in ViewVideo Activity*/
     public boolean dbSuccess(String folderPath) {
         if (folderPath.equals(DANCEVIDEOPATH)) {
             return danceVideoFileLister.httpConnectionSuccessful();

@@ -8,8 +8,14 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Picture;
 import android.graphics.PixelFormat;
+import android.graphics.drawable.PictureDrawable;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
@@ -21,6 +27,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
+import androidx.webkit.WebViewCompat;
+
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -32,6 +40,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -53,6 +62,7 @@ import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DANCEVIDE
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.FOODVIDEOPATH;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.RECIPEPATH;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.STEPSHEETPATH;
+import static java.lang.Thread.sleep;
 
 /*- Plays dropbox videos in Android videoview (Note: all videos must be encoded in H.264 Baseline to guarantee
 * playability in Android 5.0 or lower.)
@@ -74,6 +84,10 @@ public class ViewVideo extends AppCompatActivity {
     private SearchView searchView;
     private LinearLayout portraitItems;
     private WebView webview;
+    private boolean pdfPixelTestOnOrientationChange;
+    //private boolean checkOnPDFStartedCalled;
+    //private ImageView imageView;
+    //private Picture picture;
     private LinearLayout videoContainer;
 
     private CustomSearchFragment searchFragment;
@@ -81,6 +95,11 @@ public class ViewVideo extends AppCompatActivity {
     private FirebaseAnalytics mFirebaseAnalytics;
 
     private ProgressBar refreshProgressbar;
+
+    boolean pdfIsRedirecting;
+
+    //TODO test bitmap
+    private String teststring;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,6 +120,12 @@ public class ViewVideo extends AppCompatActivity {
         //vid view imp onCreate code
         videoView = findViewById(R.id.videoView);
         refreshed = false;
+
+        //TODO test
+        //imageView = findViewById(R.id.imageView);
+        teststring = "";
+        pdfPixelTestOnOrientationChange = false;
+        //imageView.setVisibility(View.GONE);
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
@@ -187,12 +212,38 @@ public class ViewVideo extends AppCompatActivity {
             if (inm != null) {
                 inm.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), 0);
             }
+
+        webview.clearHistory();
+
+        // NOTE: clears RAM cache, if you pass true, it will also clear the disk cache.
+        // Probably not a great idea to pass true if you have other WebViews still alive.
+        webview.clearCache(true);
+
+        // Loading a blank page is optional, but will ensure that the WebView isn't doing anything when you destroy it.
+        webview.loadUrl("about:blank");
+
+        webview.onPause();
+        webview.destroyDrawingCache();
+
+        // NOTE: This pauses JavaScript execution for ALL WebViews,
+        // do not use if you have other WebViews still alive.
+        // If you create another WebView after calling this,
+        // make sure to call mWebView.resumeTimers().
+        webview.pauseTimers();
+        videoView.pause();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        progressBar.setVisibility(View.VISIBLE);
+        webview.onResume();
+        webview.resumeTimers();
+        videoView.resume();
+        if (!videoView.isPlaying()) {
+            progressBar.setVisibility(View.VISIBLE);
+        }
+        pdfIsRedirecting = false;
+        loadPdf();
     }
 
 
@@ -247,6 +298,7 @@ public class ViewVideo extends AppCompatActivity {
                 if(!(refreshProgressbar.getVisibility() == View.VISIBLE)) {
                     refreshProgressbar.setVisibility(View.VISIBLE);
                     loadActivity();
+                    loadPdf();
                 }
                 return true;
             case R.id.menu_contact_form:
@@ -417,6 +469,45 @@ public class ViewVideo extends AppCompatActivity {
 
             videoContainer.setLayoutParams(contParams);
             videoView.setLayoutParams(params);
+
+            //Webview testing is done on another thread to avoid pausing the UI Thread.
+            final Thread waitForWebview = new Thread() {
+                public void run() {
+                        //wait for webview to draw itself before testing webview.
+                        while(!(webview.getMeasuredHeight() > 0)) {
+                            try {
+                                Log.d("Portrait Mode", "Waiting for webview to draw itself before bitmap test.");
+                                sleep(100);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+            };
+
+            //Webview testing is done on another thread to avoid pausing the UI Thread.
+            final Thread webviewTestThread = new Thread() {
+                public void run() {
+                    Log.d("Portrait Mode", "Begin webview bitmap test");
+                    testWebview(webview);
+                }
+            };
+
+            final Thread webviewPixelTest = new Thread() {
+                public void run() {
+                    waitForWebview.start();
+                    try {
+                        waitForWebview.join();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    runOnUiThread(webviewTestThread);
+                }
+            };
+        if (pdfPixelTestOnOrientationChange) {
+            webviewPixelTest.start();
+            pdfPixelTestOnOrientationChange = false;
+        }
         } else {
             //hide toolbar and status bar
             toolbar.setVisibility(View.GONE);
@@ -441,14 +532,18 @@ public class ViewVideo extends AppCompatActivity {
         //Data load is done here
         final Thread loadTask = new Thread() {
             public void run() {
-                try {
+                int loadAttempts = 0;
+                do {
+                    Log.d("Attempting pdf load try", Integer.toString(loadAttempts + 1));
                     //check for pdf data
                     pdfData = appData.getPdfContent(getString(R.string.DIRECTORY_ROOT), videoData.getName(), videoData.getFolderPath());
                     //refreshDialog.show(); //generally bad to show a toast with something that can be executed repetitively
-                    sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                    loadAttempts++;
+                    //TODO test failure
+                    if (!appData.dbSuccess(STEPSHEETPATH)) {
+                        Log.d("pdf load", "failed");
+                    }
+                } while (loadAttempts < 5 && !appData.dbSuccess(STEPSHEETPATH)); //same result regardless of using STEPSHEETPATH or RECIPEPATH
             }
         };
 
@@ -471,56 +566,11 @@ public class ViewVideo extends AppCompatActivity {
                     Log.d("PDF WEBVIEW START:", "EXECUTED");
                     findViewById(R.id.pdfReloadMessage).setVisibility(View.GONE);
                     noPdfMsg.setVisibility(View.GONE);
-                    //display pdf
-                    webview.getSettings().setJavaScriptEnabled(true);
 
-                    final String pdf = pdfData.getfilePathURL();
-                    //webview.setVisibility(View.GONE);
-                    webview.loadUrl("https://docs.google.com/viewer?url=" + pdf);
-                    webview.reload();
-                    webview.setVisibility(View.VISIBLE);
-                    webview.getSettings().setBuiltInZoomControls(true); //allows zoom controls and pinch zooming.
-                    webview.getSettings().setDisplayZoomControls(false); //hides webview zoom controls
-                    webview.setWebViewClient(new WebViewClient() {
+                    findViewById(R.id.pdfProgressBar5).setVisibility(View.VISIBLE);
+                    loadWebview();
+                    loadPdfViewer();
 
-                        @SuppressWarnings("deprecation")
-                        @Override
-                        public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                            view.reload();
-                            if (url.contains("print=true") || url.equals(pdf)) {
-                                Uri uri = Uri.parse(pdf);
-                                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                                startActivity(intent);
-                            } else if (url.contains("google.com/ServiceLogin")) {
-                                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                                startActivity(intent);
-                            }
-                            return true;
-                        }
-
-                        @TargetApi(Build.VERSION_CODES.N)
-                        @Override
-                        public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                            Uri url = request.getUrl();
-                            view.reload();
-                            if (url.toString().contains("print=true") || url.toString().equals(pdf)) {
-                                Uri uri = Uri.parse(pdf);
-                                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                                startActivity(intent);
-                            } else if (url.toString().contains("google.com/ServiceLogin")) {
-                                Intent intent = new Intent(Intent.ACTION_VIEW, url);
-                                startActivity(intent);
-                            }
-                            return true;
-                        }
-
-                        @Override
-                        public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                            // Make a note about the failed load.
-                            webview.setVisibility(View.GONE);
-                            findViewById(R.id.pdfReloadMessage).setVisibility(View.VISIBLE);
-                        }
-                    });
                     Log.d("PDF WEBVIEW FINISHED:", "END OF CODE");
                 } else {
                     Log.d("PDF WEBVIEW NOSTRING:", "NO PDF ON SERVER");
@@ -533,6 +583,13 @@ public class ViewVideo extends AppCompatActivity {
                         Log.d("pdf check folder", videoData.getFolderPath());*/
                     boolean requireStepsheet = videoData.getFolderPath().equals(getString(R.string.DIRECTORY_ROOT) + DANCEVIDEOPATH);
                     boolean requireRecipe = videoData.getFolderPath().equals(getString(R.string.DIRECTORY_ROOT) + FOODVIDEOPATH);
+
+                    //TODO Test
+                    if (appData.dbSuccess(STEPSHEETPATH)) {
+                        Log.d("DATABASE PDF WV ERROR", "TRUE");
+                    } else {
+                        Log.d("DATABASE PDF WV ERROR", "FALSE");
+                    }
 
                     if ((!appData.dbSuccess(GlobalAppData.STEPSHEETPATH) && requireStepsheet)
                             || (!appData.dbSuccess(GlobalAppData.RECIPEPATH) && requireRecipe) ) {
@@ -548,24 +605,210 @@ public class ViewVideo extends AppCompatActivity {
                         findViewById(R.id.pdfReloadMessage).setVisibility(View.GONE);
                     }
                 }
+                findViewById(R.id.pdfProgressBar5).setVisibility(View.GONE);
             }
         };
 
         //start background loader in a separate thread
         final Thread startLoad = new Thread() {
             public void run() {
+                //attempt a reload up to 5 times for pdfdata if connection fails.
                 loadTask.start();
                 try {
                     loadTask.join();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+
+                //Avoid progressbar from changing height of webview when it is loading
+                /*while (refreshProgressbar.getVisibility() == View.VISIBLE){
+                    try {
+                        Log.d("PDF loading", "Waiting on refresh");
+                        sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                //webview needs extra time while UI is readjusted
+                try {
+                    Log.d("PDF loading", "Waiting on refresh");
+                    sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }*/
                 runOnUiThread(setTask);
             }
 
         };
 
         startLoad.start();
+    }
+
+    //TODO Replacement PDF Viewer
+    private void loadPdfViewer() {
+        /*PDFView pdfView = findViewById(R.id.pdfView);
+        pdfView.fromUri(Uri.parse(pdfData.getfilePathURL()));
+        pdfView.loadPages();*/
+    }
+
+    //TODO Javascript does not load sometimes
+    @SuppressLint("SetJavaScriptEnabled")
+    private void loadWebview() {
+        //webview.setWebChromeClient(new WebChromeClient());
+        //display pdf
+        webview.getSettings().setJavaScriptEnabled(true);
+
+        final String pdf = pdfData.getfilePathURL();
+        //webview.setVisibility(View.GONE);
+        webview.loadUrl("https://docs.google.com/viewer?url=" + pdf);
+        //checkOnPDFStartedCalled = true;
+        //webview.reload();
+        // "https://docs.google.com/viewer?url=" + pdf
+        webview.setVisibility(View.VISIBLE);
+        webview.getSettings().setBuiltInZoomControls(true); //allows zoom controls and pinch zooming.
+        webview.getSettings().setDisplayZoomControls(false); //hides webview zoom controls
+        webview.setWebViewClient(new WebViewClient() {
+
+            //boolean checkOnPageStartedCalled = false;
+
+            /*@Override
+            public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                checkOnPageStartedCalled = true;
+                Log.d("page started", "true");
+            }*/
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                //TODO Test
+                Log.d("page finished", "true");
+                //If redirecting then we don't want to reload the webview if it hasn't loaded.
+                if (!pdfIsRedirecting) {
+                    /*picture = view.capturePicture();
+                    Bitmap  b = Bitmap.createBitmap( picture.getWidth(),
+                        picture.getHeight(), Bitmap.Config.ARGB_8888);
+                    Canvas c = new Canvas( b );
+                    picture.draw( c );*/
+                    //webview.setVisibility(View.GONE);
+                    /*imageView.setVisibility(View.VISIBLE);
+                    imageView.setImageBitmap(b);*/
+
+                    //TODO use the first pixel color on the page to test for webview failure to load
+                    //TODO check color mapping of the first pixel is black
+                    if (view.getMeasuredHeight() > 0) {
+                        Log.d("webview height", "in portrait mode. starting bitmap test.");
+                        testWebview(view);
+                    } else {
+                        Log.d("webview height", "webview not visible. postponing bitmap test until orientation change.");
+                        pdfPixelTestOnOrientationChange = true;
+                    }
+
+
+                    /*boolean found = false;
+                    for(int x = 0; x < b.getWidth() && !found; x++){
+                        for(int y = 0; y < b.getHeight() && !found; y++){
+                            int pixeltest = b.getPixel(x, y);
+                            if(pixeltest == Color.BLACK){
+                                //cordinate = x;
+                                Log.d("Black found", "True");
+                                found=true;
+                            } else {
+                                Log.d("Pixel number", Integer.toString(pixeltest));
+                            }
+                        }
+                    }*/
+                        //Log.d("search for black comp", "True");
+                    /*if (checkOnPDFStartedCalled) {
+                        //webview.loadUrl("https://docs.google.com/viewer?url=" + pdf);
+                        //checkOnPDFStartedCalled = false;
+                        //hideProgress();
+                        Log.d("on page started called", "true");
+                    } else {
+                        //showPdfFile(imageString);
+                        Log.d("on page started called", "false");
+                    }*/
+                }
+            }
+
+            //@SuppressWarnings("deprecation")
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                pdfIsRedirecting = true;
+                view.reload();
+                Log.d("Webview string comp", url.replaceAll(" ", "%20") + " : " + pdf.replaceAll(" ", "%20"));
+                if (url.contains("print=true") || url.replaceAll(" ", "%20").equals(pdf.replaceAll(" ", "%20"))) {
+                    Uri uri = Uri.parse(pdf);
+                    Log.d("Webview Link", "Print request pressed");
+                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                    startActivity(intent);
+                } else if (url.contains("google.com/ServiceLogin")) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    startActivity(intent);
+                }
+                Log.d("Override A", "call");
+                return false;
+            }
+
+            @TargetApi(Build.VERSION_CODES.N)
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                pdfIsRedirecting = true;
+                Uri url = request.getUrl();
+                view.reload();
+                Log.d("Webview string comp", url.toString().replaceAll(" ", "%20") + " : " + pdf.replaceAll(" ", "%20"));
+                if (url.toString().contains("print=true") || url.toString().replaceAll(" ", "%20").equals(pdf.replaceAll(" ", "%20"))) {
+                    Uri uri = Uri.parse(pdf);
+                    Log.d("Webview Link", "Print request pressed");
+                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                    startActivity(intent);
+                } else if (url.toString().contains("google.com/ServiceLogin")) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, url);
+                    startActivity(intent);
+                }
+                Log.d("Override N", "call");
+                return false;
+            }
+
+            @Override
+            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                // Make a note about the failed load.
+                webview.setVisibility(View.GONE);
+                findViewById(R.id.pdfReloadMessage).setVisibility(View.VISIBLE);
+            }
+        });
+    }
+
+    //Convert Picture to Bitmap
+    /*private static Bitmap toBitmap(Picture picture) {
+        PictureDrawable pd = new PictureDrawable(picture);
+        Bitmap bitmap = Bitmap.createBitmap(pd.getIntrinsicWidth(), pd.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        canvas.drawPicture(pd.getPicture());
+        return bitmap;
+    }*/
+
+    //Convert View to Bitmap
+    private static Bitmap toBitmap(View view) {
+        Bitmap bitmap = Bitmap.createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        view.draw(canvas);
+        return bitmap;
+    }
+
+    //Tests the webview for an image. Should only run when webview is on the screen.
+    private void testWebview(WebView view) {
+        int pixelDrawTest = toBitmap(view).getPixel(0,0);
+        teststring = "The Bitmap pixel 0 0 is: " + Integer.toString(pixelDrawTest);
+        Log.d("Bitmap Red value is", Integer.toString(Color.red(pixelDrawTest)));
+        Log.d("Bitmap Green value is", Integer.toString(Color.green(pixelDrawTest)));
+        Log.d("Bitmap Blue value is", Integer.toString(Color.blue(pixelDrawTest)));
+
+        Log.d("Bitmap pixel", teststring);
+
+        //In this case the first pixel in the webview is never white so this can be used to test if the webview has failed to load
+        if(pixelDrawTest == Color.WHITE) {
+            Log.d("ERROR: ", "Bitmap Pixel test has failed. Reloading webview");
+            loadWebview();
+        }
     }
 
     private void initialiseAds() {
@@ -617,6 +860,34 @@ public class ViewVideo extends AppCompatActivity {
 
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
+                /*Log.d("WEBVIEW Height: ", ((Integer) webview.getHeight()).toString());
+                Log.d("WEBVIEW url: ", webview.getUrl());
+                Log.d("WEBVIEW progress: ", ((Integer) webview.getProgress()).toString());
+                Log.d("WEBVIEW touchables: ", ((Integer) webview.getTouchables().size()).toString());
+                Log.d("WEBVIEW content heig: ", ((Integer) webview.getContentHeight()).toString());
+                Log.d("WEBVIEW linear heig: ", (((Integer) findViewById(R.id.webviewLinearLayout).getHeight()).toString()));
+                Log.d("WEBVIEW rel heig: ", (((Integer) findViewById(R.id.webviewRelativeLayout).getHeight()).toString()));
+                Log.d("WEBVIEW draw time: ", ((Long.toString(webview.getDrawingTime()))));
+                Log.d("WEBVIEW scrllbar size: ", ((Integer.toString(webview.getScrollBarSize()))));*/
+
+                //TODO Test
+                if (appData.dbSuccess(STEPSHEETPATH)) {
+                    Log.d("DATABASE PDF WV ERROR", "FALSE");
+                } else {
+                    Log.d("DATABASE PDF WV ERROR", "TRUE");
+                }
+
+                Log.d("Database pdf value", webview.getUrl());
+
+                PackageInfo webViewPackageInfo = WebViewCompat.getCurrentWebViewPackage(getApplicationContext());
+                if (webViewPackageInfo != null) {
+                    Log.d("MY_APP_TAG", "WebView version: " + webViewPackageInfo.versionName);
+                    //Log.d("ImageView height", Integer.toString(imageView.getHeight()));
+                    //Log.d("Picture height", Integer.toString(picture.getHeight()));
+                    Log.d("Bitmap pixel", teststring);
+                    Log.d("Color white is", Integer.toString(Color.WHITE));
+                }
+
                 searchFragmentLayout.setVisibility(View.VISIBLE);
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 if (imm != null) {
@@ -643,7 +914,7 @@ public class ViewVideo extends AppCompatActivity {
         anim.setDuration(3040);
         refreshProgressbar.startAnimation(anim);
 
-        loadPdf();
+        //loadPdf();
 
         PlayVideo();
 
@@ -679,6 +950,20 @@ public class ViewVideo extends AppCompatActivity {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+
+                //TODO TEST
+                /*Log.d("WEBVIEW Height: ", ((Integer) webview.getHeight()).toString());
+                if (webview.getHeight() == 0) {
+                    while (webview.getHeight() == 0) {
+                        Log.d("WEBVIEW Height: ", ((Integer) webview.getHeight()).toString());
+                        try {
+                            sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }*/
+
                 runOnUiThread(setProgressComplete);
             }
         };

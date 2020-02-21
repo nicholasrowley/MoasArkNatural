@@ -1,6 +1,8 @@
 package com.wordpress.onelifegroupnz.moaarknatural;
 
 import android.os.AsyncTask;
+import android.util.Log;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,6 +48,14 @@ public class FolderContentLister extends AsyncTask<Object, Void, Object> {
             }
             isValid = true;
             loadItemsFromCurrentList();
+
+            //if the first entry has empty fields then assume connection has failed.
+            if (!currentDirectoryListing.isEmpty())
+                if (currentDirectoryListing.get(0).getName().equals("")) {
+                    //TODO Test Timeout function
+                    Log.d("Lister Error", "could not connect to directory.");
+                    isValid = false;
+                }
         } catch (IOException e) {
             isValid = false;
         }

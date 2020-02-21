@@ -70,6 +70,7 @@ public class Home extends AppCompatActivity {
         setSupportActionBar(toolbar);
         toolbar.setLogo(R.mipmap.ic_launcher);
         findViewById(R.id.search_fragment).setVisibility(View.GONE);
+        findViewById(R.id.textBlurb).setVisibility(View.INVISIBLE);
 
         refreshing = false;
 
@@ -527,5 +528,6 @@ public class Home extends AppCompatActivity {
         } else {
             tagLineText.setText(getString(R.string.blurb));
         }
+        findViewById(R.id.textBlurb).setVisibility(View.VISIBLE);
     }
 }

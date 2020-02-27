@@ -279,9 +279,7 @@ public class VideoGallery extends AppCompatActivity {
             anim.setDuration(3040);
             refreshProgressbar.startAnimation(anim);
 
-            //final ProgressDialog progressDialog = ProgressDialog.show(VideoGallery.this, "", "Loading Videos...", true);
             final Toast refreshDialog = Toast.makeText(getApplicationContext(), "Gallery refreshed", Toast.LENGTH_SHORT);
-            final Handler mHandler = new Handler();
 
             //Data load is done here
             final Thread refreshTask = new Thread() {
@@ -468,6 +466,7 @@ public class VideoGallery extends AppCompatActivity {
         startLoad.start();
     }
 
+    /* This is the onClick method for buttons in the video gallery activity. */
     public void galleryOnClick(View v) {
         switch (v.getId()) {
             case R.id.loadMoreBtn:
@@ -478,6 +477,7 @@ public class VideoGallery extends AppCompatActivity {
         }
     }
 
+    /* Starts Google AdMob ads for this activity. */
     private void initialiseAds() {
         //initialise ads
         MobileAds.initialize(this, getString(R.string.banner_ad_unit_id_live));
@@ -493,6 +493,7 @@ public class VideoGallery extends AppCompatActivity {
         outState.putBoolean("fragment_added", true);
     }
 
+    /* Sets up the search options so that it is ready to be used by the search bar. Should be run before the search bar is expanded the first time. */
     private void addSearchFragment() {
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
@@ -501,6 +502,7 @@ public class VideoGallery extends AppCompatActivity {
         transaction.commit();
     }
 
+    /* Provides the setup necessary to get the search bar working.*/
     private void setUpSearchBar(Menu menu ) {
         // Associate searchable configuration with the SearchView
         SearchManager searchManager =

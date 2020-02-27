@@ -86,9 +86,7 @@
 
     <!--PDF urls-->
     <string name="BGP_Shares_url">https://shoptradenz.com/moasapp/forms/Notice-of-Application-for-BGP-Shares-Form.pdf</string>
-    <string name="bgp_shares_shortcodeurl">https://shoptradenz.com/moasapp/forms/Notice-of-Application-for-BGP-Shares-Form.pdf</string>
     <string name="bgp_agreement_url">https://shoptradenz.com/moasapp/forms/Participation-Agreement-in-BGP-One-Life-Trust-Digital-Exchange-Form.pdf</string>
-    <string name="bgp_agreement_shortcodeurl">https://shoptradenz.com/moasapp/forms/Participation-Agreement-in-BGP-One-Life-Trust-Digital-Exchange-Form.pdf</string>
 
     <!--BGP Register URL-->
     <string name="website_bgp_register_url">https://moasarknaturalnz.com/bgp/</string>

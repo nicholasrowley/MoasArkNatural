@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
@@ -146,26 +147,22 @@ public class GlobalAppData {
     * String folderPath - target file path on server without root directory mentioned. e.g. /food videos/
     * NOTE: if STEPSHEETPATH or RECIPEPATH are to have different outcomes then the dbsuccess code should be revised in ViewVideo Activity*/
     public boolean dbSuccess(String folderPath) {
-        if (folderPath.equals(DANCEVIDEOPATH)) {
-            return danceVideoFileLister.httpConnectionSuccessful();
-        } else if (folderPath.equals(FOODVIDEOPATH)) {
-            return foodVideoFileLister.httpConnectionSuccessful();
-        } else if (folderPath.equals(STEPSHEETPATH) || folderPath.equals(RECIPEPATH)) {
-            if (pdfFileLister.httpConnectionSuccessful())
-                Log.d("PDFDATA CHECK: ", "True");
-            else
-                Log.d("PDFDATA CHECK: ", "False");
-            return pdfFileLister.httpConnectionSuccessful();
-        } else {
-            return false;
+        switch (folderPath) {
+            case DANCEVIDEOPATH:
+                return danceVideoFileLister.httpConnectionSuccessful();
+            case FOODVIDEOPATH:
+                return foodVideoFileLister.httpConnectionSuccessful();
+            case STEPSHEETPATH:
+            case RECIPEPATH:
+                return pdfFileLister.httpConnectionSuccessful();
+            default:
+                return false;
         }
     }
 
     /*method which returns the single latest version of the step sheet which contains the given
      name. (if one exists otherwise null)*/
     public FileDataListing getPdfContent(String directoryRoot, String pdfName, String pdfPath) {
-
-        Log.d("PDFPATH: ", pdfPath);
 
         List<FileDataListing> pdfInfoList;
 
@@ -180,8 +177,6 @@ public class GlobalAppData {
         pdfFileLister.execute();
 
         waitForPdfFileListerExecution();
-
-        Log.d("PDFDATA: ", "EXECUTION COMPLETE");
 
         pdfInfoList = pdfFileLister.getLoadData();
 
@@ -268,7 +263,7 @@ public class GlobalAppData {
                     featureDanceInfo = video;
                 }
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
             Log.d("error", "something went wrong with setting the feature dance video.");
         }
@@ -289,7 +284,7 @@ public class GlobalAppData {
                     featureFoodInfo = video;
                 }
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
             Log.d("error", "something went wrong with setting the feature food video.");
         }

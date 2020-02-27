@@ -15,6 +15,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
+
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -38,8 +40,8 @@ import java.net.URL;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DANCEVIDEOPATH;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.FOODVIDEOPATH;
 
-/**Activity class for the Crypto Sign ups*/
-public class CryptoSignUp extends AppCompatActivity {
+/**Activity class for the BGP Sign ups*/
+public class BGPSignUp extends AppCompatActivity {
 
     private SearchView searchView;
     private TextView formEmail;
@@ -87,17 +89,17 @@ public class CryptoSignUp extends AppCompatActivity {
         switch (item.getItemId()) {
             // Respond to the action bar's Up/Home button
             case android.R.id.home:
-                startActivity(new Intent(CryptoSignUp.this, Home.class));
+                startActivity(new Intent(BGPSignUp.this, Home.class));
                 return true;
             case R.id.menu_dance_video_gallery:
                 //Proceed to Line Dance video gallery
-                intent = new Intent(CryptoSignUp.this, VideoGallery.class);
+                intent = new Intent(BGPSignUp.this, VideoGallery.class);
                 intent.putExtra("videoPath", DANCEVIDEOPATH); //using video path to set the gallery
                 startActivity(intent);
                 return true;
             case R.id.menu_food_video_gallery:
                 //Proceed to Food video gallery
-                intent = new Intent(CryptoSignUp.this, VideoGallery.class);
+                intent = new Intent(BGPSignUp.this, VideoGallery.class);
                 intent.putExtra("videoPath", FOODVIDEOPATH); //using video path to set the gallery
                 startActivity(intent);
                 return true;
@@ -120,15 +122,11 @@ public class CryptoSignUp extends AppCompatActivity {
         switch (v.getId()) {
             case R.id.paFormBtn:
                 String paFormUrl = getString(R.string.bgp_agreement_url);
-                //String paFormFallbackUrl = getString(R.string.Crypto_Agreement_shortcodeurl);
-
-                loadPdfFile(paFormUrl/*, paFormFallbackUrl*/);
+                loadPdfFile(paFormUrl);
                 break;
             case R.id.cryptoSharesBtn:
                 String bgpSharesUrl = getString(R.string.BGP_Shares_url);
-                //String bgpSharesFallbackUrl = getString(R.string.Crypto_Shares_shortcodeurl);
-
-                loadPdfFile(bgpSharesUrl/*, bgpSharesFallbackUrl*/);
+                loadPdfFile(bgpSharesUrl);
                 break;
             case R.id.copyBtn:
                 ClipboardManager clipboard = (ClipboardManager) this.getSystemService(Context.CLIPBOARD_SERVICE);
@@ -148,7 +146,7 @@ public class CryptoSignUp extends AppCompatActivity {
     }
 
     /*Runs a connection test on another thread before opening*/
-    private void loadPdfFile(final String URLName/*, final String fallbackURL*/){
+    private void loadPdfFile(final String URLName){
         //disable pdf button
         final Thread checkConnection = new Thread() {
             public void run() {
@@ -156,7 +154,6 @@ public class CryptoSignUp extends AppCompatActivity {
                     runOnUiThread(loadPdf);
                 } else {
                     Toast.makeText(getApplicationContext(), "404 - Page not found", Toast.LENGTH_SHORT).show();
-                    //runOnUiThread(connectFailed);
                 }
             }
 
@@ -168,17 +165,6 @@ public class CryptoSignUp extends AppCompatActivity {
                     startActivity(intent);
                 }
             };
-            /* Disabled as it is useless
-            final Thread connectFailed = new Thread() {
-                public void run() {
-                    Toast.makeText(getApplicationContext(), "Page not found - loading web page", Toast.LENGTH_SHORT).show();
-                    Intent intent;
-                    Uri pdfUri = Uri.parse(fallbackURL);
-                    intent = new Intent(Intent.ACTION_VIEW, pdfUri);
-                    startActivity(intent);
-                }
-            };
-            */
         };
 
         checkConnection.start();
@@ -229,7 +215,7 @@ public class CryptoSignUp extends AppCompatActivity {
             startActivity(intent);
 
         } catch ( ActivityNotFoundException e ) {
-            new AlertDialog.Builder(CryptoSignUp.this)
+            new AlertDialog.Builder(BGPSignUp.this)
                     .setTitle("Notification Settings Not Available")
                     .setMessage("Unable to open the apps settings screen, please try again later")
                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {

@@ -36,6 +36,7 @@ import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 
@@ -91,11 +92,9 @@ public class Home extends AppCompatActivity {
         initialiseAds();
     }
 
-    //looks for feature videos automatically if required when resuming the Home screen
     @Override
     protected void onResume() {
         super.onResume();
-        //setFeatureVideoLink();
     }
 
     @Override
@@ -119,6 +118,7 @@ public class Home extends AppCompatActivity {
         return true;
     }
 
+    /*This handles the onClick actions of most buttons on the toolbar*/
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent intent;
@@ -303,7 +303,7 @@ public class Home extends AppCompatActivity {
         }
     }
 
-    /* This method sets the text for the feature video buttons*/
+    /* This method sets the text for the feature video buttons or hides them if a feature video does not exist. */
     public void setFeatureVideoLink() {
         if (appData.getFeatureDanceVideo() == null) {
             featureDanceVideo.setVisibility(View.GONE);
@@ -346,6 +346,7 @@ public class Home extends AppCompatActivity {
         }
     }
 
+    /* This method handles on click events for buttons in this activity. */
     public void btnOnClick(View v) {
         Intent intent;
         switch (v.getId()) {
@@ -416,8 +417,8 @@ public class Home extends AppCompatActivity {
                 intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 break;
-            case R.id.cryptoSignUpBtn:
-                intent = new Intent(Home.this, CryptoSignUp.class);
+            case R.id.bgpSignUpBtn:
+                intent = new Intent(Home.this, BGPSignUp.class);
                 startActivity(intent);
                 break;
         }
@@ -438,6 +439,7 @@ public class Home extends AppCompatActivity {
         outState.putBoolean("fragment_added", true);
     }
 
+    /* Sets up the search options so that it is ready to be used by the search bar. Should be run before the search bar is expanded the first time. */
     private void addSearchFragment() {
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
@@ -446,6 +448,7 @@ public class Home extends AppCompatActivity {
         transaction.commit();
     }
 
+    /* Starts up Google AdMob Ads */
     private void initialiseAds() {
         //initialise ads
         MobileAds.initialize(this, new OnInitializationCompleteListener() {
@@ -458,8 +461,8 @@ public class Home extends AppCompatActivity {
         });
     }
 
+    /* Provides the setup necessary to get the search bar working.*/
     private void setUpSearchBar(Menu menu) {
-
         // Associate searchable configuration with the SearchView
         SearchManager searchManager =
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
@@ -507,6 +510,7 @@ public class Home extends AppCompatActivity {
         });
     }
 
+    /* Grabs tbe tagline from the web server and displays it as the first line in the app. */
     private void loadTagLine() {
         try {
             BufferedReader taglineBr = new BufferedReader(new InputStreamReader(new URL(getString(R.string.DIRECTORY_ROOT) + GlobalAppData.TAGLINETXTPATH).openStream()));
@@ -516,12 +520,13 @@ public class Home extends AppCompatActivity {
             }
             taglineBr.close();
 
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
             Log.d("error", "something went wrong with setting the tagline.");
         }
     }
 
+    /* Should be executed after loadTagLine. The tagline is set to the tagline/blurb textview on the home activity.*/
     private void setTagLine() {
         if (tagline != null) {
             tagLineText.setText(tagline);

@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorBody"
-    tools:context="com.wordpress.onelifegroupnz.moaarknatural.CryptoSignUp"
+    tools:context="com.wordpress.onelifegroupnz.moaarknatural.BGPSignUp"
     tools:showIn="@layout/activity_crypto_sign_up">
 
     <ScrollView

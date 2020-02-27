@@ -73,7 +73,7 @@
         </service>
         <!-- [END firebase_service] -->
         <activity
-            android:name=".CryptoSignUp"
+            android:name=".BGPSignUp"
             android:label="@string/title_activity_sign_up"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity

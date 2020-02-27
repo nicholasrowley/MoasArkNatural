@@ -446,7 +446,7 @@ public class SearchResults extends AppCompatActivity {
         final Thread setTask = new Thread() {
             public void run() {
                 loadResults(false);
-                //if Dropbox connection has failed.
+                //if connection to server has failed.
                 if(!searchVideoLister.httpConnectionSuccessful())
                 {
                     new AlertDialog.Builder(SearchResults.this)
@@ -486,6 +486,7 @@ public class SearchResults extends AppCompatActivity {
         startLoad.start();
     }
 
+    /* Handles all button onlick functions for this activity. */
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.loadMoreBtn:
@@ -496,6 +497,7 @@ public class SearchResults extends AppCompatActivity {
         }
     }
 
+    /* Starts Google AdMob Ads */
     private void initialiseAds() {
         //initialise ads
         MobileAds.initialize(this, getString(R.string.banner_ad_unit_id_live));
@@ -511,6 +513,7 @@ public class SearchResults extends AppCompatActivity {
         outState.putBoolean("fragment_added", true);
     }
 
+    /* Sets up the search options so that it is ready to be used by the search bar. Should be run before the search bar is expanded the first time. */
     private void addSearchFragment() {
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
@@ -519,6 +522,7 @@ public class SearchResults extends AppCompatActivity {
         transaction.commit();
     }
 
+    /* Provides the setup necessary to get the search bar working.*/
     private void setUpSearchBar(Menu menu ) {
         // Associate searchable configuration with the SearchView
         SearchManager searchManager =

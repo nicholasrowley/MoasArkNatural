@@ -133,6 +133,7 @@ public class CustomSearchFragment extends Fragment {
                 return false;
             }
 
+            //Runs when search bar text input is updated
             @Override
             public boolean onQueryTextChange(String s) {
                 populateAdapter(s, spinner);

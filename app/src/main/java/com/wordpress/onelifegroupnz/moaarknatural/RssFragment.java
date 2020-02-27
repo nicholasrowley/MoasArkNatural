@@ -37,8 +37,8 @@ public class RssFragment extends Fragment implements AdapterView.OnItemClickList
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (view == null) {
             view = inflater.inflate(R.layout.fragment_layout, container, false);
-            progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
-            listView = (MyListView) view.findViewById(R.id.listView);
+            progressBar = view.findViewById(R.id.progressBar);
+            listView = view.findViewById(R.id.listView);
             listView.setOnItemClickListener(this);
             startService();
         } else {

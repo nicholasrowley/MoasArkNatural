@@ -18,7 +18,7 @@
 
             <include layout="@layout/main_toolbar" />
 
-            <include layout="@layout/content_crypto_sign_up" />
+            <include layout="@layout/content_bgp_sign_up" />
 
         </com.google.android.material.appbar.AppBarLayout>
     </LinearLayout>

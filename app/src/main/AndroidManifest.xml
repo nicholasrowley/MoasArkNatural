@@ -76,14 +76,6 @@
             android:name=".BGPSignUp"
             android:label="@string/title_activity_sign_up"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".ContactForm"
-            android:label="@string/title_activity_contact_form"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".CryptoRegister"
-            android:label="@string/title_activity_one_coin_register"
-            android:theme="@style/AppTheme.NoActionBar"/>
     </application>
 
 </manifest>

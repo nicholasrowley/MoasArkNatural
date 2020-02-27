@@ -15,9 +15,10 @@
         android:theme="@style/AppTheme.NoActionBar">
 
         <!-- Sample AdMob App ID: ca-app-pub-3940256099942544~3347511713 -->
+        <!-- Release AdMob App ID: ca-app-pub-2838047532476449/3742836256 -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713"/>
+            android:value="ca-app-pub-2838047532476449/3742836256"/>
 
         <service android:name=".RssService" />
 

@@ -196,7 +196,7 @@ public class BGPSignUp extends AppCompatActivity {
     /*Loads ads for the page*/
     private void initialiseAds() {
         //initialise ads
-        MobileAds.initialize(this, getString(R.string.banner_ad_unit_id_live));
+        MobileAds.initialize(this, getString(R.string.banner_ad_unit_id));
 
         AdView mAdView = findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();

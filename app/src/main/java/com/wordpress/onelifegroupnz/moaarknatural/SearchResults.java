@@ -500,7 +500,7 @@ public class SearchResults extends AppCompatActivity {
     /* Starts Google AdMob Ads */
     private void initialiseAds() {
         //initialise ads
-        MobileAds.initialize(this, getString(R.string.banner_ad_unit_id_live));
+        MobileAds.initialize(this, getString(R.string.banner_ad_unit_id));
 
         AdView mAdView = findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();

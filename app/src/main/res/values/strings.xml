@@ -41,8 +41,10 @@
     <string name="search_type_food">Food</string>
 
     <!-- This is the advertisement ids for adMob please use the testing one for clicking (Do not click the real ad) -->
-    <string name="banner_ad_unit_id_test">ca-app-pub-3940256099942544/6300978111</string>
-    <string name="banner_ad_unit_id_live">ca-app-pub-2838047532476449/9234658479</string>
+    <!-- AdMob Test ID (Enable for testing builds) -->
+    <string name="banner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
+    <!-- AdMob Live ID (Enable for release builds) -->
+    <!-- <string name="banner_ad_unit_id">ca-app-pub-2838047532476449/9234658479</string> -->
 
     <!-- BGP sign up and contact form strings -->
     <string name="title_activity_sign_up">Beneficial Group Purchase</string>

@@ -8,7 +8,6 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -25,10 +24,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
-import androidx.webkit.WebViewCompat;
 
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -57,7 +54,6 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DANCEVIDEOPATH;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.FOODVIDEOPATH;
-import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.RECIPEPATH;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.STEPSHEETPATH;
 
 /*- Plays dropbox videos in Android videoview (Note: all videos must be encoded in H.264 Baseline to guarantee
@@ -684,7 +680,7 @@ public class ViewVideo extends AppCompatActivity {
     /* Starts Google AdMob ads for this activity. */
     private void initialiseAds() {
         //initialise ads
-        MobileAds.initialize(this, getString(R.string.banner_ad_unit_id_live));
+        MobileAds.initialize(this, getString(R.string.banner_ad_unit_id));
 
         AdView mAdView = findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();

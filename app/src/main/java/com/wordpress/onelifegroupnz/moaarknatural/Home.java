@@ -451,14 +451,11 @@ public class Home extends AppCompatActivity {
     /* Starts up Google AdMob Ads */
     private void initialiseAds() {
         //initialise ads
-        MobileAds.initialize(this, new OnInitializationCompleteListener() {
-            @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {
-                AdView mAdView = findViewById(R.id.adView);
-                AdRequest adRequest = new AdRequest.Builder().build();
-                mAdView.loadAd(adRequest);
-            }
-        });
+        MobileAds.initialize(this, getString(R.string.banner_ad_unit_id));
+
+        AdView mAdView = findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
     }
 
     /* Provides the setup necessary to get the search bar working.*/

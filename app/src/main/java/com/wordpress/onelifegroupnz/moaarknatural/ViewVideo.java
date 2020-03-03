@@ -17,6 +17,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.SystemClock;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -26,6 +27,7 @@ import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -38,10 +40,13 @@ import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.MediaController;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
@@ -50,6 +55,9 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.analytics.FirebaseAnalytics;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DANCEVIDEOPATH;
@@ -61,6 +69,7 @@ import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.STEPSHEET
 * - Shows a pdf that matches the video content (if there is one)*/
 public class ViewVideo extends AppCompatActivity {
 
+    private static final String TAG = "LocalPlayerActivity";
     private GlobalAppData appData; //singleton instance of globalAppData
     private FileDataListing videoData; //single video data object
     private FileDataListing pdfData; //single stepsheet data object
@@ -72,6 +81,21 @@ public class ViewVideo extends AppCompatActivity {
     private Integer savedVideoPosition; //the current position of the video
     private boolean refreshed;
     private boolean portraitView;
+
+    private RelativeLayout mControllers;
+    private TextView mStartText;
+    private TextView mEndText;
+    private SeekBar mSeekbar;
+    private ImageView mPlayPause;
+    private ImageButton mPlayCircle;
+    private Timer mSeekbarTimer;
+    private Timer mControllersTimer;
+    private PlaybackLocation mLocation;
+    private PlaybackState mPlaybackState;
+    private final Handler mHandler = new Handler();
+    private int mDuration;
+    private boolean mControllersVisible;
+    private boolean videoReloadInProgress;
 
     private SearchView searchView;
     private LinearLayout portraitItems;
@@ -86,6 +110,21 @@ public class ViewVideo extends AppCompatActivity {
     private ProgressBar refreshProgressbar;
 
     boolean pdfIsRedirecting;
+
+    /**
+     * indicates whether we are doing a local or a remote playback
+     */
+    public enum PlaybackLocation {
+        LOCAL,
+        REMOTE
+    }
+
+    /**
+     * List of various states that we can be in
+     */
+    public enum PlaybackState {
+        PLAYING, PAUSED, BUFFERING, IDLE
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +141,37 @@ public class ViewVideo extends AppCompatActivity {
         portraitItems = findViewById(R.id.portraitItems);
         videoContainer = findViewById(R.id.videoContainer);
         webview = findViewById(R.id.webview);
+
+        //progress bar shows when video is buffering
+        progressBar = findViewById(R.id.progressBar3);
+
+        mControllers = findViewById(R.id.controllers);
+        mStartText = (TextView) findViewById(R.id.startText);
+        mStartText.setText(formatMillis(0));
+        mEndText = (TextView) findViewById(R.id.endText);
+        mSeekbar = (SeekBar) findViewById(R.id.seekBar);
+        mPlayPause = (ImageView) findViewById(R.id.imageView);
+        mPlayCircle = (ImageButton) findViewById(R.id.play_circle);
+        mPlayCircle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                togglePlayback();
+                videoReloadInProgress = true;
+                progressBar.setVisibility(View.VISIBLE);
+            }
+        });
+
+        videoContainer.setOnTouchListener(new View.OnTouchListener() {
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (!mControllersVisible) {
+                    updateControllersVisibility(true);
+                }
+                startControllersTimer();
+                return false;
+            }
+        });
 
         //vid view imp onCreate code
         videoView = findViewById(R.id.videoView);
@@ -121,50 +191,7 @@ public class ViewVideo extends AppCompatActivity {
         }
         dialogIsOpen = false;
 
-        //progress bar shows when video is buffering
-        progressBar = findViewById(R.id.progressBar3);
-
-        //set up lister to handle VideoView errors
-        videoView.setOnErrorListener(new MediaPlayer.OnErrorListener() {
-
-            @Override
-            public boolean onError(MediaPlayer mp, int what, int extra) {
-                if (!dialogIsOpen) {
-                    dialogIsOpen = true;
-                    new AlertDialog.Builder(ViewVideo.this)
-                            .setTitle("Video can't be played")
-                            .setMessage("Please check your connection and reload video")
-                            .setPositiveButton("Reload Video", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    //Reload ViewVideo
-                                    dialogIsOpen = false;
-                                    loadActivity();
-                                }
-                            })
-                            .setNegativeButton("Return to Gallery", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialogIsOpen = false;
-                                    if (videoData.getFolderPath().equals(getString(R.string.DIRECTORY_ROOT) + DANCEVIDEOPATH)) {
-                                        //Proceed to Line Dance video gallery
-                                        Intent intent = new Intent(ViewVideo.this, VideoGallery.class);
-                                        intent.putExtra("videoPath", DANCEVIDEOPATH); //using video path to set the gallery
-                                        startActivity(intent);
-                                    } else if (videoData.getFolderPath().equals(getString(R.string.DIRECTORY_ROOT) + FOODVIDEOPATH)) {
-                                        //Proceed to Food video gallery
-                                        Intent intent = new Intent(ViewVideo.this, VideoGallery.class);
-                                        intent.putExtra("videoPath", FOODVIDEOPATH); //using video path to set the gallery
-                                        startActivity(intent);
-                                    }
-
-                                }
-                            })
-                            .setIcon(android.R.drawable.ic_dialog_alert)
-                            .setCancelable(false)
-                            .show();
-                }
-                return true;
-            }
-        });
+        setupControlsCallbacks();
 
         appData = GlobalAppData.getInstance(getString(R.string.DIRECTORY_ROOT),
                 ViewVideo.this, "");
@@ -181,6 +208,10 @@ public class ViewVideo extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Switch to portrait to exit fullscreen view", Toast.LENGTH_SHORT).show();
 
         initialiseAds();
+
+        mPlaybackState = PlaybackState.IDLE;
+        updatePlaybackLocation(PlaybackLocation.LOCAL);
+        updatePlayButton(mPlaybackState);
     }
 
     @Override
@@ -294,13 +325,14 @@ public class ViewVideo extends AppCompatActivity {
     //video view imp play method
     private void PlayVideo() {
         progressBar.setVisibility(View.VISIBLE);
+        videoReloadInProgress = true;
         try {
             getWindow().setFormat(PixelFormat.TRANSLUCENT);
-            MediaController mediaController;
+            //MediaController mediaController;
 
             //define media controller behaviour based on screen orientation
             if (portraitView) {
-                mediaController = new MediaController(this) {
+                /*mediaController = new MediaController(this) {
                     public boolean dispatchKeyEvent(KeyEvent event) {
                         if (event.getKeyCode() == KeyEvent.KEYCODE_BACK && event.getAction()
                                 == KeyEvent.ACTION_UP)
@@ -313,25 +345,29 @@ public class ViewVideo extends AppCompatActivity {
                     public void show() {
                         super.show(5000);
                     }
-                };
+                };*/
             } else { //if in landscape view
-                mediaController = new MediaController(ViewVideo.this) {
+                /*mediaController = new MediaController(ViewVideo.this) {
                     //hide after 5 seconds
                     @Override
                     public void show() {
                         super.show(5000);
                     }
-                };
+                };*/
             }
 
             //set up videoView
-            mediaController.setAnchorView(videoView);
+            //mediaController.setAnchorView(videoView);
 
             final Uri video = Uri.parse(videoData.getfilePathURL());
-            videoView.setMediaController(mediaController);
+            //videoView.setMediaController(mediaController);
             videoView.setVideoURI(video);
             videoView.requestFocus();
-            videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+
+            mPlaybackState = PlaybackState.PLAYING;
+            updatePlaybackLocation(PlaybackLocation.LOCAL);
+            updatePlayButton(mPlaybackState);
+            /*videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
 
                 //@Override
                 public void onPrepared(MediaPlayer mp) {
@@ -384,11 +420,347 @@ public class ViewVideo extends AppCompatActivity {
                     vsparams.putDouble(FirebaseAnalytics.Param.VALUE, 1.0);
                     mFirebaseAnalytics.logEvent(videoData.getVideoStatsName(), vsparams);
                 }
-            });
+            });*/
         } catch (Exception e) {
             System.out.println("Video Play Error :" + e.toString());
             finish();
         }
+    }
+
+    private void stopTrickplayTimer() {
+        Log.d(TAG, "Stopped TrickPlay Timer");
+        if (mSeekbarTimer != null) {
+            mSeekbarTimer.cancel();
+        }
+    }
+
+    private void restartTrickplayTimer() {
+        stopTrickplayTimer();
+        mSeekbarTimer = new Timer();
+        mSeekbarTimer.scheduleAtFixedRate(new UpdateSeekbarTask(), 100, 1000);
+        Log.d(TAG, "Restarted TrickPlay Timer");
+    }
+
+    private class UpdateSeekbarTask extends TimerTask {
+
+        @Override
+        public void run() {
+            mHandler.post(new Runnable() {
+
+                @Override
+                public void run() {
+                    if (mLocation == PlaybackLocation.LOCAL) {
+                        int currentPos = videoView.getCurrentPosition();
+                        updateSeekbar(currentPos, mDuration);
+                    }
+                }
+            });
+        }
+    }
+
+    private void updateSeekbar(int position, int duration) {
+        mSeekbar.setProgress(position);
+        mSeekbar.setMax(duration);
+        mStartText.setText(formatMillis(position));
+        mEndText.setText(formatMillis(duration));
+    }
+
+    private void updatePlaybackLocation(PlaybackLocation location) {
+        mLocation = location;
+        if (location == PlaybackLocation.LOCAL) {
+            if (mPlaybackState == PlaybackState.PLAYING
+                    || mPlaybackState == PlaybackState.BUFFERING) {
+                //setCoverArtStatus(null);
+                startControllersTimer();
+            } else {
+                stopControllersTimer();
+                //setCoverArtStatus(mSelectedMedia.getImage(0));
+            }
+        } else {
+            stopControllersTimer();
+            //setCoverArtStatus(mSelectedMedia.getImage(0));
+            updateControllersVisibility(false);
+        }
+    }
+
+    // should be called from the main thread
+    private void updateControllersVisibility(boolean show) {
+        if (show) {
+            //getSupportActionBar().show();
+            //toolbar.setVisibility(View.VISIBLE);
+            mControllers.setVisibility(View.VISIBLE);
+        } else {
+            //setOrientation();
+            //if (portraitView) {
+                //getSupportActionBar().hide();
+                //toolbar.setVisibility(View.GONE);
+            //}
+            mControllers.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    //allows the video controller to appear when tapping on black bars in video.
+    /*public void onClickVideoArea(View v) {
+        if (!mControllersVisible) {
+            updateControllersVisibility(true);
+        }
+        startControllersTimer();
+    }*/
+
+    private void togglePlayback() {
+        stopControllersTimer();
+        switch (mPlaybackState) {
+            case PAUSED:
+                switch (mLocation) {
+                    case LOCAL:
+                        videoView.start();
+                        Log.d(TAG, "Playing locally...");
+                        mPlaybackState = PlaybackState.PLAYING;
+                        startControllersTimer();
+                        restartTrickplayTimer();
+                        updatePlaybackLocation(PlaybackLocation.LOCAL);
+                        break;
+                    case REMOTE:
+                        finish();
+                        break;
+                    default:
+                        break;
+                }
+                break;
+
+            case PLAYING:
+                mPlaybackState = PlaybackState.PAUSED;
+                videoView.pause();
+                break;
+
+            case IDLE:
+                switch (mLocation) {
+                    case LOCAL:
+                        videoView.setVideoURI(Uri.parse(videoData.getfilePathURL()));
+                        videoView.seekTo(0);
+                        videoView.start();
+                        mPlaybackState = PlaybackState.PLAYING;
+                        restartTrickplayTimer();
+                        updatePlaybackLocation(PlaybackLocation.LOCAL);
+                        break;
+                    case REMOTE:
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            default:
+                break;
+        }
+        updatePlayButton(mPlaybackState);
+    }
+
+    private void stopControllersTimer() {
+        if (mControllersTimer != null) {
+            mControllersTimer.cancel();
+        }
+    }
+
+    private void startControllersTimer() {
+        if (mControllersTimer != null) {
+            mControllersTimer.cancel();
+        }
+        if (mLocation == PlaybackLocation.REMOTE) {
+            return;
+        }
+        mControllersTimer = new Timer();
+        mControllersTimer.schedule(new HideControllersTask(), 5000);
+    }
+
+    private class HideControllersTask extends TimerTask {
+
+        @Override
+        public void run() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    updateControllersVisibility(false);
+                    mControllersVisible = false;
+                }
+            });
+
+        }
+    }
+
+    private void setupControlsCallbacks() {
+        videoView.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+
+            @Override
+            public boolean onError(MediaPlayer mp, int what, int extra) {
+                Log.e(TAG, "OnErrorListener.onError(): VideoView encountered an "
+                        + "error, what: " + what + ", extra: " + extra);
+                /*String msg;
+                if (extra == MediaPlayer.MEDIA_ERROR_TIMED_OUT) {
+                    msg = getString(R.string.video_error_media_load_timeout);
+                } else if (what == MediaPlayer.MEDIA_ERROR_SERVER_DIED) {
+                    msg = getString(R.string.video_error_server_unaccessible);
+                } else {
+                    msg = getString(R.string.video_error_unknown_error);
+                }
+                Utils.showErrorDialog(LocalPlayerActivity.this, msg);*/
+
+                if (!dialogIsOpen) {
+                    dialogIsOpen = true;
+                    new AlertDialog.Builder(ViewVideo.this)
+                            .setTitle("Video can't be played")
+                            .setMessage("Please check your connection and reload video")
+                            .setPositiveButton("Reload Video", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    //Reload ViewVideo
+                                    dialogIsOpen = false;
+                                    loadActivity();
+                                }
+                            })
+                            .setNegativeButton("Return to Gallery", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialogIsOpen = false;
+                                    if (videoData.getFolderPath().equals(getString(R.string.DIRECTORY_ROOT) + DANCEVIDEOPATH)) {
+                                        //Proceed to Line Dance video gallery
+                                        Intent intent = new Intent(ViewVideo.this, VideoGallery.class);
+                                        intent.putExtra("videoPath", DANCEVIDEOPATH); //using video path to set the gallery
+                                        startActivity(intent);
+                                    } else if (videoData.getFolderPath().equals(getString(R.string.DIRECTORY_ROOT) + FOODVIDEOPATH)) {
+                                        //Proceed to Food video gallery
+                                        Intent intent = new Intent(ViewVideo.this, VideoGallery.class);
+                                        intent.putExtra("videoPath", FOODVIDEOPATH); //using video path to set the gallery
+                                        startActivity(intent);
+                                    }
+
+                                }
+                            })
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .setCancelable(false)
+                            .show();
+                }
+
+                videoView.stopPlayback();
+                mPlaybackState = PlaybackState.IDLE;
+                updatePlayButton(mPlaybackState);
+                return true;
+            }
+        });
+
+        videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+
+            @Override
+            public void onPrepared(MediaPlayer mp) {
+                Log.d(TAG, "onPrepared is reached");
+                mDuration = mp.getDuration();
+                mEndText.setText(formatMillis(mDuration));
+                mSeekbar.setMax(mDuration);
+                restartTrickplayTimer();
+                progressBar.setVisibility(View.GONE);
+                videoReloadInProgress = false;
+
+                videoView.start();
+
+                //set the video frame to match the video
+                DisplayMetrics displayMetrics = new DisplayMetrics();
+                getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+                ViewGroup.LayoutParams params = videoView.getLayoutParams();
+                ViewGroup.LayoutParams contParams = videoContainer.getLayoutParams();
+                if (portraitView) {
+                    params.height = MATCH_PARENT;
+                    contParams.height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                            200, getResources().getDisplayMetrics());
+                } else {
+                    params.height = displayMetrics.heightPixels;
+                    contParams.height = displayMetrics.heightPixels;
+                }
+
+                videoView.setLayoutParams(params);
+                videoContainer.setLayoutParams(contParams);
+
+                // Obtain the FirebaseAnalytics instance.
+                mFirebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
+
+                //log when the video starts
+                Bundle vsparams = new Bundle();
+                vsparams.putDouble(FirebaseAnalytics.Param.VALUE, 1.0);
+                mFirebaseAnalytics.logEvent(videoData.getVideoStatsName(), vsparams);
+            }
+        });
+
+        videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                stopTrickplayTimer();
+                Log.d(TAG, "setOnCompletionListener()");
+                mPlaybackState = PlaybackState.IDLE;
+                updatePlayButton(mPlaybackState);
+            }
+        });
+
+        videoView.setOnTouchListener(new View.OnTouchListener() {
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (!mControllersVisible) {
+                    updateControllersVisibility(true);
+                }
+                startControllersTimer();
+                return false;
+            }
+        });
+
+        mSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                if (mPlaybackState == PlaybackState.PLAYING) {
+                    play(seekBar.getProgress());
+                } else if (mPlaybackState != PlaybackState.IDLE) {
+                    videoView.seekTo(seekBar.getProgress());
+                }
+                startControllersTimer();
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                stopTrickplayTimer();
+                videoView.pause();
+                stopControllersTimer();
+            }
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress,
+                                          boolean fromUser) {
+                mStartText.setText(formatMillis(progress));
+            }
+        });
+
+        mPlayPause.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                if (mLocation == PlaybackLocation.LOCAL) {
+                    togglePlayback();
+                }
+            }
+        });
+    }
+
+    private void play(int position) {
+        startControllersTimer();
+        switch (mLocation) {
+            case LOCAL:
+                videoView.seekTo(position);
+                videoView.start();
+                break;
+            case REMOTE:
+                mPlaybackState = PlaybackState.BUFFERING;
+                updatePlayButton(mPlaybackState);
+                break;
+            default:
+                break;
+        }
+        restartTrickplayTimer();
     }
 
     //Opens the app setting so the user can turn notifications on or off
@@ -412,6 +784,45 @@ public class ViewVideo extends AppCompatActivity {
                     })
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .show();
+        }
+    }
+
+    private void updatePlayButton(PlaybackState state) {
+        Log.d(TAG, "Controls: PlayBackState: " + state);
+        boolean isConnected = false;
+        mControllers.setVisibility(isConnected ? View.GONE : View.VISIBLE);
+        mPlayCircle.setVisibility(isConnected ? View.GONE : View.VISIBLE);
+        switch (state) {
+            case PLAYING:
+                if(!videoReloadInProgress){
+                    progressBar.setVisibility(View.GONE);
+                }
+                mPlayPause.setVisibility(View.VISIBLE);
+                mPlayPause.setImageDrawable(
+                        getResources().getDrawable(R.drawable.ic_pause));
+                mPlayCircle.setVisibility(isConnected ? View.VISIBLE : View.GONE);
+                break;
+            case IDLE:
+                mPlayCircle.setVisibility(View.VISIBLE);
+                mControllers.setVisibility(View.GONE);
+                //mCoverArt.setVisibility(View.VISIBLE);
+                //mVideoView.setVisibility(View.INVISIBLE);
+                break;
+            case PAUSED:
+                if(!videoReloadInProgress){
+                    progressBar.setVisibility(View.GONE);
+                }
+                mPlayPause.setVisibility(View.VISIBLE);
+                mPlayPause.setImageDrawable(
+                        getResources().getDrawable(R.drawable.ic_play));
+                mPlayCircle.setVisibility(isConnected ? View.VISIBLE : View.GONE);
+                break;
+            case BUFFERING:
+                mPlayPause.setVisibility(View.INVISIBLE);
+                progressBar.setVisibility(View.VISIBLE);
+                break;
+            default:
+                break;
         }
     }
 
@@ -800,5 +1211,24 @@ public class ViewVideo extends AppCompatActivity {
     public void onClickPDFRefresh(View v) {
         findViewById(R.id.pdfReloadMessage).setVisibility(View.GONE);
         loadPdf();
+    }
+
+    /**
+     * Formats time from milliseconds to hh:mm:ss string format.
+     */
+    public static String formatMillis(int millisec) {
+        int seconds = (int) (millisec / 1000);
+        int hours = seconds / (60 * 60);
+        seconds %= (60 * 60);
+        int minutes = seconds / 60;
+        seconds %= 60;
+
+        String time;
+        if (hours > 0) {
+            time = String.format("%d:%02d:%02d", hours, minutes, seconds);
+        } else {
+            time = String.format("%d:%02d", minutes, seconds);
+        }
+        return time;
     }
 }

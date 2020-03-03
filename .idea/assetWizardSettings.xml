@@ -35,7 +35,7 @@
                                           <PersistentState>
                                             <option name="values">
                                               <map>
-                                                <entry key="url" value="jar:file:/C:/Program%20Files/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material_design_icons/navigation/ic_arrow_drop_down_black_24dp.xml" />
+                                                <entry key="url" value="jar:file:/C:/Program%20Files/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material_design_icons/av/ic_play_arrow_black_24dp.xml" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -58,9 +58,9 @@
                                   <option name="values">
                                     <map>
                                       <entry key="imageAsset" value="D:\File Documents\Programming and Things\Moa's Ark Natural\Android Development\Icons\mipmap-xxxhdpi\ic_contact_form.png" />
-                                      <entry key="outputName" value="ic_spinner_down_green" />
+                                      <entry key="outputName" value="ic_play" />
                                       <entry key="theme" value="CUSTOM" />
-                                      <entry key="themeColor" value="329932" />
+                                      <entry key="themeColor" value="ffffff" />
                                     </map>
                                   </option>
                                 </PersistentState>

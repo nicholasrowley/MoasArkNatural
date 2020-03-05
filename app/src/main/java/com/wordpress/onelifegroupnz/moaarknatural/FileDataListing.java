@@ -1,6 +1,11 @@
 package com.wordpress.onelifegroupnz.moaarknatural;
 
+import android.media.MediaMetadataRetriever;
+
 import java.io.Serializable;
+import java.util.HashMap;
+
+import wseemann.media.FFmpegMediaMetadataRetriever;
 
 /**
  * This is a simple data object for storing information on Files that have been fetched from web server.
@@ -13,6 +18,7 @@ public class FileDataListing implements Serializable {
     private String dateLastModified;
     private String timeLastModified;
     private String viewStatsName; //log entry for stats
+    private long duration; //duration in milliseconds
     private static final long serialVersionUID = 1L; //required for Serializable
 
     public FileDataListing(String fileName, String httpFolderPath, String dateDDMMYYYY, String timeAmPm) {
@@ -38,6 +44,17 @@ public class FileDataListing implements Serializable {
     public String getVideoStatsName(){
         return viewStatsName;
     }
+
+    public void setDuration() {
+        //sets the video duration in milliseconds
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        retriever.setDataSource(filePath, new HashMap<String, String>());
+        String time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+        duration = Long.parseLong(time);
+        retriever.release();
+    }
+
+    public long getDurationInMilliseconds() { return duration; }
 
     /*Unused functions*/
     public String getDate() { return dateLastModified; }

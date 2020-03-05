@@ -39,11 +39,17 @@ import java.net.URL;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DANCEVIDEOPATH;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.FOODVIDEOPATH;
 
+import com.google.android.gms.cast.framework.CastContext;
+import com.google.android.gms.cast.framework.CastButtonFactory;
+
 /**Activity class for the BGP Sign ups*/
 public class BGPSignUp extends AppCompatActivity {
 
     private SearchView searchView;
     private TextView formEmail;
+
+    private CastContext mCastContext;
+    private MenuItem mediaRouteMenuItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +59,8 @@ public class BGPSignUp extends AppCompatActivity {
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_home_green);
         findViewById(R.id.search_fragment).setVisibility(View.GONE);
+
+        mCastContext = CastContext.getSharedInstance(this);
 
         formEmail = findViewById(R.id.cryptoSubmitEmail);
 
@@ -69,6 +77,7 @@ public class BGPSignUp extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu, menu);
 
         setUpSearchbar(menu);
+        mediaRouteMenuItem = CastButtonFactory.setUpMediaRouteButton(getApplicationContext(), menu, R.id.media_route_menu_item);
 
         return true;
     }

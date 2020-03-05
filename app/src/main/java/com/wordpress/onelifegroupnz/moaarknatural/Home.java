@@ -44,6 +44,9 @@ import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.ALLVIDEOS
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DANCEVIDEOPATH;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.FOODVIDEOPATH;
 
+import com.google.android.gms.cast.framework.CastContext;
+import com.google.android.gms.cast.framework.CastButtonFactory;
+
 /** This is the main activity for navigating to different areas of the app.*/
 public class Home extends AppCompatActivity {
 
@@ -63,6 +66,9 @@ public class Home extends AppCompatActivity {
     private ProgressBar refreshProgressbar;
     private RelativeLayout rssView;
 
+    private CastContext mCastContext;
+    private MenuItem mediaRouteMenuItem;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,6 +78,8 @@ public class Home extends AppCompatActivity {
         toolbar.setLogo(R.mipmap.ic_launcher);
         findViewById(R.id.search_fragment).setVisibility(View.GONE);
         findViewById(R.id.textBlurb).setVisibility(View.INVISIBLE);
+
+        mCastContext = CastContext.getSharedInstance(this);
 
         refreshing = false;
 
@@ -114,6 +122,7 @@ public class Home extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu, menu);
 
         setUpSearchBar(menu);
+        mediaRouteMenuItem = CastButtonFactory.setUpMediaRouteButton(getApplicationContext(), menu, R.id.media_route_menu_item);
 
         return true;
     }
@@ -384,6 +393,7 @@ public class Home extends AppCompatActivity {
                     //Proceed to ViewVideo
                     intent = new Intent(Home.this, ViewVideo.class);
                     intent.putExtra("videoIndex", appData.getFeatureDanceVideo());
+                    intent.putExtra("shouldStart", true);
                     startActivity(intent);
                 }
                 break;
@@ -409,6 +419,7 @@ public class Home extends AppCompatActivity {
                     //Proceed to ViewVideo
                     intent = new Intent(Home.this, ViewVideo.class);
                     intent.putExtra("videoIndex", appData.getFeatureFoodVideo());
+                    intent.putExtra("shouldStart", true);
                     startActivity(intent);
                 }
                 break;

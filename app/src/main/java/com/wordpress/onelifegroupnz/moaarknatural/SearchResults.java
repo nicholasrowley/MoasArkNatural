@@ -43,6 +43,9 @@ import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DANCEVIDE
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DROPBOXTIMEOUTLIMIT;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.FOODVIDEOPATH;
 
+import com.google.android.gms.cast.framework.CastContext;
+import com.google.android.gms.cast.framework.CastButtonFactory;
+
 /* This activity is for listing the results of a search.*/
 public class SearchResults extends AppCompatActivity {
 
@@ -62,6 +65,9 @@ public class SearchResults extends AppCompatActivity {
 
     private int searchResultsDisplayed;
 
+    private CastContext mCastContext;
+    private MenuItem mediaRouteMenuItem;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,6 +77,8 @@ public class SearchResults extends AppCompatActivity {
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_home_green);
         findViewById(R.id.search_fragment).setVisibility(View.GONE);
+
+        mCastContext = CastContext.getSharedInstance(this);
 
         searchInput = "";
         String searchType = "";
@@ -124,6 +132,7 @@ public class SearchResults extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu, menu);
 
         setUpSearchBar(menu);
+        mediaRouteMenuItem = CastButtonFactory.setUpMediaRouteButton(getApplicationContext(), menu, R.id.media_route_menu_item);
 
         return true;
     }
@@ -261,6 +270,7 @@ public class SearchResults extends AppCompatActivity {
                     //Proceed to View_Video
                     Intent intent = new Intent(SearchResults.this, ViewVideo.class);
                     intent.putExtra("videoIndex", videoInfoResults.get(view.getId()));
+                    intent.putExtra("shouldStart", true);
                     startActivity(intent);
                 }
             });

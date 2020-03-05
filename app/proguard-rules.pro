@@ -15,3 +15,6 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+-keep class abc.xyz.videocast.CastOptionsProvider { *; }
+-keep class android.support.** { *; }
+-keep class com.google.** { *; }

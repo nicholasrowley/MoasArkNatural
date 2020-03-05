@@ -221,11 +221,19 @@ tools:showIn="@layout/activity_view_video">
                 android:indeterminateDrawable="@drawable/gradient_progress_circular"
                 android:scaleX="0.2"
                 android:scaleY="0.2" />
+
         </RelativeLayout>
 
         <!--ScrollView padding space for ad @ BANNER size-->
 
-
-
     </LinearLayout>
+
+    <fragment
+        android:id="@+id/castMiniController"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:visibility="gone"
+        class="com.google.android.gms.cast.framework.media.widget.MiniControllerFragment"/>
+
 </RelativeLayout>

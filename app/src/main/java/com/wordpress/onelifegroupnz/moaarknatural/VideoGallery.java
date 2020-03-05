@@ -42,6 +42,9 @@ import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.ALLVIDEOS
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DANCEVIDEOPATH;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.FOODVIDEOPATH;
 
+import com.google.android.gms.cast.framework.CastContext;
+import com.google.android.gms.cast.framework.CastButtonFactory;
+
 /**
  * Description:
  * This class manages and sets up the video Gallery for
@@ -61,6 +64,9 @@ public class VideoGallery extends AppCompatActivity {
     private ProgressBar refreshProgressbar;
     private int galleryViewButtonsLoaded;
 
+    private CastContext mCastContext;
+    private MenuItem mediaRouteMenuItem;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,6 +75,9 @@ public class VideoGallery extends AppCompatActivity {
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_home_green);
         findViewById(R.id.search_fragment).setVisibility(View.GONE);
+
+        mCastContext = CastContext.getSharedInstance(this);
+
         refreshing = false;
         //load more button
         loadMore = findViewById(R.id.loadMoreBtn);
@@ -120,6 +129,7 @@ public class VideoGallery extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu, menu);
 
         setUpSearchBar(menu);
+        mediaRouteMenuItem = CastButtonFactory.setUpMediaRouteButton(getApplicationContext(), menu, R.id.media_route_menu_item);
 
         return true;
     }
@@ -240,9 +250,10 @@ public class VideoGallery extends AppCompatActivity {
             galleryLinks.get(i % FolderContentLister.LOADAMOUNT).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    //Proceed to View_Video
+                    //Proceed to ViewVideo
                     Intent intent = new Intent(VideoGallery.this, ViewVideo.class);
                     intent.putExtra("videoIndex", appData.getVideoData(targetFolder).get(view.getId()));
+                    intent.putExtra("shouldStart", true);
                     startActivity(intent);
                 }
             });

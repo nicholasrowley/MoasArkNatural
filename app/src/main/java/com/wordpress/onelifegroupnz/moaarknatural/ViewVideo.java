@@ -54,15 +54,28 @@ import android.widget.VideoView;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.cast.MediaLoadRequestData;
+import com.google.android.gms.cast.MediaSeekOptions;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static com.google.android.gms.cast.MediaSeekOptions.RESUME_STATE_PLAY;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DANCEVIDEOPATH;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.FOODVIDEOPATH;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.STEPSHEETPATH;
+
+import com.google.android.gms.cast.framework.CastContext;
+import com.google.android.gms.cast.framework.CastButtonFactory;
+import com.google.android.gms.cast.framework.CastSession;
+import com.google.android.gms.cast.framework.SessionManagerListener;
+import com.google.android.gms.cast.framework.media.RemoteMediaClient;
+import com.google.android.gms.cast.MediaInfo;
+import com.google.android.gms.cast.MediaLoadOptions;
+import com.google.android.gms.cast.MediaMetadata;
+import com.google.android.gms.common.images.WebImage;
 
 /*- Plays dropbox videos in Android videoview (Note: all videos must be encoded in H.264 Baseline to guarantee
 * playability in Android 5.0 or lower.)
@@ -96,6 +109,8 @@ public class ViewVideo extends AppCompatActivity {
     private int mDuration;
     private boolean mControllersVisible;
     private boolean videoReloadInProgress;
+    boolean shouldStartPlayback;
+    int startPosition;
 
     private SearchView searchView;
     private LinearLayout portraitItems;
@@ -110,6 +125,12 @@ public class ViewVideo extends AppCompatActivity {
     private ProgressBar refreshProgressbar;
 
     boolean pdfIsRedirecting;
+
+    private CastContext mCastContext;
+    private MenuItem mediaRouteMenuItem;
+    private CastSession mCastSession;
+    private SessionManagerListener<CastSession> mSessionManagerListener;
+
 
     /**
      * indicates whether we are doing a local or a remote playback
@@ -138,12 +159,9 @@ public class ViewVideo extends AppCompatActivity {
 
         findViewById(R.id.pdfReloadMessage).setVisibility(View.GONE);
 
-        portraitItems = findViewById(R.id.portraitItems);
-        videoContainer = findViewById(R.id.videoContainer);
-        webview = findViewById(R.id.webview);
-
-        //progress bar shows when video is buffering
-        progressBar = findViewById(R.id.progressBar3);
+        //vid view imp onCreate code
+        videoView = findViewById(R.id.videoView);
+        refreshed = false;
 
         mControllers = findViewById(R.id.controllers);
         mStartText = (TextView) findViewById(R.id.startText);
@@ -161,6 +179,18 @@ public class ViewVideo extends AppCompatActivity {
             }
         });
 
+        setupControlsCallbacks();
+        setupCastListener();
+        mCastContext = CastContext.getSharedInstance(this);
+        mCastSession = mCastContext.getSessionManager().getCurrentCastSession();
+
+        portraitItems = findViewById(R.id.portraitItems);
+        videoContainer = findViewById(R.id.videoContainer);
+        webview = findViewById(R.id.webview);
+
+        //progress bar shows when video is buffering
+        progressBar = findViewById(R.id.progressBar3);
+
         videoContainer.setOnTouchListener(new View.OnTouchListener() {
 
             @Override
@@ -173,15 +203,13 @@ public class ViewVideo extends AppCompatActivity {
             }
         });
 
-        //vid view imp onCreate code
-        videoView = findViewById(R.id.videoView);
-        refreshed = false;
-
         pdfPixelTestOnOrientationChange = false;
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             videoData = (FileDataListing) extras.getSerializable("videoIndex");
+            shouldStartPlayback = extras.getBoolean("shouldStart");
+            startPosition = extras.getInt("startPosition", 0);
         }
 
         //check if activity refreshed
@@ -224,6 +252,9 @@ public class ViewVideo extends AppCompatActivity {
                 inm.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), 0);
             }
 
+        mCastContext.getSessionManager().removeSessionManagerListener(
+                mSessionManagerListener, CastSession.class);
+
         webview.clearHistory();
 
         // NOTE: clears RAM cache, if you pass true, it will also clear the disk cache.
@@ -246,6 +277,14 @@ public class ViewVideo extends AppCompatActivity {
 
     @Override
     protected void onResume() {
+        Log.d(TAG, "onResume() was called");
+        mCastContext.getSessionManager().addSessionManagerListener(
+                mSessionManagerListener, CastSession.class);
+        if (mCastSession != null && mCastSession.isConnected()) {
+            updatePlaybackLocation(PlaybackLocation.REMOTE);
+        } else {
+            updatePlaybackLocation(PlaybackLocation.LOCAL);
+        }
         super.onResume();
         webview.onResume();
         webview.resumeTimers();
@@ -278,6 +317,7 @@ public class ViewVideo extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu, menu);
 
         setUpSearchBar(menu);
+        mediaRouteMenuItem = CastButtonFactory.setUpMediaRouteButton(getApplicationContext(), menu, R.id.media_route_menu_item);
 
         return true;
     }
@@ -364,9 +404,27 @@ public class ViewVideo extends AppCompatActivity {
             videoView.setVideoURI(video);
             videoView.requestFocus();
 
-            mPlaybackState = PlaybackState.PLAYING;
-            updatePlaybackLocation(PlaybackLocation.LOCAL);
-            updatePlayButton(mPlaybackState);
+            if (shouldStartPlayback) {
+                mPlaybackState = PlaybackState.PLAYING;
+                updatePlaybackLocation(PlaybackLocation.LOCAL);
+                updatePlayButton(mPlaybackState);
+                if (startPosition > 0) {
+                    videoView.seekTo(startPosition);
+                }
+                videoView.start();
+                startControllersTimer();
+            } else {
+                // we should load the video but pause it
+                if (mCastSession != null && mCastSession.isConnected()) {
+                    updatePlaybackLocation(PlaybackLocation.REMOTE);
+                } else {
+                    updatePlaybackLocation(PlaybackLocation.LOCAL);
+                }
+                updatePlaybackLocation(PlaybackLocation.LOCAL);
+                mPlaybackState = PlaybackState.IDLE;
+                updatePlayButton(mPlaybackState);
+            }
+
             /*videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
 
                 //@Override
@@ -544,6 +602,9 @@ public class ViewVideo extends AppCompatActivity {
                         updatePlaybackLocation(PlaybackLocation.LOCAL);
                         break;
                     case REMOTE:
+                        if (mCastSession != null && mCastSession.isConnected()) {
+                            loadRemoteMedia(mSeekbar.getProgress(), true);
+                        }
                         break;
                     default:
                         break;
@@ -756,6 +817,8 @@ public class ViewVideo extends AppCompatActivity {
             case REMOTE:
                 mPlaybackState = PlaybackState.BUFFERING;
                 updatePlayButton(mPlaybackState);
+                //mCastSession.getRemoteMediaClient().seek(position); //deprecated
+                mCastSession.getRemoteMediaClient().seek(new MediaSeekOptions.Builder().setPosition(position*1000).build());
                 break;
             default:
                 break;
@@ -789,7 +852,9 @@ public class ViewVideo extends AppCompatActivity {
 
     private void updatePlayButton(PlaybackState state) {
         Log.d(TAG, "Controls: PlayBackState: " + state);
-        boolean isConnected = false;
+        boolean isConnected = (mCastSession != null)
+                && (mCastSession.isConnected() ||
+                mCastSession.isConnecting());
         mControllers.setVisibility(isConnected ? View.GONE : View.VISIBLE);
         mPlayCircle.setVisibility(isConnected ? View.GONE : View.VISIBLE);
         switch (state) {
@@ -1230,5 +1295,108 @@ public class ViewVideo extends AppCompatActivity {
             time = String.format("%d:%02d", minutes, seconds);
         }
         return time;
+    }
+
+    private void setupCastListener() {
+        mSessionManagerListener = new SessionManagerListener<CastSession>() {
+
+            @Override
+            public void onSessionEnded(CastSession session, int error) {
+                onApplicationDisconnected();
+            }
+
+            @Override
+            public void onSessionResumed(CastSession session, boolean wasSuspended) {
+                onApplicationConnected(session);
+            }
+
+            @Override
+            public void onSessionResumeFailed(CastSession session, int error) {
+                onApplicationDisconnected();
+            }
+
+            @Override
+            public void onSessionStarted(CastSession session, String sessionId) {
+                onApplicationConnected(session);
+            }
+
+            @Override
+            public void onSessionStartFailed(CastSession session, int error) {
+                onApplicationDisconnected();
+            }
+
+            @Override
+            public void onSessionStarting(CastSession session) {}
+
+            @Override
+            public void onSessionEnding(CastSession session) {}
+
+            @Override
+            public void onSessionResuming(CastSession session, String sessionId) {}
+
+            @Override
+            public void onSessionSuspended(CastSession session, int reason) {}
+
+            private void onApplicationConnected(CastSession castSession) {
+                mCastSession = castSession;
+                if (null != videoData) {
+
+                    if (mPlaybackState == PlaybackState.PLAYING) {
+                        videoView.pause();
+                        loadRemoteMedia(mSeekbar.getProgress(), true);
+                        return;
+                    } else {
+                        mPlaybackState = PlaybackState.IDLE;
+                        updatePlaybackLocation(PlaybackLocation.REMOTE);
+                    }
+                }
+                updatePlayButton(mPlaybackState);
+                supportInvalidateOptionsMenu();
+            }
+
+            private void onApplicationDisconnected() {
+                updatePlaybackLocation(PlaybackLocation.LOCAL);
+                mPlaybackState = PlaybackState.IDLE;
+                mLocation = PlaybackLocation.LOCAL;
+                updatePlayButton(mPlaybackState);
+                supportInvalidateOptionsMenu();
+            }
+        };
+    }
+
+    private void loadRemoteMedia(int position, boolean autoPlay) {
+        if (mCastSession == null) {
+            return;
+        }
+        RemoteMediaClient remoteMediaClient = mCastSession.getRemoteMediaClient();
+        if (remoteMediaClient == null) {
+            return;
+        }
+        remoteMediaClient.load(new MediaLoadRequestData.Builder()
+                .setMediaInfo(buildMediaInfo())
+                .setAutoplay(autoPlay)
+                .setCurrentTime(position).build());
+    }
+
+    private MediaInfo buildMediaInfo() {
+        MediaMetadata movieMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
+
+        //subtitle to display
+        //movieMetadata.putString(MediaMetadata.KEY_SUBTITLE, subtitle-or-studio-string-value-here);
+        movieMetadata.putString(MediaMetadata.KEY_TITLE, videoData.getName());
+        //Images (if any (uri format))
+        //movieMetadata.addImage(new WebImage(Uri.parse(image-url-1-here)));
+        //movieMetadata.addImage(new WebImage(Uri.parse(image-url-2-here)));
+
+        if (videoData.getDurationInMilliseconds() == 0L) {
+            videoData.setDuration();
+        }
+
+        return new MediaInfo.Builder(videoData.getfilePathURL())
+                .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
+                .setContentType("videos/mp4")
+                .setMetadata(movieMetadata)
+                .setStreamDuration(videoData.getDurationInMilliseconds())
+                .build();
     }
 }

@@ -14,6 +14,12 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme.NoActionBar">
 
+        <!-- Google Cast -->
+        <meta-data
+            android:name="com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME"
+            android:value="com.wordpress.onelifegroupnz.moaarknatural.CastOptionsProvider" />
+        <!-- End Google Cast -->
+
         <!-- Sample AdMob App ID: ca-app-pub-3940256099942544~3347511713 -->
         <!-- Release AdMob App ID: ca-app-pub-2838047532476449~9234658479 -->
         <meta-data

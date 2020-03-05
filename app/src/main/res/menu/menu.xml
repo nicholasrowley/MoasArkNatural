@@ -12,6 +12,12 @@
         android:actionLayout="@layout/app_search_view"/>
 
     <item
+        android:id="@+id/media_route_menu_item"
+        android:title="@string/media_route_menu_title"
+        app:actionProviderClass="androidx.mediarouter.app.MediaRouteActionProvider"
+        app:showAsAction="always"/>
+
+    <item
         android:id="@+id/menu_refresh"
         android:title="@string/menu_refresh"
         android:icon="@drawable/ic_refresh_green"

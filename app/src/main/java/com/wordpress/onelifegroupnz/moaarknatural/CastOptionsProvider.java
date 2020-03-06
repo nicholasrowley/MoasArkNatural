@@ -16,10 +16,11 @@ public class CastOptionsProvider implements OptionsProvider {
     @Override
     public CastOptions getCastOptions(Context context) {
         NotificationOptions notificationOptions = new NotificationOptions.Builder()
-                .setTargetActivityClassName(VideoGallery.class.getName())
+                .setTargetActivityClassName(ExpandedControlsActivity.class.getName())
                 .build();
         CastMediaOptions mediaOptions = new CastMediaOptions.Builder()
                 .setNotificationOptions(notificationOptions)
+                .setExpandedControllerActivityClassName(ExpandedControlsActivity.class.getName())
                 .build();
 
         return new CastOptions.Builder()

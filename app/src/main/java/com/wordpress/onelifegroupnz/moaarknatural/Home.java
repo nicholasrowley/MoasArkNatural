@@ -15,6 +15,7 @@ import android.os.Bundle;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 
+import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -46,6 +47,9 @@ import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.FOODVIDEO
 
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.cast.framework.CastButtonFactory;
+import com.google.android.gms.cast.framework.IntroductoryOverlay;
+import com.google.android.gms.cast.framework.CastState;
+import com.google.android.gms.cast.framework.CastStateListener;
 
 /** This is the main activity for navigating to different areas of the app.*/
 public class Home extends AppCompatActivity {
@@ -69,6 +73,9 @@ public class Home extends AppCompatActivity {
     private CastContext mCastContext;
     private MenuItem mediaRouteMenuItem;
 
+    private IntroductoryOverlay mIntroductoryOverlay;
+    private CastStateListener mCastStateListener;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,6 +86,14 @@ public class Home extends AppCompatActivity {
         findViewById(R.id.search_fragment).setVisibility(View.GONE);
         findViewById(R.id.textBlurb).setVisibility(View.INVISIBLE);
 
+        mCastStateListener = new CastStateListener() {
+            @Override
+            public void onCastStateChanged(int newState) {
+                if (newState != CastState.NO_DEVICES_AVAILABLE) {
+                    showIntroductoryOverlay();
+                }
+            }
+        };
         mCastContext = CastContext.getSharedInstance(this);
 
         refreshing = false;
@@ -102,11 +117,13 @@ public class Home extends AppCompatActivity {
 
     @Override
     protected void onResume() {
+        mCastContext.addCastStateListener(mCastStateListener);
         super.onResume();
     }
 
     @Override
     public void onPause() {
+        mCastContext.removeCastStateListener(mCastStateListener);
         super.onPause();
         InputMethodManager inm = (InputMethodManager) this.getSystemService(Activity.INPUT_METHOD_SERVICE);
         View focusedView = this.getCurrentFocus();
@@ -542,5 +559,32 @@ public class Home extends AppCompatActivity {
             tagLineText.setText(getString(R.string.blurb));
         }
         findViewById(R.id.textBlurb).setVisibility(View.VISIBLE);
+    }
+
+    //Shows Google Cast Introductory Overlay for users new to Google Cast.
+    private void showIntroductoryOverlay() {
+        if (mIntroductoryOverlay != null) {
+            mIntroductoryOverlay.remove();
+        }
+        if ((mediaRouteMenuItem != null) && mediaRouteMenuItem.isVisible()) {
+            new Handler().post(new Runnable() {
+                @Override
+                public void run() {
+                    mIntroductoryOverlay = new IntroductoryOverlay.Builder(
+                            Home.this, mediaRouteMenuItem)
+                            .setTitleText("Introducing Cast")
+                            .setSingleTime()
+                            .setOnOverlayDismissedListener(
+                                    new IntroductoryOverlay.OnOverlayDismissedListener() {
+                                        @Override
+                                        public void onOverlayDismissed() {
+                                            mIntroductoryOverlay = null;
+                                        }
+                                    })
+                            .build();
+                    mIntroductoryOverlay.show();
+                }
+            });
+        }
     }
 }

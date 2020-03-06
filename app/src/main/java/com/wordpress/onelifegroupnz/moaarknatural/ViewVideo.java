@@ -76,6 +76,7 @@ import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaLoadOptions;
 import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.common.images.WebImage;
+import com.google.android.gms.cast.framework.IntroductoryOverlay;
 
 /*- Plays dropbox videos in Android videoview (Note: all videos must be encoded in H.264 Baseline to guarantee
 * playability in Android 5.0 or lower.)
@@ -130,6 +131,7 @@ public class ViewVideo extends AppCompatActivity {
     private MenuItem mediaRouteMenuItem;
     private CastSession mCastSession;
     private SessionManagerListener<CastSession> mSessionManagerListener;
+    private IntroductoryOverlay mIntroductoryOverlay;
 
 
     /**
@@ -288,7 +290,7 @@ public class ViewVideo extends AppCompatActivity {
         super.onResume();
         webview.onResume();
         webview.resumeTimers();
-        videoView.resume();
+
         if (!videoView.isPlaying()) {
             progressBar.setVisibility(View.VISIBLE);
         }
@@ -403,6 +405,15 @@ public class ViewVideo extends AppCompatActivity {
             //videoView.setMediaController(mediaController);
             videoView.setVideoURI(video);
             videoView.requestFocus();
+            videoView.pause();
+
+            boolean isConnected = (mCastSession != null)
+                    && (mCastSession.isConnected() ||
+                    mCastSession.isConnecting());
+
+            if (isConnected) {
+                shouldStartPlayback = false;
+            }
 
             if (shouldStartPlayback) {
                 mPlaybackState = PlaybackState.PLAYING;
@@ -420,7 +431,7 @@ public class ViewVideo extends AppCompatActivity {
                 } else {
                     updatePlaybackLocation(PlaybackLocation.LOCAL);
                 }
-                updatePlaybackLocation(PlaybackLocation.LOCAL);
+                //updatePlaybackLocation(PlaybackLocation.LOCAL);
                 mPlaybackState = PlaybackState.IDLE;
                 updatePlayButton(mPlaybackState);
             }
@@ -718,7 +729,7 @@ public class ViewVideo extends AppCompatActivity {
                 progressBar.setVisibility(View.GONE);
                 videoReloadInProgress = false;
 
-                videoView.start();
+                //videoView.start();
 
                 //set the video frame to match the video
                 DisplayMetrics displayMetrics = new DisplayMetrics();
@@ -1368,10 +1379,19 @@ public class ViewVideo extends AppCompatActivity {
         if (mCastSession == null) {
             return;
         }
-        RemoteMediaClient remoteMediaClient = mCastSession.getRemoteMediaClient();
+        final RemoteMediaClient remoteMediaClient = mCastSession.getRemoteMediaClient();
         if (remoteMediaClient == null) {
             return;
         }
+        remoteMediaClient.registerCallback(new RemoteMediaClient.Callback() {
+            @Override
+            public void onStatusUpdated() {
+                Intent intent = new Intent(ViewVideo.this, ExpandedControlsActivity.class);
+                startActivity(intent);
+                remoteMediaClient.unregisterCallback(this);
+            }
+        });
+
         remoteMediaClient.load(new MediaLoadRequestData.Builder()
                 .setMediaInfo(buildMediaInfo())
                 .setAutoplay(autoPlay)

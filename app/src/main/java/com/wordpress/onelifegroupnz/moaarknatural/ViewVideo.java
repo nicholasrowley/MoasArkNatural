@@ -5,12 +5,9 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -21,7 +18,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.SystemClock;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.appcompat.app.AlertDialog;
@@ -29,11 +25,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 
-import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -47,7 +41,6 @@ import android.webkit.WebViewClient;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.MediaController;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
@@ -66,7 +59,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static com.google.android.gms.cast.MediaSeekOptions.RESUME_STATE_PLAY;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DANCEVIDEOPATH;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.FOODVIDEOPATH;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.STEPSHEETPATH;
@@ -77,9 +69,7 @@ import com.google.android.gms.cast.framework.CastSession;
 import com.google.android.gms.cast.framework.SessionManagerListener;
 import com.google.android.gms.cast.framework.media.RemoteMediaClient;
 import com.google.android.gms.cast.MediaInfo;
-import com.google.android.gms.cast.MediaLoadOptions;
 import com.google.android.gms.cast.MediaMetadata;
-import com.google.android.gms.common.images.WebImage;
 import com.google.android.gms.cast.framework.IntroductoryOverlay;
 
 /*- Plays dropbox videos in Android videoview (Note: all videos must be encoded in H.264 Baseline to guarantee
@@ -135,7 +125,6 @@ public class ViewVideo extends AppCompatActivity {
     private MenuItem mediaRouteMenuItem;
     private CastSession mCastSession;
     private SessionManagerListener<CastSession> mSessionManagerListener;
-    private IntroductoryOverlay mIntroductoryOverlay;
 
 
     /**
@@ -404,39 +393,9 @@ public class ViewVideo extends AppCompatActivity {
         videoReloadInProgress = true;
         try {
             getWindow().setFormat(PixelFormat.TRANSLUCENT);
-            //MediaController mediaController;
-
-            //define media controller behaviour based on screen orientation
-            if (portraitView) {
-                /*mediaController = new MediaController(this) {
-                    public boolean dispatchKeyEvent(KeyEvent event) {
-                        if (event.getKeyCode() == KeyEvent.KEYCODE_BACK && event.getAction()
-                                == KeyEvent.ACTION_UP)
-                            ((Activity) getContext()).finish();
-
-                        return super.dispatchKeyEvent(event);
-                    }
-
-                    @Override
-                    public void show() {
-                        super.show(5000);
-                    }
-                };*/
-            } else { //if in landscape view
-                /*mediaController = new MediaController(ViewVideo.this) {
-                    //hide after 5 seconds
-                    @Override
-                    public void show() {
-                        super.show(5000);
-                    }
-                };*/
-            }
 
             //set up videoView
-            //mediaController.setAnchorView(videoView);
-
             final Uri video = Uri.parse(videoData.getfilePathURL());
-            //videoView.setMediaController(mediaController);
             videoView.setVideoURI(video);
             videoView.requestFocus();
             videoView.pause();
@@ -465,65 +424,9 @@ public class ViewVideo extends AppCompatActivity {
                 } else {
                     updatePlaybackLocation(PlaybackLocation.LOCAL);
                 }
-                //updatePlaybackLocation(PlaybackLocation.LOCAL);
                 mPlaybackState = PlaybackState.IDLE;
                 updatePlayButton(mPlaybackState);
             }
-
-            /*videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-
-                //@Override
-                public void onPrepared(MediaPlayer mp) {
-
-                    //if refreshed continue from last know position
-                    if (savedVideoPosition != null && refreshed) {
-                        videoView.seekTo(savedVideoPosition);
-                        refreshed = false;
-                    }
-
-                    //Simulates the onTouchEvent to show the Media controller
-                    if (portraitView) {
-                        videoView.dispatchTouchEvent(MotionEvent.obtain(
-                                SystemClock.uptimeMillis(),
-                                SystemClock.uptimeMillis() + 100,
-                                MotionEvent.ACTION_DOWN,
-                                0.0f,
-                                0.0f,
-                                0
-                                )
-                        );
-                    }
-
-                    progressBar.setVisibility(View.GONE);
-
-                    videoView.start();
-
-                    //set the video frame to match the video
-                    DisplayMetrics displayMetrics = new DisplayMetrics();
-                    getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-                    ViewGroup.LayoutParams params = videoView.getLayoutParams();
-                    ViewGroup.LayoutParams contParams = videoContainer.getLayoutParams();
-                    if (portraitView) {
-                        params.height = MATCH_PARENT;
-                        contParams.height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                                200, getResources().getDisplayMetrics());
-                    } else {
-                        params.height = displayMetrics.heightPixels;
-                        contParams.height = displayMetrics.heightPixels;
-                    }
-
-                    videoView.setLayoutParams(params);
-                    videoContainer.setLayoutParams(contParams);
-
-                    // Obtain the FirebaseAnalytics instance.
-                    mFirebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
-
-                    //log when the video starts
-                    Bundle vsparams = new Bundle();
-                    vsparams.putDouble(FirebaseAnalytics.Param.VALUE, 1.0);
-                    mFirebaseAnalytics.logEvent(videoData.getVideoStatsName(), vsparams);
-                }
-            });*/
         } catch (Exception e) {
             System.out.println("Video Play Error :" + e.toString());
             finish();
@@ -573,15 +476,12 @@ public class ViewVideo extends AppCompatActivity {
         if (location == PlaybackLocation.LOCAL) {
             if (mPlaybackState == PlaybackState.PLAYING
                     || mPlaybackState == PlaybackState.BUFFERING) {
-                //setCoverArtStatus(null);
                 startControllersTimer();
             } else {
                 stopControllersTimer();
-                //setCoverArtStatus(mSelectedMedia.getImage(0));
             }
         } else {
             stopControllersTimer();
-            //setCoverArtStatus(mSelectedMedia.getImage(0));
             updateControllersVisibility(false);
         }
     }
@@ -589,26 +489,11 @@ public class ViewVideo extends AppCompatActivity {
     // should be called from the main thread
     private void updateControllersVisibility(boolean show) {
         if (show) {
-            //getSupportActionBar().show();
-            //toolbar.setVisibility(View.VISIBLE);
             mControllers.setVisibility(View.VISIBLE);
         } else {
-            //setOrientation();
-            //if (portraitView) {
-                //getSupportActionBar().hide();
-                //toolbar.setVisibility(View.GONE);
-            //}
             mControllers.setVisibility(View.INVISIBLE);
         }
     }
-
-    //allows the video controller to appear when tapping on black bars in video.
-    /*public void onClickVideoArea(View v) {
-        if (!mControllersVisible) {
-            updateControllersVisibility(true);
-        }
-        startControllersTimer();
-    }*/
 
     private void togglePlayback() {
         stopControllersTimer();
@@ -700,15 +585,6 @@ public class ViewVideo extends AppCompatActivity {
             public boolean onError(MediaPlayer mp, int what, int extra) {
                 Log.e(TAG, "OnErrorListener.onError(): VideoView encountered an "
                         + "error, what: " + what + ", extra: " + extra);
-                /*String msg;
-                if (extra == MediaPlayer.MEDIA_ERROR_TIMED_OUT) {
-                    msg = getString(R.string.video_error_media_load_timeout);
-                } else if (what == MediaPlayer.MEDIA_ERROR_SERVER_DIED) {
-                    msg = getString(R.string.video_error_server_unaccessible);
-                } else {
-                    msg = getString(R.string.video_error_unknown_error);
-                }
-                Utils.showErrorDialog(LocalPlayerActivity.this, msg);*/
 
                 if (!dialogIsOpen) {
                     dialogIsOpen = true;
@@ -762,8 +638,6 @@ public class ViewVideo extends AppCompatActivity {
                 restartTrickplayTimer();
                 progressBar.setVisibility(View.GONE);
                 videoReloadInProgress = false;
-
-                //videoView.start();
 
                 //set the video frame to match the video
                 DisplayMetrics displayMetrics = new DisplayMetrics();
@@ -862,7 +736,6 @@ public class ViewVideo extends AppCompatActivity {
             case REMOTE:
                 mPlaybackState = PlaybackState.BUFFERING;
                 updatePlayButton(mPlaybackState);
-                //mCastSession.getRemoteMediaClient().seek(position); //deprecated
                 mCastSession.getRemoteMediaClient().seek(new MediaSeekOptions.Builder().setPosition(position*1000).build());
                 break;
             default:
@@ -915,8 +788,6 @@ public class ViewVideo extends AppCompatActivity {
             case IDLE:
                 mPlayCircle.setVisibility(View.VISIBLE);
                 mControllers.setVisibility(View.GONE);
-                //mCoverArt.setVisibility(View.VISIBLE);
-                //mVideoView.setVisibility(View.INVISIBLE);
                 break;
             case PAUSED:
                 if(!videoReloadInProgress){
@@ -1435,12 +1306,8 @@ public class ViewVideo extends AppCompatActivity {
     private MediaInfo buildMediaInfo() {
         MediaMetadata movieMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
 
-        //subtitle to display
-        //movieMetadata.putString(MediaMetadata.KEY_SUBTITLE, subtitle-or-studio-string-value-here);
+        //information to display
         movieMetadata.putString(MediaMetadata.KEY_TITLE, videoData.getName());
-        //Images (if any (uri format))
-        //movieMetadata.addImage(new WebImage(Uri.parse(image-url-1-here)));
-        //movieMetadata.addImage(new WebImage(Uri.parse(image-url-2-here)));
 
         if (videoData.getDurationInMilliseconds() == 0L) {
             videoData.setDuration();

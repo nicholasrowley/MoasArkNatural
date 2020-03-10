@@ -372,7 +372,7 @@ public class ViewVideo extends AppCompatActivity {
                 startActivity(intent);
                 return true;
             case R.id.menu_share_video:
-                //Share video url
+                //Share video url with other apps
                 if(videoData != null && !videoData.getfilePathURL().isEmpty()) {
                     Intent sendIntent = new Intent();
                     sendIntent.setAction(Intent.ACTION_SEND);
@@ -387,7 +387,7 @@ public class ViewVideo extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    //video view imp play method
+    //video view play method (runs when activity is started/resumed)
     private void PlayVideo() {
         progressBar.setVisibility(View.VISIBLE);
         videoReloadInProgress = true;
@@ -433,6 +433,7 @@ public class ViewVideo extends AppCompatActivity {
         }
     }
 
+    //stops the seekbar from updating
     private void stopTrickplayTimer() {
         Log.d(TAG, "Stopped TrickPlay Timer");
         if (mSeekbarTimer != null) {
@@ -440,6 +441,7 @@ public class ViewVideo extends AppCompatActivity {
         }
     }
 
+    //starts up / restarts the seekbar updates.
     private void restartTrickplayTimer() {
         stopTrickplayTimer();
         mSeekbarTimer = new Timer();
@@ -447,8 +449,8 @@ public class ViewVideo extends AppCompatActivity {
         Log.d(TAG, "Restarted TrickPlay Timer");
     }
 
+    //defines the seekbar updates on each tick.
     private class UpdateSeekbarTask extends TimerTask {
-
         @Override
         public void run() {
             mHandler.post(new Runnable() {
@@ -464,6 +466,7 @@ public class ViewVideo extends AppCompatActivity {
         }
     }
 
+    //updates the seekbar with new information.
     private void updateSeekbar(int position, int duration) {
         mSeekbar.setProgress(position);
         mSeekbar.setMax(duration);
@@ -546,12 +549,14 @@ public class ViewVideo extends AppCompatActivity {
         updatePlayButton(mPlaybackState);
     }
 
+    //cancels timer to show controller
     private void stopControllersTimer() {
         if (mControllersTimer != null) {
             mControllersTimer.cancel();
         }
     }
 
+    //starts timer to show controller for 5 seconds
     private void startControllersTimer() {
         if (mControllersTimer != null) {
             mControllersTimer.cancel();
@@ -563,6 +568,7 @@ public class ViewVideo extends AppCompatActivity {
         mControllersTimer.schedule(new HideControllersTask(), 5000);
     }
 
+    //Hides the media controller
     private class HideControllersTask extends TimerTask {
 
         @Override
@@ -578,6 +584,7 @@ public class ViewVideo extends AppCompatActivity {
         }
     }
 
+    //sets up neccessary functions for videoview, seekbar, play/pause button.
     private void setupControlsCallbacks() {
         videoView.setOnErrorListener(new MediaPlayer.OnErrorListener() {
 
@@ -726,6 +733,7 @@ public class ViewVideo extends AppCompatActivity {
         });
     }
 
+    //plays the video at the specified seekbar position on local or remote video player.
     private void play(int position) {
         startControllersTimer();
         switch (mLocation) {
@@ -973,6 +981,7 @@ public class ViewVideo extends AppCompatActivity {
         startLoad.start();
     }
 
+    //loads the pdf webview.
     @SuppressLint("SetJavaScriptEnabled")
     private void loadWebview() {
         //display pdf
@@ -1213,6 +1222,7 @@ public class ViewVideo extends AppCompatActivity {
         return time;
     }
 
+    //sets up listeners for Google Cast
     private void setupCastListener() {
         mSessionManagerListener = new SessionManagerListener<CastSession>() {
 

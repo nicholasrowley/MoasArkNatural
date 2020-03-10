@@ -94,7 +94,34 @@ public class Home extends AppCompatActivity {
                 }
             }
         };
-        mCastContext = CastContext.getSharedInstance(this);
+
+        try {
+            mCastContext = CastContext.getSharedInstance(this);
+        } catch (RuntimeException re) {
+            re.printStackTrace();
+            //display message to user.
+            new AlertDialog.Builder(Home.this)
+                    .setTitle(getString(R.string.play_services_error_title))
+                    .setMessage(getString(R.string.play_services_error_message))
+                    .setPositiveButton("Open Google Play", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            String googlePlayServicesPackage = "com.google.android.gms";
+                            try {
+                                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + googlePlayServicesPackage)));
+                            } catch (android.content.ActivityNotFoundException anfe) {
+                                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + googlePlayServicesPackage)));
+                            }
+                        }
+                    })
+                    .setNegativeButton("Close", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            // continue with app
+                        }
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setCancelable(false)
+                    .show();
+        }
 
         refreshing = false;
 
@@ -117,13 +144,17 @@ public class Home extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        mCastContext.addCastStateListener(mCastStateListener);
+        if (mCastContext != null) {
+            mCastContext.addCastStateListener(mCastStateListener);
+        }
         super.onResume();
     }
 
     @Override
     public void onPause() {
-        mCastContext.removeCastStateListener(mCastStateListener);
+        if (mCastContext != null) {
+            mCastContext.removeCastStateListener(mCastStateListener);
+        }
         super.onPause();
         InputMethodManager inm = (InputMethodManager) this.getSystemService(Activity.INPUT_METHOD_SERVICE);
         View focusedView = this.getCurrentFocus();

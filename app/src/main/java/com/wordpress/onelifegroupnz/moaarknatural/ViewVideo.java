@@ -5,9 +5,12 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -26,6 +29,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 
+import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -183,8 +187,14 @@ public class ViewVideo extends AppCompatActivity {
 
         setupControlsCallbacks();
         setupCastListener();
-        mCastContext = CastContext.getSharedInstance(this);
-        mCastSession = mCastContext.getSessionManager().getCurrentCastSession();
+        try {
+            mCastContext = CastContext.getSharedInstance(this);
+            mCastSession = mCastContext.getSessionManager().getCurrentCastSession();
+        } catch (RuntimeException re) {
+            re.printStackTrace();
+            //display message to user.
+            Toast.makeText(getApplicationContext(), getString(R.string.play_services_error_toast), Toast.LENGTH_SHORT).show();
+        }
 
         portraitItems = findViewById(R.id.portraitItems);
         videoContainer = findViewById(R.id.videoContainer);
@@ -254,8 +264,10 @@ public class ViewVideo extends AppCompatActivity {
                 inm.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), 0);
             }
 
-        mCastContext.getSessionManager().removeSessionManagerListener(
-                mSessionManagerListener, CastSession.class);
+        if (mCastContext != null) {
+            mCastContext.getSessionManager().removeSessionManagerListener(
+                    mSessionManagerListener, CastSession.class);
+        }
 
         webview.clearHistory();
 
@@ -280,8 +292,10 @@ public class ViewVideo extends AppCompatActivity {
     @Override
     protected void onResume() {
         Log.d(TAG, "onResume() was called");
-        mCastContext.getSessionManager().addSessionManagerListener(
-                mSessionManagerListener, CastSession.class);
+        if (mCastContext != null) {
+            mCastContext.getSessionManager().addSessionManagerListener(
+                    mSessionManagerListener, CastSession.class);
+        }
         if (mCastSession != null && mCastSession.isConnected()) {
             updatePlaybackLocation(PlaybackLocation.REMOTE);
         } else {
@@ -311,6 +325,14 @@ public class ViewVideo extends AppCompatActivity {
         outState.putInt("VideoTime", videoView.getCurrentPosition());
 
         outState.putBoolean("fragment_added", true);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem item;
+        item = menu.findItem(R.id.menu_share_video);
+        item.setVisible(true);
+        return true;
     }
 
     @Override
@@ -359,6 +381,18 @@ public class ViewVideo extends AppCompatActivity {
                 Uri uri = Uri.parse(getString(R.string.website_contact_form_url));
                 intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
+                return true;
+            case R.id.menu_share_video:
+                //Share video url
+                if(videoData != null && !videoData.getfilePathURL().isEmpty()) {
+                    Intent sendIntent = new Intent();
+                    sendIntent.setAction(Intent.ACTION_SEND);
+                    sendIntent.putExtra(Intent.EXTRA_TEXT, videoData.getfilePathURL().replaceAll(" ", "%20"));
+                    sendIntent.setType("text/plain");
+
+                    Intent shareIntent = Intent.createChooser(sendIntent, null);
+                    startActivity(shareIntent);
+                }
                 return true;
         }
         return super.onOptionsItemSelected(item);

@@ -18,6 +18,7 @@
     <string name="search_title">Search</string>
     <string name="menu_refresh">Menu Refresh</string>
     <string name="action_notification">Notifications</string>
+    <string name="action_share_video">Share Video</string>
     <string name="search_dialog"></string>
     <string name="msg_no_results">No results found for %s</string>
     <string name="msg_results_found">%1$s results found for %2$s</string>
@@ -97,5 +98,8 @@
     <!-- Google Cast -->
     <string name="cast_app_id">4F8B3483</string>
     <string name="media_route_menu_title">Play on&#8230;</string>
+    <string name="play_services_error_title">Can\'t find Google Play Services</string>
+    <string name="play_services_error_message">Could not find Google Play Services or Google Play Services is not installed. Please install the latest version of Google Play Services and try again. Some features of the app may not be available.</string>
+    <string name="play_services_error_toast">Google Play Services is not installed. Some features of the app may not be available.</string>
 
 </resources>

@@ -57,6 +57,13 @@
                 android:icon="@drawable/ic_contact_form_green"
                 android:orderInCategory="7"
                 app:showAsAction="never" />
+            <item
+                android:id="@+id/menu_share_video"
+                android:icon="@drawable/ic_action_share_video"
+                android:orderInCategory="10"
+                android:title="@string/action_share_video"
+                android:visible="false"
+                app:showAsAction="never" />
         </menu>
     </item>
 </menu>

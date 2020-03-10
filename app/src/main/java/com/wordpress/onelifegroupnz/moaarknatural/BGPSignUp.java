@@ -60,7 +60,13 @@ public class BGPSignUp extends AppCompatActivity {
         toolbar.setNavigationIcon(R.drawable.ic_home_green);
         findViewById(R.id.search_fragment).setVisibility(View.GONE);
 
-        mCastContext = CastContext.getSharedInstance(this);
+        try {
+            mCastContext = CastContext.getSharedInstance(this);
+        } catch (RuntimeException re) {
+            re.printStackTrace();
+            //display message to user.
+            Toast.makeText(getApplicationContext(), getString(R.string.play_services_error_toast), Toast.LENGTH_SHORT).show();
+        }
 
         formEmail = findViewById(R.id.cryptoSubmitEmail);
 

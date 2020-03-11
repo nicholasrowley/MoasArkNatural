@@ -83,7 +83,7 @@
             android:name=".ExpandedControlsActivity"
             android:label="@string/app_name"
             android:launchMode="singleTask"
-            android:theme="@style/Theme.CastVideosDark"
+            android:theme="@style/AppTheme.NoActionBar"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity">
             <intent-filter>

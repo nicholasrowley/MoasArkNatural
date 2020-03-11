@@ -53,6 +53,7 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.cast.MediaLoadRequestData;
 import com.google.android.gms.cast.MediaSeekOptions;
+import com.google.android.gms.common.images.WebImage;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.Timer;
@@ -670,6 +671,11 @@ public class ViewVideo extends AppCompatActivity {
                 Bundle vsparams = new Bundle();
                 vsparams.putDouble(FirebaseAnalytics.Param.VALUE, 1.0);
                 mFirebaseAnalytics.logEvent(videoData.getVideoStatsName(), vsparams);
+
+                //set up a still image for the video
+                videoView.start();
+                if (!shouldStartPlayback || mLocation == PlaybackLocation.REMOTE)
+                    videoView.pause();
             }
         });
 
@@ -1318,6 +1324,8 @@ public class ViewVideo extends AppCompatActivity {
 
         //information to display
         movieMetadata.putString(MediaMetadata.KEY_TITLE, videoData.getName());
+        //displays a default image in the extended controller and mini controllers
+        movieMetadata.addImage(new WebImage(Uri.parse("https://shoptradenz.com/moasapp/castimages/imagedefault.jpg")));
 
         if (videoData.getDurationInMilliseconds() == 0L) {
             videoData.setDuration();

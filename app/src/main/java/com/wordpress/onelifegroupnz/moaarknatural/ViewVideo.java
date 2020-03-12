@@ -82,6 +82,7 @@ public class ViewVideo extends AppCompatActivity {
     private GlobalAppData appData; //singleton instance of globalAppData
     private FileDataListing videoData; //single video data object
     private FileDataListing pdfData; //single stepsheet data object
+    private FileDataListing castImageData; //single cast image data object
     private Boolean dialogIsOpen; //ensure that only one video/wifi error dialog is displayed
     private Toolbar toolbar;
 
@@ -1325,7 +1326,19 @@ public class ViewVideo extends AppCompatActivity {
         //information to display
         movieMetadata.putString(MediaMetadata.KEY_TITLE, videoData.getName());
         //displays a default image in the extended controller and mini controllers
-        movieMetadata.addImage(new WebImage(Uri.parse("https://shoptradenz.com/moasapp/castimages/imagedefault.jpg")));
+
+        int loadAttempts = 0;
+        do {
+            //check for pdf data
+            castImageData = appData.getImageContent(getString(R.string.DIRECTORY_ROOT), videoData.getName());
+            loadAttempts++;
+        } while (loadAttempts < 5 && !appData.dbSuccess(GlobalAppData.CASTIMAGEPATH)); //same result regardless of using STEPSHEETPATH or RECIPEPATH
+
+        if (castImageData.getfilePathURL().equals("")) {
+            movieMetadata.addImage(new WebImage(Uri.parse("https://shoptradenz.com/moasapp/castimages/imagedefault3.jpg")));
+        } else {
+            movieMetadata.addImage(new WebImage(Uri.parse(castImageData.getfilePathURL())));
+        }
 
         if (videoData.getDurationInMilliseconds() == 0L) {
             videoData.setDuration();

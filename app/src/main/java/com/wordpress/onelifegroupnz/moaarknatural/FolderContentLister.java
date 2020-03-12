@@ -52,7 +52,6 @@ public class FolderContentLister extends AsyncTask<Object, Void, Object> {
             //if the first entry has empty fields then assume connection has failed.
             if (!currentDirectoryListing.isEmpty())
                 if (currentDirectoryListing.get(0).getName().equals("")) {
-                    //TODO Test Timeout function
                     Log.d("Lister Error", "could not connect to directory.");
                     isValid = false;
                 }

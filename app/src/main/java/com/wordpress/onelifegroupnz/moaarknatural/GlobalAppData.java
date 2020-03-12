@@ -23,6 +23,7 @@ public class GlobalAppData {
     private static GlobalAppData instance = null;
     private FolderContentLister danceVideoFileLister;
     private FolderContentLister pdfFileLister;
+    private FolderContentLister imageFileLister;
     private FolderContentLister foodVideoFileLister;
     private List<FileDataListing> danceVideoInfoList;
     private List<FileDataListing> foodVideoInfoList;
@@ -32,6 +33,7 @@ public class GlobalAppData {
     public static final String STEPSHEETPATH = "/steps/";
     public static final String FOODVIDEOPATH = "/food videos/";
     public static final String RECIPEPATH = "/recipes/";
+    public static final String CASTIMAGEPATH = "/castimages/";
     public static final String FEATUREDANCETXTPATH = "/feature video/feature dance.txt";
     public static final String FEATUREFOODTXTPATH = "/feature video/feature food.txt";
     public static final String TAGLINETXTPATH = "/tagline/tagline.txt";
@@ -155,6 +157,8 @@ public class GlobalAppData {
             case STEPSHEETPATH:
             case RECIPEPATH:
                 return pdfFileLister.httpConnectionSuccessful();
+            case CASTIMAGEPATH:
+                return imageFileLister.httpConnectionSuccessful();
             default:
                 return false;
         }
@@ -185,6 +189,33 @@ public class GlobalAppData {
             pdfInfoList.add(new FileDataListing("", "", "", ""));
 
         return pdfInfoList.get(0); //returns the latest step sheet
+    }
+
+    /*method which returns a single image to display in cast videos (if one exists otherwise null)*/
+    public FileDataListing getImageContent(String directoryRoot, String imageName) {
+
+        List<FileDataListing> imageInfoList;
+
+        imageFileLister = new FolderContentLister(directoryRoot, CASTIMAGEPATH, imageName, 0, new ArrayList<FileDataListing>());
+
+
+        imageFileLister.execute();
+
+        try {
+            imageFileLister.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        imageInfoList = imageFileLister.getLoadData();
+
+        //if no result. declare with empty fields
+        if (imageInfoList.size() == 0)
+            imageInfoList.add(new FileDataListing("", "", "", ""));
+
+        return imageInfoList.get(0); //returns an image matching the search conditions
     }
 
     public List<SearchSuggestion> getSearchSuggestions(){

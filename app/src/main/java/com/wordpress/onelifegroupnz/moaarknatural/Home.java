@@ -148,6 +148,7 @@ public class Home extends AppCompatActivity {
             mCastContext.addCastStateListener(mCastStateListener);
         }
         super.onResume();
+
     }
 
     @Override
@@ -162,6 +163,26 @@ public class Home extends AppCompatActivity {
             if (inm != null) {
                 inm.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), 0);
             }
+    }
+
+    @Override
+    public void onBackPressed() {
+        new AlertDialog.Builder(Home.this)
+                .setTitle("Really Exit?")
+                .setMessage("Are you sure you want to exit?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        Home.super.onBackPressed();
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        // do nothing
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setCancelable(true)
+                .show();
     }
 
     @Override

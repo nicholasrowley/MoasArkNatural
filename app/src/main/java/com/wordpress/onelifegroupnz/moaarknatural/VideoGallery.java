@@ -160,19 +160,24 @@ public class VideoGallery extends AppCompatActivity {
         switch (item.getItemId()) {
             // Respond to the action bar's Up/Home button
             case android.R.id.home:
-                startActivity(new Intent(VideoGallery.this, Home.class));
+                intent = new Intent(VideoGallery.this, Home.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
                 return true;
             case R.id.menu_dance_video_gallery:
                 //Proceed to Line Dance video gallery
                 intent = new Intent(VideoGallery.this, VideoGallery.class);
                 intent.putExtra("videoPath", DANCEVIDEOPATH); //using video path to set the gallery
                 startActivity(intent);
+                finish();
                 return true;
             case R.id.menu_food_video_gallery:
                 //Proceed to Food video gallery
                 intent = new Intent(VideoGallery.this, VideoGallery.class);
                 intent.putExtra("videoPath", FOODVIDEOPATH); //using video path to set the gallery
                 startActivity(intent);
+                finish();
                 return true;
             case R.id.action_notification:
                 openAppSettings();

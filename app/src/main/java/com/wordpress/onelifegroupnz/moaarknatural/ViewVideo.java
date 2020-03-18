@@ -71,7 +71,6 @@ import com.google.android.gms.cast.framework.SessionManagerListener;
 import com.google.android.gms.cast.framework.media.RemoteMediaClient;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
-import com.google.android.gms.cast.framework.IntroductoryOverlay;
 
 /*- Plays dropbox videos in Android videoview (Note: all videos must be encoded in H.264 Baseline to guarantee
 * playability in Android 5.0 or lower.)
@@ -83,12 +82,12 @@ public class ViewVideo extends AppCompatActivity {
     private FileDataListing videoData; //single video data object
     private FileDataListing pdfData; //single stepsheet data object
     private FileDataListing castImageData; //single cast image data object
+    private WebImage castImage;
     private Boolean dialogIsOpen; //ensure that only one video/wifi error dialog is displayed
     private Toolbar toolbar;
 
     private ProgressBar progressBar;
     private VideoView videoView;
-    private Integer savedVideoPosition; //the current position of the video
     private boolean refreshed;
     private boolean portraitView;
 
@@ -107,7 +106,7 @@ public class ViewVideo extends AppCompatActivity {
     private boolean mControllersVisible;
     private boolean videoReloadInProgress;
     boolean shouldStartPlayback;
-    int startPosition;
+    int startPosition; //the current position to start the video
 
     private SearchView searchView;
     private LinearLayout portraitItems;
@@ -127,6 +126,7 @@ public class ViewVideo extends AppCompatActivity {
     private MenuItem mediaRouteMenuItem;
     private CastSession mCastSession;
     private SessionManagerListener<CastSession> mSessionManagerListener;
+    private boolean castSessionLoading;
 
 
     /**
@@ -217,7 +217,7 @@ public class ViewVideo extends AppCompatActivity {
 
         //check if activity refreshed
         if (savedInstanceState != null) {
-            savedVideoPosition = savedInstanceState.getInt("VideoTime");
+            startPosition = savedInstanceState.getInt("VideoTime");
             refreshed = true;
         }
         dialogIsOpen = false;
@@ -243,6 +243,7 @@ public class ViewVideo extends AppCompatActivity {
         mPlaybackState = PlaybackState.IDLE;
         updatePlaybackLocation(PlaybackLocation.LOCAL);
         updatePlayButton(mPlaybackState);
+        castSessionLoading = false;
     }
 
     @Override
@@ -303,7 +304,6 @@ public class ViewVideo extends AppCompatActivity {
         loadActivity();
     }
 
-
     // Save UI state changes to the savedInstanceState.
     // This bundle will be passed to onCreate if the process is
     // killed and restarted.
@@ -315,6 +315,7 @@ public class ViewVideo extends AppCompatActivity {
         //save the current position of the video, used when orientation changes
         outState.putInt("VideoTime", videoView.getCurrentPosition());
 
+        outState.putBoolean("shouldStart", true);
         outState.putBoolean("fragment_added", true);
     }
 
@@ -343,7 +344,10 @@ public class ViewVideo extends AppCompatActivity {
         switch (item.getItemId()) {
             // Respond to the action bar's Up/Home button
             case android.R.id.home:
-                startActivity(new Intent(ViewVideo.this, Home.class));
+                intent = new Intent(ViewVideo.this, Home.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
                 return true;
             case R.id.action_notification:
                 openAppSettings();
@@ -353,12 +357,14 @@ public class ViewVideo extends AppCompatActivity {
                 intent = new Intent(ViewVideo.this, VideoGallery.class);
                 intent.putExtra("videoPath", DANCEVIDEOPATH); //using video path to set the gallery
                 startActivity(intent);
+                finish();
                 return true;
             case R.id.menu_food_video_gallery:
                 //Proceed to Food video gallery
                 intent = new Intent(ViewVideo.this, VideoGallery.class);
                 intent.putExtra("videoPath", FOODVIDEOPATH); //using video path to set the gallery
                 startActivity(intent);
+                finish();
                 return true;
             case R.id.menu_refresh:
                 if(!(refreshProgressbar.getVisibility() == View.VISIBLE)) {
@@ -389,6 +395,7 @@ public class ViewVideo extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    //TODO Figure out if Google Cast is affecting pdf load
     //video view play method (runs when activity is started/resumed)
     private void PlayVideo() {
         progressBar.setVisibility(View.VISIBLE);
@@ -501,11 +508,14 @@ public class ViewVideo extends AppCompatActivity {
     }
 
     private void togglePlayback() {
+        Log.d(TAG, "playback state: " + mPlaybackState.toString());
+        Log.d(TAG, "location state: " + mLocation.toString());
         stopControllersTimer();
         switch (mPlaybackState) {
             case PAUSED:
                 switch (mLocation) {
                     case LOCAL:
+                        shouldStartPlayback = true;
                         videoView.start();
                         Log.d(TAG, "Playing locally...");
                         mPlaybackState = PlaybackState.PLAYING;
@@ -529,8 +539,10 @@ public class ViewVideo extends AppCompatActivity {
             case IDLE:
                 switch (mLocation) {
                     case LOCAL:
+                        Log.d(TAG, "Local state detected. Playing locally...");
                         videoView.setVideoURI(Uri.parse(videoData.getfilePathURL()));
                         videoView.seekTo(0);
+                        shouldStartPlayback = true;
                         videoView.start();
                         mPlaybackState = PlaybackState.PLAYING;
                         restartTrickplayTimer();
@@ -586,7 +598,7 @@ public class ViewVideo extends AppCompatActivity {
         }
     }
 
-    //sets up neccessary functions for videoview, seekbar, play/pause button.
+    //sets up necessary functions for videoview, seekbar, play/pause button.
     private void setupControlsCallbacks() {
         videoView.setOnErrorListener(new MediaPlayer.OnErrorListener() {
 
@@ -615,11 +627,13 @@ public class ViewVideo extends AppCompatActivity {
                                         Intent intent = new Intent(ViewVideo.this, VideoGallery.class);
                                         intent.putExtra("videoPath", DANCEVIDEOPATH); //using video path to set the gallery
                                         startActivity(intent);
+                                        finish();
                                     } else if (videoData.getFolderPath().equals(getString(R.string.DIRECTORY_ROOT) + FOODVIDEOPATH)) {
                                         //Proceed to Food video gallery
                                         Intent intent = new Intent(ViewVideo.this, VideoGallery.class);
                                         intent.putExtra("videoPath", FOODVIDEOPATH); //using video path to set the gallery
                                         startActivity(intent);
+                                        finish();
                                     }
 
                                 }
@@ -645,7 +659,9 @@ public class ViewVideo extends AppCompatActivity {
                 mEndText.setText(formatMillis(mDuration));
                 mSeekbar.setMax(mDuration);
                 restartTrickplayTimer();
-                progressBar.setVisibility(View.GONE);
+                if (!castSessionLoading) {
+                    progressBar.setVisibility(View.GONE);
+                }
                 videoReloadInProgress = false;
 
                 //set the video frame to match the video
@@ -750,6 +766,7 @@ public class ViewVideo extends AppCompatActivity {
                 break;
             case REMOTE:
                 mPlaybackState = PlaybackState.BUFFERING;
+                castSessionLoading = true;
                 updatePlayButton(mPlaybackState);
                 mCastSession.getRemoteMediaClient().seek(new MediaSeekOptions.Builder().setPosition(position*1000).build());
                 break;
@@ -801,17 +818,18 @@ public class ViewVideo extends AppCompatActivity {
                 mPlayCircle.setVisibility(isConnected ? View.VISIBLE : View.GONE);
                 break;
             case IDLE:
-                mPlayCircle.setVisibility(View.VISIBLE);
+                Log.d(TAG, "Controls: IDLE castSessionLoading = " + Boolean.toString(castSessionLoading));
+                mPlayCircle.setVisibility(!castSessionLoading ? View.VISIBLE : View.GONE);
                 mControllers.setVisibility(View.GONE);
                 break;
             case PAUSED:
-                if(!videoReloadInProgress){
+                if(!videoReloadInProgress && !castSessionLoading){
                     progressBar.setVisibility(View.GONE);
                 }
                 mPlayPause.setVisibility(View.VISIBLE);
                 mPlayPause.setImageDrawable(
                         getResources().getDrawable(R.drawable.ic_play));
-                mPlayCircle.setVisibility(isConnected ? View.VISIBLE : View.GONE);
+                mPlayCircle.setVisibility(!castSessionLoading && isConnected ? View.VISIBLE : View.GONE);
                 break;
             case BUFFERING:
                 mPlayPause.setVisibility(View.INVISIBLE);
@@ -1271,6 +1289,7 @@ public class ViewVideo extends AppCompatActivity {
             public void onSessionSuspended(CastSession session, int reason) {}
 
             private void onApplicationConnected(CastSession castSession) {
+                Log.d(TAG, "OnApplicationConntected()");
                 mCastSession = castSession;
                 if (null != videoData) {
 
@@ -1298,6 +1317,7 @@ public class ViewVideo extends AppCompatActivity {
     }
 
     private void loadRemoteMedia(int position, boolean autoPlay) {
+        castSessionLoading = true;
         if (mCastSession == null) {
             return;
         }
@@ -1314,35 +1334,67 @@ public class ViewVideo extends AppCompatActivity {
             }
         });
 
-        remoteMediaClient.load(new MediaLoadRequestData.Builder()
-                .setMediaInfo(buildMediaInfo())
-                .setAutoplay(autoPlay)
-                .setCurrentTime(position).build());
+        final boolean currentAutoPlayState = autoPlay;
+        final int currentPositionState = position;
+
+
+        //Data load is done here
+        final Thread streamingTask = new Thread() {
+            public void run() {
+                int loadAttempts = 0;
+                do {
+                    //check for pdf data
+                    castImageData = appData.getImageContent(getString(R.string.DIRECTORY_ROOT), videoData.getName());
+                    loadAttempts++;
+                } while (loadAttempts < 5 && !appData.dbSuccess(GlobalAppData.CASTIMAGEPATH));
+
+                if (castImageData.getfilePathURL().equals("")) {
+                    castImage = new WebImage(Uri.parse("https://shoptradenz.com/moasapp/castimages/imagedefault3.jpg"));
+                } else {
+                    castImage = new WebImage(Uri.parse(castImageData.getfilePathURL()));
+                }
+
+                if (videoData.getDurationInMilliseconds() == 0L) {
+                    videoData.setDuration();
+                }
+            }
+        };
+
+        final Thread startCast = new Thread() {
+            public void run() {
+                remoteMediaClient.load(new MediaLoadRequestData.Builder()
+                        .setMediaInfo(buildMediaInfo(castImage))
+                        .setAutoplay(currentAutoPlayState)
+                        .setCurrentTime(currentPositionState).build());
+            }
+        };
+
+
+        //start background loader in a separate thread
+        final Thread startLoad = new Thread() {
+            public void run() {
+                //attempt a reload up to 5 times for pdfdata if connection fails.
+                streamingTask.start();
+                try {
+                    streamingTask.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                runOnUiThread(startCast);
+                castSessionLoading = false;
+            }
+        };
+        Toast.makeText(getApplicationContext(), "Starting video cast...", Toast.LENGTH_SHORT).show();
+        startLoad.start();
     }
 
-    private MediaInfo buildMediaInfo() {
+    private MediaInfo buildMediaInfo(WebImage castImage) {
         MediaMetadata movieMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
 
         //information to display
         movieMetadata.putString(MediaMetadata.KEY_TITLE, videoData.getName());
-        //displays a default image in the extended controller and mini controllers
 
-        int loadAttempts = 0;
-        do {
-            //check for pdf data
-            castImageData = appData.getImageContent(getString(R.string.DIRECTORY_ROOT), videoData.getName());
-            loadAttempts++;
-        } while (loadAttempts < 5 && !appData.dbSuccess(GlobalAppData.CASTIMAGEPATH)); //same result regardless of using STEPSHEETPATH or RECIPEPATH
-
-        if (castImageData.getfilePathURL().equals("")) {
-            movieMetadata.addImage(new WebImage(Uri.parse("https://shoptradenz.com/moasapp/castimages/imagedefault3.jpg")));
-        } else {
-            movieMetadata.addImage(new WebImage(Uri.parse(castImageData.getfilePathURL())));
-        }
-
-        if (videoData.getDurationInMilliseconds() == 0L) {
-            videoData.setDuration();
-        }
+        movieMetadata.addImage(castImage);
 
         return new MediaInfo.Builder(videoData.getfilePathURL())
                 .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)

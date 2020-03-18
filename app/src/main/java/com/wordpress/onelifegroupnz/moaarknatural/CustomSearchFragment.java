@@ -1,5 +1,6 @@
 package com.wordpress.onelifegroupnz.moaarknatural;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.database.MatrixCursor;
 import android.os.Bundle;
@@ -8,6 +9,8 @@ import androidx.fragment.app.Fragment;
 import androidx.cursoradapter.widget.CursorAdapter;
 import androidx.cursoradapter.widget.SimpleCursorAdapter;
 import androidx.appcompat.widget.SearchView;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
@@ -130,6 +133,11 @@ public class CustomSearchFragment extends Fragment {
                 intent.putExtra("searchType", spinner.getSelectedItem().toString());
                 searchView.clearFocus();
                 startActivity(intent);
+                if (getContext() != null) {
+                    if (!getContext().getClass().getSimpleName().equals("Home")) {
+                        ((Activity) getContext()).finish();
+                    }
+                }
                 return false;
             }
 

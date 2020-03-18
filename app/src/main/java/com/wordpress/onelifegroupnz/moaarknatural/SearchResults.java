@@ -149,7 +149,10 @@ public class SearchResults extends AppCompatActivity {
         switch (item.getItemId()) {
             // Respond to the action bar's Up/Home button
             case android.R.id.home:
-                startActivity(new Intent(SearchResults.this, Home.class));
+                intent = new Intent(SearchResults.this, Home.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
                 return true;
             case R.id.action_notification:
                 openAppSettings();
@@ -159,12 +162,14 @@ public class SearchResults extends AppCompatActivity {
                 intent = new Intent(SearchResults.this, VideoGallery.class);
                 intent.putExtra("videoPath", DANCEVIDEOPATH); //using video path to set the gallery
                 startActivity(intent);
+                finish();
                 return true;
             case R.id.menu_food_video_gallery:
                 //Proceed to Food video gallery
                 intent = new Intent(SearchResults.this, VideoGallery.class);
                 intent.putExtra("videoPath", FOODVIDEOPATH); //using video path to set the gallery
                 startActivity(intent);
+                finish();
                 return true;
             case R.id.menu_refresh:
                 if(!(refreshProgressbar.getVisibility() == View.VISIBLE)){

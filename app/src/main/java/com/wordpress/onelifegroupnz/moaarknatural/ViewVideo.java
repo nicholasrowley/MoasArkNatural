@@ -111,6 +111,10 @@ public class ViewVideo extends AppCompatActivity {
     private SearchView searchView;
     private LinearLayout portraitItems;
     private WebView webview;
+    private int pdfTestAttempts; //prevents running to many tests
+    public static final int PDFLOADRETRIES = 5; //number of retries for loading PDF if test fails
+    public static final int PDFLOADTIMEOUT = 5000; //timeout period in milliseconds to avoid pdf load testing too quickly
+
     private boolean pdfPixelTestOnOrientationChange; //checks if the pdf webview needs to be checked on next orientation change to portrait.
     private LinearLayout videoContainer;
 
@@ -244,6 +248,7 @@ public class ViewVideo extends AppCompatActivity {
         updatePlaybackLocation(PlaybackLocation.LOCAL);
         updatePlayButton(mPlaybackState);
         castSessionLoading = false;
+        pdfTestAttempts = 0;
     }
 
     @Override
@@ -370,7 +375,6 @@ public class ViewVideo extends AppCompatActivity {
                 if(!(refreshProgressbar.getVisibility() == View.VISIBLE)) {
                     refreshProgressbar.setVisibility(View.VISIBLE);
                     loadActivity();
-                    loadPdf();
                 }
                 return true;
             case R.id.menu_contact_form:
@@ -964,27 +968,10 @@ public class ViewVideo extends AppCompatActivity {
                     noPdfMsg.setVisibility(View.GONE);
 
                     findViewById(R.id.pdfProgressBar5).setVisibility(View.VISIBLE);
+                    pdfTestAttempts = 0;
                     loadWebview();
                 } else {
-                    //hide pdf view and display appropriate message.
-                    webview.setVisibility(View.GONE);
-
-                    boolean requireStepsheet = videoData.getFolderPath().equals(getString(R.string.DIRECTORY_ROOT) + DANCEVIDEOPATH);
-                    boolean requireRecipe = videoData.getFolderPath().equals(getString(R.string.DIRECTORY_ROOT) + FOODVIDEOPATH);
-
-                    if ((!appData.dbSuccess(GlobalAppData.STEPSHEETPATH) && requireStepsheet)
-                            || (!appData.dbSuccess(GlobalAppData.RECIPEPATH) && requireRecipe) ) {
-                        findViewById(R.id.pdfReloadMessage).setVisibility(View.VISIBLE);
-                        TextView pdfReloadText = findViewById(R.id.pdfReloadText);
-                        if (requireStepsheet)
-                            pdfReloadText.setText(getString(R.string.pdf_reload_text_stepsheet));
-                        else if (requireRecipe)
-                            pdfReloadText.setText(getString(R.string.pdf_reload_text_recipe));
-                    }
-                    else {
-                        noPdfMsg.setVisibility(View.VISIBLE);
-                        findViewById(R.id.pdfReloadMessage).setVisibility(View.GONE);
-                    }
+                    displayPDFReloadMessage();
                 }
                 findViewById(R.id.pdfProgressBar5).setVisibility(View.GONE);
             }
@@ -1004,6 +991,30 @@ public class ViewVideo extends AppCompatActivity {
             }
         };
         startLoad.start();
+    }
+
+    /* Prompts the user to try and reload pdf if pdf is unable to load on its own. */
+    private void displayPDFReloadMessage() {
+        //hide pdf view and display appropriate message.
+        TextView noPdfMsg = findViewById(R.id.noSheetMsg);
+        webview.setVisibility(View.GONE);
+
+        boolean requireStepsheet = videoData.getFolderPath().equals(getString(R.string.DIRECTORY_ROOT) + DANCEVIDEOPATH);
+        boolean requireRecipe = videoData.getFolderPath().equals(getString(R.string.DIRECTORY_ROOT) + FOODVIDEOPATH);
+
+        if ((!appData.dbSuccess(GlobalAppData.STEPSHEETPATH) && requireStepsheet)
+                || (!appData.dbSuccess(GlobalAppData.RECIPEPATH) && requireRecipe) ) {
+            findViewById(R.id.pdfReloadMessage).setVisibility(View.VISIBLE);
+            TextView pdfReloadText = findViewById(R.id.pdfReloadText);
+            if (requireStepsheet)
+                pdfReloadText.setText(getString(R.string.pdf_reload_text_stepsheet));
+            else if (requireRecipe)
+                pdfReloadText.setText(getString(R.string.pdf_reload_text_recipe));
+        }
+        else {
+            noPdfMsg.setVisibility(View.VISIBLE);
+            findViewById(R.id.pdfReloadMessage).setVisibility(View.GONE);
+        }
     }
 
     //loads the pdf webview.
@@ -1093,14 +1104,54 @@ public class ViewVideo extends AppCompatActivity {
 
     /*Tests the webview for an image. Should only run when webview is on the screen.
     * This is based on the assumption that the first pixel is never white when the webview loads successfully.*/
-    private void testWebview(WebView view) {
-        int pixelDrawTest = toBitmap(view).getPixel(0,0);
+    private void testWebview(final WebView view) {
+        Log.d(TAG, "TESTING PDF... " + Integer.toString(pdfTestAttempts + 1));
+        final Thread pdfWaitTask = new Thread() {
+            public void run() {
+                try {
+                    Thread.sleep(PDFLOADTIMEOUT);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
 
-        /*In this case the first pixel in the webview is never white so this can be used to test
-        if the webview has failed to load in case of a javascript loading issue. */
-        if(pixelDrawTest == Color.WHITE) {
-            loadWebview();
-        }
+        final Thread pdfTestTask = new Thread() {
+            public void run() {
+                int pixelDrawTest = toBitmap(view).getPixel(0,0);
+
+                /*In this case the first pixel in the webview is never white so this can be used to test
+                if the webview has failed to load in case of a javascript loading issue. */
+                if(pixelDrawTest == Color.WHITE) {
+                    if (pdfTestAttempts < PDFLOADRETRIES) {
+                        findViewById(R.id.pdfProgressBar5).setVisibility(View.VISIBLE);
+                        loadWebview();
+                        pdfTestAttempts++;
+                    } else {
+                        //show reload dialog message for pdf.
+                        displayPDFReloadMessage();
+                    }
+                } else {
+                    findViewById(R.id.pdfProgressBar5).setVisibility(View.GONE);
+                }
+            }
+        };
+
+        final Thread pdfTestExecuteTask = new Thread() {
+            public void run() {
+                pdfWaitTask.start();
+                try {
+                    pdfWaitTask.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                runOnUiThread(pdfTestTask);
+            }
+        };
+        pdfTestExecuteTask.start();
+
+
+
     }
 
     /* Starts Google AdMob ads for this activity. */

@@ -46,7 +46,7 @@ public class SplashScreen extends AppCompatActivity {
                     //cancel warning
                     warningThread.interrupt();
                     //checks for notification then starts activity
-                    checkNotification();
+                    startApplication();
                 }
             }
         };
@@ -59,8 +59,8 @@ public class SplashScreen extends AppCompatActivity {
         finish();
     }
 
-    //checks the notification for any readable data.
-    public void checkNotification() {
+    //checks the notification for any readable data then starts the application.
+    public void startApplication() {
         FileDataListing video = null;
         // If a notification message is tapped, any data accompanying the notification
         // message is available in the intent extras. In this sample the launcher
@@ -109,6 +109,7 @@ public class SplashScreen extends AppCompatActivity {
         {
             //startup like normal
             Intent intent = new Intent(SplashScreen.this, Home.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         }
     }

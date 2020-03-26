@@ -107,6 +107,7 @@ public class ViewVideo extends AppCompatActivity {
     private boolean videoReloadInProgress;
     boolean shouldStartPlayback;
     int startPosition; //the current position to start the video
+    private boolean savedInstanceExists;
 
     private SearchView searchView;
     private LinearLayout portraitItems;
@@ -231,7 +232,10 @@ public class ViewVideo extends AppCompatActivity {
         appData = GlobalAppData.getInstance(getString(R.string.DIRECTORY_ROOT),
                 ViewVideo.this, "");
 
-        addSearchFragment();
+        savedInstanceExists = savedInstanceState != null;
+        if (!savedInstanceExists) {
+            addSearchFragment();
+        }
 
         refreshProgressbar = findViewById(R.id.refreshProgress);
 
@@ -351,6 +355,7 @@ public class ViewVideo extends AppCompatActivity {
             case android.R.id.home:
                 intent = new Intent(ViewVideo.this, Home.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.putExtra("SplashscreenLoaded", true);
                 startActivity(intent);
                 finish();
                 return true;
@@ -408,7 +413,7 @@ public class ViewVideo extends AppCompatActivity {
             getWindow().setFormat(PixelFormat.TRANSLUCENT);
 
             //set up videoView
-            final Uri video = Uri.parse(videoData.getfilePathURL());
+            final Uri video = Uri.parse(videoData.getfilePathURL().replaceAll(" ", "%20"));
             videoView.setVideoURI(video);
             videoView.requestFocus();
             videoView.pause();
@@ -544,7 +549,7 @@ public class ViewVideo extends AppCompatActivity {
                 switch (mLocation) {
                     case LOCAL:
                         Log.d(TAG, "Local state detected. Playing locally...");
-                        videoView.setVideoURI(Uri.parse(videoData.getfilePathURL()));
+                        videoView.setVideoURI(Uri.parse(videoData.getfilePathURL().replaceAll(" ", "%20")));
                         videoView.seekTo(0);
                         shouldStartPlayback = true;
                         videoView.start();

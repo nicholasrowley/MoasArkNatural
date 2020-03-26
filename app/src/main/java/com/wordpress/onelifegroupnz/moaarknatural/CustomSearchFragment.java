@@ -38,6 +38,8 @@ public class CustomSearchFragment extends Fragment {
     private MatrixCursor cursor;
     private View view;
 
+    private static String lastSessionID;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,8 +50,30 @@ public class CustomSearchFragment extends Fragment {
         if (view == null) {
             view = inflater.inflate(R.layout.search_fragment, container, false);
 
-            if (appData == null)
-                appData = GlobalAppData.getInstance(getString(R.string.DIRECTORY_ROOT), getContext(), "");
+            Log.d("Run: ", "add fragment");
+
+            if (((Activity)view.getContext()).toString().equals(lastSessionID)) {
+                Log.d("SearchFrag", "Unnatural execution of activity detected. restarting application.");
+                Intent intent = new Intent(((Activity) view.getContext()), SplashScreen.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+            } else {
+                lastSessionID = ((Activity)view.getContext()).toString();
+            }
+
+            if (appData == null) {
+                final Thread fetchData = new Thread() {
+                    public void run() {
+                        appData = GlobalAppData.getInstance(getString(R.string.DIRECTORY_ROOT), getContext(), "");
+                    }
+                };
+                fetchData.start();
+                try {
+                    fetchData.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
 
             final String[] from = new String[] {"videoName"};
             final int[] to = new int[] {android.R.id.text1};

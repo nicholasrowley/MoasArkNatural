@@ -63,6 +63,7 @@ public class VideoGallery extends AppCompatActivity {
     private String targetFolder;
     private ProgressBar refreshProgressbar;
     private int galleryViewButtonsLoaded;
+    private boolean savedInstanceExists;
 
     private CastContext mCastContext;
     private MenuItem mediaRouteMenuItem;
@@ -104,7 +105,10 @@ public class VideoGallery extends AppCompatActivity {
 
         galleryViewButtonsLoaded = 0;
 
-        addSearchFragment();
+        savedInstanceExists = savedInstanceState != null;
+        if (!savedInstanceExists) {
+            addSearchFragment();
+        }
 
         refreshProgressbar = findViewById(R.id.refreshProgress);
 

@@ -47,6 +47,7 @@ public class BGPSignUp extends AppCompatActivity {
 
     private SearchView searchView;
     private TextView formEmail;
+    private boolean savedInstanceExists;
 
     private CastContext mCastContext;
     private MenuItem mediaRouteMenuItem;
@@ -70,7 +71,10 @@ public class BGPSignUp extends AppCompatActivity {
 
         formEmail = findViewById(R.id.cryptoSubmitEmail);
 
-        addSearchFragment();
+        savedInstanceExists = savedInstanceState != null;
+        if (!savedInstanceExists) {
+            addSearchFragment();
+        }
 
         initialiseAds();
 

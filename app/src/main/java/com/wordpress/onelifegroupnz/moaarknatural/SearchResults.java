@@ -60,6 +60,7 @@ public class SearchResults extends AppCompatActivity {
     private SearchView searchView;
     private ProgressBar progressBar;
     private CustomSearchFragment searchFragment;
+    private boolean savedInstanceExists;
 
     private ProgressBar refreshProgressbar;
 
@@ -114,7 +115,10 @@ public class SearchResults extends AppCompatActivity {
         refreshProgressbar = findViewById(R.id.refreshProgress);
 
         //For fragment implementation
-        addSearchFragment();
+        savedInstanceExists = savedInstanceState != null;
+        if (!savedInstanceExists) {
+            addSearchFragment();
+        }
 
         refreshContent();
 

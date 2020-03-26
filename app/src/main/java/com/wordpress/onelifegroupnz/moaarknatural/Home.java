@@ -132,7 +132,9 @@ public class Home extends AppCompatActivity {
 
         //For fragment implementation
         savedInstanceExists = savedInstanceState != null;
-        addSearchFragment();
+        if (!savedInstanceExists) {
+            addSearchFragment();
+        }
 
         refreshProgressbar = findViewById(R.id.refreshProgress);
         rssView = findViewById(R.id.fragment_container);
@@ -148,7 +150,6 @@ public class Home extends AppCompatActivity {
             mCastContext.addCastStateListener(mCastStateListener);
         }
         super.onResume();
-
     }
 
     @Override
@@ -524,6 +525,7 @@ public class Home extends AppCompatActivity {
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
         searchFragment = new CustomSearchFragment();
+        Log.d("Run: ", "add fragment at home");
         transaction.add(R.id.search_fragment, searchFragment);
         transaction.commit();
     }

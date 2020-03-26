@@ -38,6 +38,7 @@
             </activity>
         <activity
             android:name=".SplashScreen"
+            android:configChanges="orientation|screenSize"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -53,6 +54,7 @@
 
         <activity
             android:name=".VideoGallery"
+            android:configChanges="orientation|screenSize"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -60,6 +62,7 @@
         </activity>
         <activity
             android:name=".SearchResults"
+            android:configChanges="orientation|screenSize"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <!-- [START firebase_service] -->
@@ -72,6 +75,7 @@
         <!-- [END firebase_service] -->
         <activity
             android:name=".BGPSignUp"
+            android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_sign_up"
             android:theme="@style/AppTheme.NoActionBar" >
             <intent-filter>

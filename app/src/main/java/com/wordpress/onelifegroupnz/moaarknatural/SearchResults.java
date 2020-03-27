@@ -191,6 +191,14 @@ public class SearchResults extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(SearchResults.this, Home.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
     //Opens the app setting so the user can turn notifications on or off
     public void openAppSettings() {
         String packageName = getString(R.string.package_name);
@@ -524,9 +532,6 @@ public class SearchResults extends AppCompatActivity {
 
     /* Starts Google AdMob Ads */
     private void initialiseAds() {
-        //initialise ads
-        MobileAds.initialize(this, getString(R.string.banner_ad_unit_id));
-
         AdView mAdView = findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);

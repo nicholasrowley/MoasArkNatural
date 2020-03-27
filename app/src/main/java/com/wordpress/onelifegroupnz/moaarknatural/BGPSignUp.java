@@ -116,6 +116,7 @@ public class BGPSignUp extends AppCompatActivity {
                 //Proceed to Line Dance video gallery
                 intent = new Intent(BGPSignUp.this, VideoGallery.class);
                 intent.putExtra("videoPath", DANCEVIDEOPATH); //using video path to set the gallery
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 finish();
                 return true;
@@ -123,6 +124,7 @@ public class BGPSignUp extends AppCompatActivity {
                 //Proceed to Food video gallery
                 intent = new Intent(BGPSignUp.this, VideoGallery.class);
                 intent.putExtra("videoPath", FOODVIDEOPATH); //using video path to set the gallery
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 finish();
                 return true;
@@ -219,9 +221,6 @@ public class BGPSignUp extends AppCompatActivity {
 
     /*Loads ads for the page*/
     private void initialiseAds() {
-        //initialise ads
-        MobileAds.initialize(this, getString(R.string.banner_ad_unit_id));
-
         AdView mAdView = findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);

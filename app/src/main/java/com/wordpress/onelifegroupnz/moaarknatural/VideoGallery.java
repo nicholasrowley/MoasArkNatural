@@ -202,6 +202,14 @@ public class VideoGallery extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(VideoGallery.this, Home.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
     //This method loads the buttons for the Video Gallery after video data is found.
     public void loadGallery(boolean loadFromScratch) {
         List<Button> galleryLinks;
@@ -502,9 +510,6 @@ public class VideoGallery extends AppCompatActivity {
 
     /* Starts Google AdMob ads for this activity. */
     private void initialiseAds() {
-        //initialise ads
-        MobileAds.initialize(this, getString(R.string.banner_ad_unit_id));
-
         AdView mAdView = findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);

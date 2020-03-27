@@ -6,6 +6,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+
 /** Loading screen when app is opened. Also can process notification payloads*/
 public class SplashScreen extends AppCompatActivity {
 
@@ -16,6 +20,8 @@ public class SplashScreen extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
+
+        initialiseAds();
 
         final Thread warningThread = new Thread(){
             public void run(){
@@ -112,6 +118,17 @@ public class SplashScreen extends AppCompatActivity {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         }
+    }
+
+    /* Starts up Google AdMob Ads */
+    private void initialiseAds() {
+        //initialise ads
+        MobileAds.initialize(this, new OnInitializationCompleteListener() {
+            @Override
+            public void onInitializationComplete(InitializationStatus initializationStatus) {
+
+            }
+        });
     }
 
 }

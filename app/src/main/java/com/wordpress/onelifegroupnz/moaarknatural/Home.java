@@ -33,6 +33,7 @@ import android.widget.Toast;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.RequestConfiguration;
 import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 
@@ -40,6 +41,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.Arrays;
 
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.ALLVIDEOSCODE;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DANCEVIDEOPATH;
@@ -532,8 +534,8 @@ public class Home extends AppCompatActivity {
 
     /* Starts up Google AdMob Ads */
     private void initialiseAds() {
-        //initialise ads
-        MobileAds.initialize(this, getString(R.string.banner_ad_unit_id));
+        Log.d("Home ", "Adding ads");
+        //RequestConfiguration config = new RequestConfiguration.Builder().setTestDeviceIds(Arrays.asList("DFB0532C6F1BA5EC6AA8114601A89B48")).build();
 
         AdView mAdView = findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();

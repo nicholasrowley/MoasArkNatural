@@ -136,6 +136,7 @@ public class CustomSearchFragment extends Fragment {
                     Intent intent = new Intent(getContext(), SearchResults.class);
                     intent.putExtra("searchInput", suggestions.get(cursor.getInt(0)).getFileName());
                     intent.putExtra("searchType", spinner.getSelectedItem().toString());
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     searchView.clearFocus();
                     startActivity(intent);
                 }

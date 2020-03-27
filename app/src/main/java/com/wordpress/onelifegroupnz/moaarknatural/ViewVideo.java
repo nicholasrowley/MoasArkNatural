@@ -77,7 +77,7 @@ import com.google.android.gms.cast.MediaMetadata;
 * - Shows a pdf that matches the video content (if there is one)*/
 public class ViewVideo extends AppCompatActivity {
 
-    private static final String TAG = "LocalPlayerActivity";
+    private static final String TAG = "ViewVideo";
     private GlobalAppData appData; //singleton instance of globalAppData
     private FileDataListing videoData; //single video data object
     private FileDataListing pdfData; //single stepsheet data object
@@ -286,7 +286,7 @@ public class ViewVideo extends AppCompatActivity {
         // do not use if you have other WebViews still alive.
         // If you create another WebView after calling this,
         // make sure to call webview.resumeTimers().
-        webview.pauseTimers();
+        //webview.pauseTimers(); //This also pauses ad banners on other activities
         videoView.pause();
     }
 
@@ -355,9 +355,7 @@ public class ViewVideo extends AppCompatActivity {
             case android.R.id.home:
                 intent = new Intent(ViewVideo.this, Home.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                intent.putExtra("SplashscreenLoaded", true);
-                startActivity(intent);
-                finish();
+                startNewActivity(intent);
                 return true;
             case R.id.action_notification:
                 openAppSettings();
@@ -366,15 +364,15 @@ public class ViewVideo extends AppCompatActivity {
                 //Proceed to Line Dance video gallery
                 intent = new Intent(ViewVideo.this, VideoGallery.class);
                 intent.putExtra("videoPath", DANCEVIDEOPATH); //using video path to set the gallery
-                startActivity(intent);
-                finish();
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startNewActivity(intent);
                 return true;
             case R.id.menu_food_video_gallery:
                 //Proceed to Food video gallery
                 intent = new Intent(ViewVideo.this, VideoGallery.class);
                 intent.putExtra("videoPath", FOODVIDEOPATH); //using video path to set the gallery
-                startActivity(intent);
-                finish();
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startNewActivity(intent);
                 return true;
             case R.id.menu_refresh:
                 if(!(refreshProgressbar.getVisibility() == View.VISIBLE)) {
@@ -1161,9 +1159,6 @@ public class ViewVideo extends AppCompatActivity {
 
     /* Starts Google AdMob ads for this activity. */
     private void initialiseAds() {
-        //initialise ads
-        MobileAds.initialize(this, getString(R.string.banner_ad_unit_id));
-
         AdView mAdView = findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
@@ -1458,5 +1453,12 @@ public class ViewVideo extends AppCompatActivity {
                 .setMetadata(movieMetadata)
                 .setStreamDuration(videoData.getDurationInMilliseconds())
                 .build();
+    }
+
+    //starts new activity and destroys the current activity
+    private void startNewActivity(Intent intent) {
+        videoView.pause();
+        startActivity(intent);
+        finish();
     }
 }

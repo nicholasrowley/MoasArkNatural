@@ -382,7 +382,7 @@ public class ViewVideo extends AppCompatActivity {
                 return true;
             case R.id.menu_contact_form:
                 //Proceed to contact form on Moa's Ark website
-                Uri uri = Uri.parse(getString(R.string.website_contact_form_url));
+                Uri uri = Uri.parse(getString(R.string.website_contact_form_url).replaceAll(" ", "%20"));
                 intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 return true;
@@ -1026,7 +1026,7 @@ public class ViewVideo extends AppCompatActivity {
         //display pdf
         webview.getSettings().setJavaScriptEnabled(true);
 
-        final String pdf = pdfData.getfilePathURL();
+        final String pdf = pdfData.getfilePathURL().replaceAll(" ", "%20");
         webview.loadUrl("https://docs.google.com/viewer?url=" + pdf);
         webview.setVisibility(View.VISIBLE);
         webview.getSettings().setBuiltInZoomControls(true); //allows zoom controls and pinch zooming.
@@ -1395,14 +1395,14 @@ public class ViewVideo extends AppCompatActivity {
                 int loadAttempts = 0;
                 do {
                     //check for pdf data
-                    castImageData = appData.getImageContent(getString(R.string.DIRECTORY_ROOT), videoData.getName());
+                    castImageData = appData.getImageContent(getString(R.string.DIRECTORY_ROOT).replaceAll(" ", "%20"), videoData.getName());
                     loadAttempts++;
                 } while (loadAttempts < 5 && !appData.dbSuccess(GlobalAppData.CASTIMAGEPATH));
 
                 if (castImageData.getfilePathURL().equals("")) {
-                    castImage = new WebImage(Uri.parse("https://shoptradenz.com/moasapp/castimages/imagedefault3.jpg"));
+                    castImage = new WebImage(Uri.parse(("https://shoptradenz.com/moasapp/castimages/imagedefault3.jpg").replaceAll(" ", "%20")));
                 } else {
-                    castImage = new WebImage(Uri.parse(castImageData.getfilePathURL()));
+                    castImage = new WebImage(Uri.parse(castImageData.getfilePathURL().replaceAll(" ", "%20")));
                 }
 
                 if (videoData.getDurationInMilliseconds() == 0L) {
@@ -1447,7 +1447,7 @@ public class ViewVideo extends AppCompatActivity {
 
         movieMetadata.addImage(castImage);
 
-        return new MediaInfo.Builder(videoData.getfilePathURL())
+        return new MediaInfo.Builder(videoData.getfilePathURL().replaceAll(" ", "%20"))
                 .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
                 .setContentType("videos/mp4")
                 .setMetadata(movieMetadata)

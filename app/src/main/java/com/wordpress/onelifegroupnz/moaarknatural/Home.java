@@ -225,7 +225,7 @@ public class Home extends AppCompatActivity {
                 return true;
             case R.id.menu_contact_form:
                 //Proceed to contact form on Moa's Ark website
-                Uri uri = Uri.parse(getString(R.string.website_contact_form_url));
+                Uri uri = Uri.parse(getString(R.string.website_contact_form_url).replaceAll(" ", "%20"));
                 intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 return true;
@@ -496,7 +496,7 @@ public class Home extends AppCompatActivity {
                 }
                 break;
             case R.id.productLinkBtn:
-                Uri uri = Uri.parse(getString(R.string.website_shop_url));
+                Uri uri = Uri.parse(getString(R.string.website_shop_url).replaceAll(" ", "%20"));
                 intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 break;
@@ -594,7 +594,7 @@ public class Home extends AppCompatActivity {
     /* Grabs tbe tagline from the web server and displays it as the first line in the app. */
     private void loadTagLine() {
         try {
-            BufferedReader taglineBr = new BufferedReader(new InputStreamReader(new URL(getString(R.string.DIRECTORY_ROOT) + GlobalAppData.TAGLINETXTPATH).openStream()));
+            BufferedReader taglineBr = new BufferedReader(new InputStreamReader(new URL(getString(R.string.DIRECTORY_ROOT).replaceAll(" ", "%20") + GlobalAppData.TAGLINETXTPATH.replaceAll(" ", "%20")).openStream()));
 
             if ((tagline = taglineBr.readLine()) == null) {
                 tagline = "";

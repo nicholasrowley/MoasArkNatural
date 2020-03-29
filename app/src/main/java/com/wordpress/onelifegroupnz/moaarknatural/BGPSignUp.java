@@ -146,11 +146,11 @@ public class BGPSignUp extends AppCompatActivity {
         Intent intent;
         switch (v.getId()) {
             case R.id.paFormBtn:
-                String paFormUrl = getString(R.string.bgp_agreement_url);
+                String paFormUrl = getString(R.string.bgp_agreement_url).replaceAll(" ", "%20");
                 loadPdfFile(paFormUrl);
                 break;
             case R.id.cryptoSharesBtn:
-                String bgpSharesUrl = getString(R.string.BGP_Shares_url);
+                String bgpSharesUrl = getString(R.string.BGP_Shares_url).replaceAll(" ", "%20");
                 loadPdfFile(bgpSharesUrl);
                 break;
             case R.id.copyBtn:
@@ -163,7 +163,7 @@ public class BGPSignUp extends AppCompatActivity {
                 break;
             case R.id.cryptoRegisterBtn:
                 //Proceed to register form online
-                Uri uri = Uri.parse(getString(R.string.website_bgp_register_url));
+                Uri uri = Uri.parse(getString(R.string.website_bgp_register_url).replaceAll(" ", "%20"));
                 intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 break;

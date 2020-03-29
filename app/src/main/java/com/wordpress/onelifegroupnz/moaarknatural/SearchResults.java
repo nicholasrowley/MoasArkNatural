@@ -183,7 +183,7 @@ public class SearchResults extends AppCompatActivity {
                 return true;
             case R.id.menu_contact_form:
                 //Proceed to contact form on Moa's Ark website
-                Uri uri = Uri.parse(getString(R.string.website_contact_form_url));
+                Uri uri = Uri.parse(getString(R.string.website_contact_form_url).replaceAll(" ", "%20"));
                 intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 return true;

@@ -48,7 +48,7 @@ public class FileDataListing implements Serializable {
     public void setDuration() {
         //sets the video duration in milliseconds
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        retriever.setDataSource(filePath, new HashMap<String, String>());
+        retriever.setDataSource(filePath.replaceAll(" ", "%20"), new HashMap<String, String>());
         String time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
         duration = Long.parseLong(time);
         retriever.release();

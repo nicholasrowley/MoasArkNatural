@@ -390,10 +390,10 @@ public class ViewVideo extends AppCompatActivity {
                 if(videoData != null && !videoData.getfilePathURL().isEmpty()) {
                     Intent sendIntent = new Intent();
                     sendIntent.setAction(Intent.ACTION_SEND);
-                    sendIntent.putExtra(Intent.EXTRA_TEXT, videoData.getfilePathURL().replaceAll(" ", "%20"));
+                    sendIntent.putExtra(Intent.EXTRA_TEXT, "Shared " + videoData.getName() + " from Moa\'s Ark Natural NZ app\n" + videoData.getfilePathURL().replaceAll(" ", "%20"));
                     sendIntent.setType("text/plain");
 
-                    Intent shareIntent = Intent.createChooser(sendIntent, null);
+                    Intent shareIntent = Intent.createChooser(sendIntent, "Share Video URL with...");
                     startActivity(shareIntent);
                 }
                 return true;

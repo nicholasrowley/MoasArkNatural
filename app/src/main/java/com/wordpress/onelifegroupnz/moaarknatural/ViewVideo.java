@@ -50,7 +50,6 @@ import android.widget.VideoView;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.cast.MediaLoadRequestData;
 import com.google.android.gms.cast.MediaSeekOptions;
 import com.google.android.gms.common.images.WebImage;
@@ -402,7 +401,6 @@ public class ViewVideo extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    //TODO Figure out if Google Cast is affecting pdf load
     //video view play method (runs when activity is started/resumed)
     private void PlayVideo() {
         progressBar.setVisibility(View.VISIBLE);
@@ -490,6 +488,9 @@ public class ViewVideo extends AppCompatActivity {
         mEndText.setText(formatMillis(duration));
     }
 
+    /**
+     * updates controllers in response to playback location
+     */
     private void updatePlaybackLocation(PlaybackLocation location) {
         mLocation = location;
         if (location == PlaybackLocation.LOCAL) {
@@ -700,6 +701,8 @@ public class ViewVideo extends AppCompatActivity {
                 videoView.start();
                 if (!shouldStartPlayback || mLocation == PlaybackLocation.REMOTE)
                     videoView.pause();
+
+
             }
         });
 
@@ -708,7 +711,6 @@ public class ViewVideo extends AppCompatActivity {
             @Override
             public void onCompletion(MediaPlayer mp) {
                 stopTrickplayTimer();
-                Log.d(TAG, "setOnCompletionListener()");
                 mPlaybackState = PlaybackState.IDLE;
                 updatePlayButton(mPlaybackState);
             }
@@ -1108,7 +1110,7 @@ public class ViewVideo extends AppCompatActivity {
     /*Tests the webview for an image. Should only run when webview is on the screen.
     * This is based on the assumption that the first pixel is never white when the webview loads successfully.*/
     private void testWebview(final WebView view) {
-        Log.d(TAG, "TESTING PDF... " + Integer.toString(pdfTestAttempts + 1));
+        Log.d(TAG, "TESTING PDF ATTEMPT " + Integer.toString(pdfTestAttempts + 1));
         final Thread pdfWaitTask = new Thread() {
             public void run() {
                 try {
@@ -1340,7 +1342,6 @@ public class ViewVideo extends AppCompatActivity {
             public void onSessionSuspended(CastSession session, int reason) {}
 
             private void onApplicationConnected(CastSession castSession) {
-                Log.d(TAG, "OnApplicationConntected()");
                 mCastSession = castSession;
                 if (null != videoData) {
 
@@ -1367,6 +1368,9 @@ public class ViewVideo extends AppCompatActivity {
         };
     }
 
+    /**
+     * starts up the remote cast for viewing the video remotely. This is run on another thread to avoid stopping user input.
+     */
     private void loadRemoteMedia(int position, boolean autoPlay) {
         castSessionLoading = true;
         if (mCastSession == null) {

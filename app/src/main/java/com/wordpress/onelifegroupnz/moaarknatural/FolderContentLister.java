@@ -106,7 +106,6 @@ public class FolderContentLister extends AsyncTask<Object, Void, Object> {
         while (!sourceToParse.startsWith("</pre>")) {
             //Select the characters for the date and save it as a string
 
-            //Log.d("pattern test 1:", sourceToParse);
             Pattern pd = Pattern.compile(".{10}");
             Matcher md = pd.matcher(sourceToParse);
             if (md.find()){

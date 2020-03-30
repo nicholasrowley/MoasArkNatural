@@ -50,8 +50,6 @@ public class CustomSearchFragment extends Fragment {
         if (view == null) {
             view = inflater.inflate(R.layout.search_fragment, container, false);
 
-            Log.d("Run: ", "add fragment");
-
             if (((Activity)view.getContext()).toString().equals(lastSessionID)) {
                 Log.d("SearchFrag", "Unnatural execution of activity detected. restarting application.");
                 Intent intent = new Intent(((Activity) view.getContext()), SplashScreen.class);

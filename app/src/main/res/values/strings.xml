@@ -34,6 +34,10 @@
     <string name="pdf_reload_text_generic">There was an error getting additional data from the server. Try reloading it.</string>
     <string name="pdf_reload_text_stepsheet">There was an error getting stepsheet data from the server. Try reloading it.</string>
     <string name="pdf_reload_text_recipe">There was an error getting recipe data from the server. Try reloading it.</string>
+    <string name="previous_video"><![CDATA[< Previous Video]]></string>
+    <string name="next_video"><![CDATA[Next Video >]]></string>
+    <string name="app_play_store_url">https://play.google.com/store/apps/details?id=com.wordpress.onelifegroupnz.moaarknatural</string>
+    <string name="no_pdf_found_generic">No description was found for this video.</string>
 
     <!-- Search Type spinner suggestions-->
     <string name="search_type_title">Search Type:</string>

@@ -464,7 +464,7 @@ public class Home extends AppCompatActivity {
                 } else {
                     //Proceed to ViewVideo
                     intent = new Intent(Home.this, ViewVideo.class);
-                    intent.putExtra("videoIndex", appData.getFeatureDanceVideo());
+                    intent.putExtra("videoData", appData.getFeatureDanceVideo());
                     intent.putExtra("shouldStart", true);
                     startActivity(intent);
                 }
@@ -490,7 +490,7 @@ public class Home extends AppCompatActivity {
                 } else {
                     //Proceed to ViewVideo
                     intent = new Intent(Home.this, ViewVideo.class);
-                    intent.putExtra("videoIndex", appData.getFeatureFoodVideo());
+                    intent.putExtra("videoData", appData.getFeatureFoodVideo());
                     intent.putExtra("shouldStart", true);
                     startActivity(intent);
                 }

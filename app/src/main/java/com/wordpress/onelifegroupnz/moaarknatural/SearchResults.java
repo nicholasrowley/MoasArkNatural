@@ -17,6 +17,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
+
+import android.os.Parcelable;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,6 +34,7 @@ import android.widget.Toast;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -290,8 +293,11 @@ public class SearchResults extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     //Proceed to View_Video
+                    appData.setLastSearchResult(videoInfoResults);
                     Intent intent = new Intent(SearchResults.this, ViewVideo.class);
-                    intent.putExtra("videoIndex", videoInfoResults.get(view.getId()));
+                    intent.putExtra("videoData", videoInfoResults.get(view.getId()));
+                    intent.putExtra("videoIndex", view.getId());
+                    intent.putExtra("wasSearched", true);
                     intent.putExtra("shouldStart", true);
                     startActivity(intent);
                 }

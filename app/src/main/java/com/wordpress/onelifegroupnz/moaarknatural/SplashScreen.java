@@ -107,7 +107,7 @@ public class SplashScreen extends AppCompatActivity {
         if (video != null) {
             //Proceed to View_Video
             Intent intent = new Intent(this, ViewVideo.class);
-            intent.putExtra("videoIndex", video);
+            intent.putExtra("videoData", video);
             intent.putExtra("shouldStart", true);
             startActivity(intent);
         }

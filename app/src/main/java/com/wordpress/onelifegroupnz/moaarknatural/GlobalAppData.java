@@ -27,6 +27,7 @@ public class GlobalAppData {
     private FolderContentLister foodVideoFileLister;
     private List<FileDataListing> danceVideoInfoList;
     private List<FileDataListing> foodVideoInfoList;
+    private List<FileDataListing> lastSearchResult;
     private int danceVideosLoaded;
     private int foodVideosLoaded;
     public static final String DANCEVIDEOPATH = "/line dance videos/";
@@ -329,5 +330,15 @@ public class GlobalAppData {
     /* returns the data for the feature dance video */
     public FileDataListing getFeatureDanceVideo() {
         return featureDanceInfo;
+    }
+
+    public void setLastSearchResult(List<FileDataListing> searchResult) {
+        lastSearchResult = searchResult;
+        Log.d("search list: ", "List Set");
+    }
+
+    public List<FileDataListing> getVideoListFromLastSearchResult() {
+        Log.d("search list: ", "List Get");
+        return lastSearchResult;
     }
 }

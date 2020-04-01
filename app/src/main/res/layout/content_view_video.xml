@@ -80,6 +80,37 @@ tools:showIn="@layout/activity_view_video">
                 android:background="@drawable/player_bg_gradient_dark">
 
                 <RelativeLayout
+                    android:id="@+id/playlist_bar"
+                    android:layout_width="fill_parent"
+                    android:layout_height="45dp"
+                    android:layout_alignParentTop="true">
+
+                    <Button
+                        android:id="@+id/preVidBtn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:background="#00FFFFFF"
+                        android:paddingLeft="@dimen/activity_horizontal_margin"
+                        android:paddingRight="@dimen/activity_horizontal_margin"
+                        android:text="@string/previous_video"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14dp" />
+
+                    <Button
+                        android:id="@+id/nextVidBtn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:background="#00BFBFBF"
+                        android:paddingLeft="@dimen/activity_horizontal_margin"
+                        android:paddingRight="@dimen/activity_horizontal_margin"
+                        android:text="@string/next_video"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14dp" />
+                </RelativeLayout>
+
+                <RelativeLayout
                     android:id="@+id/control_bar"
                     android:layout_width="fill_parent"
                     android:layout_height="45dp"
@@ -156,7 +187,7 @@ tools:showIn="@layout/activity_view_video">
                     android:layout_marginRight="@dimen/activity_horizontal_margin"
                     android:textSize="@dimen/subTitle_text_size"
                     android:visibility="visible"
-                    tools:text="@string/stepsheet_not_found" />
+                    tools:text="@string/no_pdf_found_generic" />
 
                 <LinearLayout
                     android:id="@+id/pdfReloadMessage"

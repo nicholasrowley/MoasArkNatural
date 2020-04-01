@@ -38,6 +38,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -55,6 +56,8 @@ import com.google.android.gms.cast.MediaSeekOptions;
 import com.google.android.gms.common.images.WebImage;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -100,6 +103,8 @@ public class ViewVideo extends AppCompatActivity {
     private Timer mControllersTimer;
     private PlaybackLocation mLocation;
     private PlaybackState mPlaybackState;
+    private Button mPreVidBtn;
+    private Button mNextVidBtn;
     private final Handler mHandler = new Handler();
     private int mDuration;
     private boolean mControllersVisible;
@@ -107,6 +112,10 @@ public class ViewVideo extends AppCompatActivity {
     boolean shouldStartPlayback;
     int startPosition; //the current position to start the video
     private boolean savedInstanceExists;
+    private String videoTypePath;
+    private int videoIndex;
+    private boolean wasSearched;
+    private List<FileDataListing> searchList;
 
     private SearchView searchView;
     private LinearLayout portraitItems;
@@ -210,11 +219,23 @@ public class ViewVideo extends AppCompatActivity {
             }
         });
 
+
+
         pdfPixelTestOnOrientationChange = false;
+
+        appData = GlobalAppData.getInstance(getString(R.string.DIRECTORY_ROOT),
+                ViewVideo.this, "");
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            videoData = (FileDataListing) extras.getSerializable("videoIndex");
+            videoData = (FileDataListing) extras.getSerializable("videoData");
+            videoIndex = extras.getInt("videoIndex", -1);
+            //TODO get searchList
+            wasSearched = extras.getBoolean("wasSearched", false);
+
+            if (wasSearched)
+                searchList = appData.getVideoListFromLastSearchResult();
+
             shouldStartPlayback = extras.getBoolean("shouldStart");
             startPosition = extras.getInt("startPosition", 0);
         }
@@ -228,15 +249,68 @@ public class ViewVideo extends AppCompatActivity {
 
         setupControlsCallbacks();
 
-        appData = GlobalAppData.getInstance(getString(R.string.DIRECTORY_ROOT),
-                ViewVideo.this, "");
-
         savedInstanceExists = savedInstanceState != null;
         if (!savedInstanceExists) {
             addSearchFragment();
         }
 
         refreshProgressbar = findViewById(R.id.refreshProgress);
+
+        //set up previous and next video buttons
+        mPreVidBtn = findViewById(R.id.preVidBtn);
+        mNextVidBtn = findViewById(R.id.nextVidBtn);
+
+        //enable on touch if videos are available
+        if (videoData.getFolderPath().equals(getString(R.string.DIRECTORY_ROOT) + DANCEVIDEOPATH)) {
+            videoTypePath = DANCEVIDEOPATH;
+        } else if (videoData.getFolderPath().equals(getString(R.string.DIRECTORY_ROOT) + FOODVIDEOPATH)) {
+            videoTypePath = FOODVIDEOPATH;
+        }
+
+        if (videoTypePath != null) {
+            Log.d("index: ", Integer.toString(appData.getVideoData(videoTypePath).indexOf(videoData)));
+            if (videoIndex > 0) {
+                mPreVidBtn.setTextColor(Color.WHITE);
+                //TODO DO NOT USE ONTOUCH!!!!
+                mPreVidBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (wasSearched) {
+                            Toast.makeText(getApplicationContext(), "Displaying previous video in search results", Toast.LENGTH_SHORT).show();
+                        } else if(videoTypePath.equals(DANCEVIDEOPATH)) {
+                            Toast.makeText(getApplicationContext(), "Displaying previous video in " + getString(R.string.title_activity_dance_video_gallery), Toast.LENGTH_SHORT).show();
+                        } else if(videoTypePath.equals(FOODVIDEOPATH)) {
+                            Toast.makeText(getApplicationContext(), "Displaying previous video in " + getString(R.string.title_activity_food_video_gallery), Toast.LENGTH_SHORT).show();
+                        }
+                        seekToVideoID(videoIndex - 1);
+                    }
+                });
+            } else {
+                mPreVidBtn.setTextColor(Color.GRAY);
+            }
+
+            if ((!wasSearched && (videoIndex < appData.getVideoData(videoTypePath).size() - 1)) || (wasSearched && (videoIndex < searchList.size() - 1))) {
+                mNextVidBtn.setTextColor(Color.WHITE);
+                mNextVidBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (wasSearched) {
+                            Toast.makeText(getApplicationContext(), "Displaying next video in search results", Toast.LENGTH_SHORT).show();
+                        } else if(videoTypePath.equals(DANCEVIDEOPATH)) {
+                            Toast.makeText(getApplicationContext(), "Displaying next video in " + getString(R.string.title_activity_dance_video_gallery), Toast.LENGTH_SHORT).show();
+                        } else if(videoTypePath.equals(FOODVIDEOPATH)) {
+                            Toast.makeText(getApplicationContext(), "Displaying next video in " + getString(R.string.title_activity_food_video_gallery), Toast.LENGTH_SHORT).show();
+                        }
+                        seekToVideoID(videoIndex + 1);
+                    }
+                });
+            } else {
+                mNextVidBtn.setTextColor(Color.GRAY);
+            }
+        } else {
+            mPreVidBtn.setTextColor(Color.GRAY);
+            mNextVidBtn.setTextColor(Color.GRAY);
+        }
 
         setOrientation();
 
@@ -390,7 +464,7 @@ public class ViewVideo extends AppCompatActivity {
                 if(videoData != null && !videoData.getfilePathURL().isEmpty()) {
                     Intent sendIntent = new Intent();
                     sendIntent.setAction(Intent.ACTION_SEND);
-                    sendIntent.putExtra(Intent.EXTRA_TEXT, "Shared " + videoData.getName() + " from Moa\'s Ark Natural NZ app\n" + videoData.getfilePathURL().replaceAll(" ", "%20"));
+                    sendIntent.putExtra(Intent.EXTRA_TEXT, "Shared " + videoData.getName() + " from Moa\'s Ark Natural NZ app. Download from " + getString(R.string.app_play_store_url) + "\n\n" + videoData.getfilePathURL().replaceAll(" ", "%20"));
                     sendIntent.setType("text/plain");
 
                     Intent shareIntent = Intent.createChooser(sendIntent, "Share Video URL with...");
@@ -1462,6 +1536,22 @@ public class ViewVideo extends AppCompatActivity {
     //starts new activity and destroys the current activity
     private void startNewActivity(Intent intent) {
         videoView.pause();
+        startActivity(intent);
+        finish();
+    }
+
+    private void seekToVideoID(int index) {
+        //Proceed to View_Video
+        Intent intent = new Intent(ViewVideo.this, ViewVideo.class);
+        intent.putExtra("videoIndex", index);
+        if (wasSearched) {
+            appData.setLastSearchResult(searchList);
+            intent.putExtra("wasSearched", true);
+            intent.putExtra("videoData", searchList.get(index));
+        } else {
+            intent.putExtra("videoData", appData.getVideoData(videoTypePath).get(index));
+        }
+        intent.putExtra("shouldStart", true);
         startActivity(intent);
         finish();
     }

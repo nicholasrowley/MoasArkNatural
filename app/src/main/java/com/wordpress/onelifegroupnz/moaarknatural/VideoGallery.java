@@ -275,7 +275,8 @@ public class VideoGallery extends AppCompatActivity {
                 public void onClick(View view) {
                     //Proceed to ViewVideo
                     Intent intent = new Intent(VideoGallery.this, ViewVideo.class);
-                    intent.putExtra("videoIndex", appData.getVideoData(targetFolder).get(view.getId()));
+                    intent.putExtra("videoData", appData.getVideoData(targetFolder).get(view.getId()));
+                    intent.putExtra("videoIndex", view.getId());
                     intent.putExtra("shouldStart", true);
                     startActivity(intent);
                 }

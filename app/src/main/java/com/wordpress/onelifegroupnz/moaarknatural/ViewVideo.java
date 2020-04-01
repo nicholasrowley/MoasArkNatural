@@ -8,6 +8,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -87,6 +88,7 @@ public class ViewVideo extends AppCompatActivity {
     private WebImage castImage;
     private Boolean dialogIsOpen; //ensure that only one video/wifi error dialog is displayed
     private Toolbar toolbar;
+    private SharedPreferences settings;
 
     private ProgressBar progressBar;
     private VideoView videoView;
@@ -242,9 +244,16 @@ public class ViewVideo extends AppCompatActivity {
 
         //check if activity refreshed
         if (savedInstanceState != null) {
-            startPosition = savedInstanceState.getInt("VideoTime");
+            startPosition = savedInstanceState.getInt("VideoTime", 0);
             refreshed = true;
         }
+
+        // Whenever the activity is created, set the video position based on bundles.
+        this.settings = getPreferences(MODE_PRIVATE);
+        SharedPreferences.Editor editor = this.settings.edit();
+        editor.putInt("videoPosition", startPosition);
+        editor.apply();
+
         dialogIsOpen = false;
 
         setupControlsCallbacks();
@@ -361,6 +370,11 @@ public class ViewVideo extends AppCompatActivity {
         // make sure to call webview.resumeTimers().
         //webview.pauseTimers(); //This also pauses ad banners on other activities
         videoView.pause();
+
+        // Whenever application is paused, save the video position for future sessions.
+        SharedPreferences.Editor editor = this.settings.edit();
+        editor.putInt("videoPosition", videoView.getCurrentPosition());
+        editor.apply();
     }
 
     @Override
@@ -379,10 +393,16 @@ public class ViewVideo extends AppCompatActivity {
         webview.onResume();
         webview.resumeTimers();
 
+        // Gets values from last session of your application, check video position
+        // start at 0 if no saved value was found (first session of your app)
+        this.settings = getPreferences(MODE_PRIVATE);
+        startPosition = settings.getInt("videoPosition", 0);
+
         if (!videoView.isPlaying()) {
             progressBar.setVisibility(View.VISIBLE);
         }
         pdfIsRedirecting = false;
+        Log.d(TAG, "Video start position is " + Integer.toString(startPosition));
         loadActivity();
     }
 
@@ -394,10 +414,10 @@ public class ViewVideo extends AppCompatActivity {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        //save the current position of the video, used when orientation changes
+        //save the current position of the video, used when activity is reopened
         outState.putInt("VideoTime", videoView.getCurrentPosition());
 
-        outState.putBoolean("shouldStart", true);
+        //outState.putBoolean("shouldStart", true);
         outState.putBoolean("fragment_added", true);
     }
 

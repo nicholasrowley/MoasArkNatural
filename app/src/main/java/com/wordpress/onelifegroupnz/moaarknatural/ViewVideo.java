@@ -57,7 +57,6 @@ import com.google.android.gms.cast.MediaSeekOptions;
 import com.google.android.gms.common.images.WebImage;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -118,6 +117,7 @@ public class ViewVideo extends AppCompatActivity {
     private int videoIndex;
     private boolean wasSearched;
     private List<FileDataListing> searchList;
+    private MenuItem searchBar;
 
     private SearchView searchView;
     private LinearLayout portraitItems;
@@ -126,7 +126,7 @@ public class ViewVideo extends AppCompatActivity {
     public static final int PDFLOADRETRIES = 5; //number of retries for loading PDF if test fails
     public static final int PDFLOADTIMEOUT = 5000; //timeout period in milliseconds to avoid pdf load testing too quickly
 
-    private boolean pdfPixelTestOnOrientationChange; //checks if the pdf webview needs to be checked on next orientation change to portrait.
+    private boolean pdfPixelTestDelayedStart; //checks if the pdf webview needs to be checked on next orientation change to portrait.
     private LinearLayout videoContainer;
 
     private CustomSearchFragment searchFragment;
@@ -223,7 +223,7 @@ public class ViewVideo extends AppCompatActivity {
 
 
 
-        pdfPixelTestOnOrientationChange = false;
+        pdfPixelTestDelayedStart = false;
 
         appData = GlobalAppData.getInstance(getString(R.string.DIRECTORY_ROOT),
                 ViewVideo.this, "");
@@ -979,44 +979,12 @@ public class ViewVideo extends AppCompatActivity {
             videoContainer.setLayoutParams(contParams);
             videoView.setLayoutParams(params);
 
-            //Webview testing is done on another thread to avoid pausing the UI Thread.
-            final Thread waitForWebview = new Thread() {
-                public void run() {
-                        //wait for webview to draw itself before testing webview.
-                        while(!(webview.getMeasuredHeight() > 0)) {
-                            try {
-                                sleep(100);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-            };
-
-            //Webview testing is done on another thread to avoid pausing the UI Thread.
-            final Thread webviewTestThread = new Thread() {
-                public void run() {
-                    testWebview(webview);
-                }
-            };
-
-            final Thread webviewPixelTest = new Thread() {
-                public void run() {
-                    waitForWebview.start();
-                    try {
-                        waitForWebview.join();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    runOnUiThread(webviewTestThread);
-                }
-            };
-        if (pdfPixelTestOnOrientationChange) {
-            webviewPixelTest.start();
-            pdfPixelTestOnOrientationChange = false;
-        }
+            startDelayedPdfTest();
         } else {
-            //hide toolbar and status bar
+            //hide toolbar, collapse search bar and hide status bar
+            if (findViewById(R.id.search_fragment).getVisibility() == View.VISIBLE) {
+                searchBar.collapseActionView();
+            }
             toolbar.setVisibility(View.GONE);
             findViewById(R.id.toolbarUnderline).setVisibility(View.GONE);
             decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
@@ -1032,6 +1000,46 @@ public class ViewVideo extends AppCompatActivity {
 
             videoContainer.setLayoutParams(contParams);
             videoView.setLayoutParams(params);
+        }
+    }
+
+    private void startDelayedPdfTest() {
+        //Webview testing is done on another thread to avoid pausing the UI Thread.
+        final Thread waitForWebview = new Thread() {
+            public void run() {
+                //wait for webview to draw itself before testing webview.
+                while(!(webview.getMeasuredHeight() > 0)) {
+                    try {
+                        sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+
+        //Webview testing is done on another thread to avoid pausing the UI Thread.
+        final Thread webviewTestThread = new Thread() {
+            public void run() {
+                testWebview(webview);
+            }
+        };
+
+        final Thread webviewPixelTest = new Thread() {
+            public void run() {
+                waitForWebview.start();
+                try {
+                    waitForWebview.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                runOnUiThread(webviewTestThread);
+            }
+        };
+        if (pdfPixelTestDelayedStart && (findViewById(R.id.search_fragment).getVisibility() == View.GONE)) {
+            Log.d(TAG, "Starting delayed testing of pdf.");
+            webviewPixelTest.start();
+            pdfPixelTestDelayedStart = false;
         }
     }
 
@@ -1134,11 +1142,12 @@ public class ViewVideo extends AppCompatActivity {
                 //If redirecting then we don't want to reload the webview if it hasn't loaded.
                 if (!pdfIsRedirecting) {
                     //we don't want to test the webview if it is not visible on the screen.
-                    if (view.getMeasuredHeight() > 0) {
+                    if ((view.getMeasuredHeight() > 0) && (findViewById(R.id.search_fragment).getVisibility() == View.GONE)) {
                         testWebview(view);
                     } else {
-                        //if not visible then postpone the test until orientation is changed to portrait.
-                        pdfPixelTestOnOrientationChange = true;
+                        //if not visible then postpone the test until orientation is changed to portrait or search is collapsed.
+                        Log.d(TAG, "Could not test pdf. Load test will be delayed.");
+                        pdfPixelTestDelayedStart = true;
                     }
                 }
             }
@@ -1201,6 +1210,7 @@ public class ViewVideo extends AppCompatActivity {
         return bitmap;
     }
 
+    //TODO keyboard open will crash the application.
     /*Tests the webview for an image. Should only run when webview is on the screen.
     * This is based on the assumption that the first pixel is never white when the webview loads successfully.*/
     private void testWebview(final WebView view) {
@@ -1290,18 +1300,23 @@ public class ViewVideo extends AppCompatActivity {
         final LinearLayout searchFragmentLayout = findViewById(R.id.search_fragment);
         searchFragmentLayout.setVisibility(View.GONE);
 
-        MenuItem searchItem = menu.findItem(R.id.search);
+        searchBar = menu.findItem(R.id.search);
 
-        searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
+        searchBar.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
+                //TODO toggle pdf test if not done
                 searchFragmentLayout.setVisibility(View.GONE);
+                if (portraitView) {
+                    startDelayedPdfTest();
+                }
                 searchView.clearFocus();
                 return true;
             }
 
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
+                //TODO flag for pdf test if not yet done
                 searchFragmentLayout.setVisibility(View.VISIBLE);
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 if (imm != null) {

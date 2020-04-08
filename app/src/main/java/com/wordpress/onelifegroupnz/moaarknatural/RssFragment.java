@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import androidx.fragment.app.Fragment;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,7 +48,11 @@ public class RssFragment extends Fragment implements AdapterView.OnItemClickList
             // "view" is still attached to the previous view hierarchy
             // so we need to remove it and re-attach it to the current one
             ViewGroup parent = (ViewGroup) view.getParent();
-            parent.removeView(view);
+            if (parent != null) {
+                parent.removeView(view);
+            } else {
+                Log.d("Test", "NULL");
+            }
         }
         return view;
     }

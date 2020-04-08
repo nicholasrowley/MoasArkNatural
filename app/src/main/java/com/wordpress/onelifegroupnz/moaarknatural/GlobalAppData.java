@@ -2,6 +2,7 @@ package com.wordpress.onelifegroupnz.moaarknatural;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -41,6 +42,7 @@ public class GlobalAppData {
     public static final String ALLVIDEOSCODE = "ALLVIDEOS";
     private List<SearchSuggestion> searchSuggestions;
     public static final int DROPBOXTIMEOUTLIMIT = 60000; //Milliseconds
+    private Toast toast;
 
     //name of featured videos & featured video
     private FileDataListing featureDanceInfo;
@@ -340,5 +342,21 @@ public class GlobalAppData {
     public List<FileDataListing> getVideoListFromLastSearchResult() {
         Log.d("search list: ", "List Get");
         return lastSearchResult;
+    }
+
+    public void showToastMessage(String message, boolean cancelPrevious, Context context ) {
+        if (toast != null) {
+            if (cancelPrevious) {
+                toast.setText(message);
+                toast.show();
+            }
+            else {
+                toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
+                toast.show();
+            }
+        } else {
+            toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
+            toast.show();
+        }
     }
 }

@@ -27,6 +27,7 @@ public class FolderContentLister extends AsyncTask<Object, Void, Object> {
     private String searchString;
     private List<FileDataListing> currentDirectoryListing;
     private boolean isValid; //checks if the url source was loaded properly
+    private boolean isFileFound; //checks if the url source was loaded but found nothing.
     private String sourceToParse; //remaining string to interpret.
     private int loadedFiles; //videos that have already been loaded
     public static final int LOADAMOUNT = 5; //number of files loaded with a single execution of the class. Less is faster.
@@ -50,14 +51,25 @@ public class FolderContentLister extends AsyncTask<Object, Void, Object> {
             loadItemsFromCurrentList();
 
             //if the first entry has empty fields then assume connection has failed.
-            if (!currentDirectoryListing.isEmpty())
+            if (!currentDirectoryListing.isEmpty()) {
+                Log.d("Lister Log", currentDirectoryListing.get(0).getName());
                 if (currentDirectoryListing.get(0).getName().equals("")) {
-                    Log.d("Lister Error", "could not connect to directory.");
+                    Log.d("Lister Error", "could not find any files.");
+                    isFileFound = false;
                     isValid = false;
+                } else {
+                    Log.d("Lister", "Files loaded.");
+                    isFileFound = true;
                 }
+            } else {
+                Log.d("Lister Error", "Directory empty. Something went wrong with the connection.");
+                isFileFound = false;
+            }
         } catch (IOException e) {
+            Log.d("Lister Error", "could not connect to directory.");
             isValid = false;
         }
+        Log.d("Lister Log", Boolean.toString(isValid));
         return null;
     }
 
@@ -84,6 +96,7 @@ public class FolderContentLister extends AsyncTask<Object, Void, Object> {
         in.close();
 
         sourceToParse = html.toString();
+        Log.d("Lister Log", sourceToParse);
         //Trim off irrelevant information in source code up to the first listing in directory listing.
         sourceToParse = sourceToParse.replaceFirst(".+?(?:<br><br>)", "");
 
@@ -174,5 +187,10 @@ public class FolderContentLister extends AsyncTask<Object, Void, Object> {
     /* returns the result of the last connection to web server directory listing*/
     public boolean httpConnectionSuccessful(){
         return isValid;
+    }
+
+    /* returns true if a file was found during the previous search */
+    public boolean isFileFound(){
+        return isFileFound;
     }
 }

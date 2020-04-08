@@ -123,6 +123,7 @@ public class ViewVideo extends AppCompatActivity {
     private LinearLayout portraitItems;
     private WebView webview;
     private int pdfTestAttempts; //prevents running to many tests
+    private boolean isTesting; //prevents the test counter from incrementing if a prior test was executed.
     public static final int PDFLOADRETRIES = 5; //number of retries for loading PDF if test fails
     public static final int PDFLOADTIMEOUT = 5000; //timeout period in milliseconds to avoid pdf load testing too quickly
 
@@ -159,6 +160,7 @@ public class ViewVideo extends AppCompatActivity {
         PLAYING, PAUSED, BUFFERING, IDLE
     }
 
+    //TODO fix autoplay button state at start of activity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -199,7 +201,7 @@ public class ViewVideo extends AppCompatActivity {
         } catch (RuntimeException re) {
             re.printStackTrace();
             //display message to user.
-            Toast.makeText(getApplicationContext(), getString(R.string.play_services_error_toast), Toast.LENGTH_SHORT).show();
+            appData.showToastMessage(getString(R.string.play_services_error_toast), false, getApplicationContext());
         }
 
         portraitItems = findViewById(R.id.portraitItems);
@@ -285,11 +287,11 @@ public class ViewVideo extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         if (wasSearched) {
-                            Toast.makeText(getApplicationContext(), "Displaying previous video in search results", Toast.LENGTH_SHORT).show();
+                            appData.showToastMessage("Displaying previous video in search results", true, getApplicationContext());
                         } else if(videoTypePath.equals(DANCEVIDEOPATH)) {
-                            Toast.makeText(getApplicationContext(), "Displaying previous video in " + getString(R.string.title_activity_dance_video_gallery), Toast.LENGTH_SHORT).show();
+                            appData.showToastMessage("Displaying previous video in " + getString(R.string.title_activity_dance_video_gallery), true, getApplicationContext());
                         } else if(videoTypePath.equals(FOODVIDEOPATH)) {
-                            Toast.makeText(getApplicationContext(), "Displaying previous video in " + getString(R.string.title_activity_food_video_gallery), Toast.LENGTH_SHORT).show();
+                            appData.showToastMessage("Displaying previous video in " + getString(R.string.title_activity_food_video_gallery), true, getApplicationContext());
                         }
                         seekToVideoID(videoIndex - 1);
                     }
@@ -304,11 +306,11 @@ public class ViewVideo extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         if (wasSearched) {
-                            Toast.makeText(getApplicationContext(), "Displaying next video in search results", Toast.LENGTH_SHORT).show();
+                            appData.showToastMessage("Displaying next video in " + getString(R.string.title_activity_food_video_gallery), true, getApplicationContext());
                         } else if(videoTypePath.equals(DANCEVIDEOPATH)) {
-                            Toast.makeText(getApplicationContext(), "Displaying next video in " + getString(R.string.title_activity_dance_video_gallery), Toast.LENGTH_SHORT).show();
+                            appData.showToastMessage("Displaying next video in " + getString(R.string.title_activity_food_video_gallery), true, getApplicationContext());
                         } else if(videoTypePath.equals(FOODVIDEOPATH)) {
-                            Toast.makeText(getApplicationContext(), "Displaying next video in " + getString(R.string.title_activity_food_video_gallery), Toast.LENGTH_SHORT).show();
+                            appData.showToastMessage("Displaying next video in " + getString(R.string.title_activity_food_video_gallery), true, getApplicationContext());
                         }
                         seekToVideoID(videoIndex + 1);
                     }
@@ -324,9 +326,9 @@ public class ViewVideo extends AppCompatActivity {
         setOrientation();
 
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
-            Toast.makeText(getApplicationContext(), "Switch to landscape for fullscreen view", Toast.LENGTH_SHORT).show();
+            appData.showToastMessage("Switch to landscape for fullscreen view", false, getApplicationContext());
         else
-            Toast.makeText(getApplicationContext(), "Switch to portrait to exit fullscreen view", Toast.LENGTH_SHORT).show();
+            appData.showToastMessage("Switch to portrait to exit fullscreen view", false, getApplicationContext());
 
         initialiseAds();
 
@@ -369,6 +371,7 @@ public class ViewVideo extends AppCompatActivity {
         // If you create another WebView after calling this,
         // make sure to call webview.resumeTimers().
         //webview.pauseTimers(); //This also pauses ad banners on other activities
+
         videoView.pause();
 
         // Whenever application is paused, save the video position for future sessions.
@@ -470,7 +473,19 @@ public class ViewVideo extends AppCompatActivity {
             case R.id.menu_refresh:
                 if(!(refreshProgressbar.getVisibility() == View.VISIBLE)) {
                     refreshProgressbar.setVisibility(View.VISIBLE);
+                    videoView.pause();
                     loadActivity();
+                    //TODO Add revised refresh code to reload the activity.
+                    //Proceed to View_Video
+                    /*intent = new Intent(ViewVideo.this, ViewVideo.class);
+                    intent.putExtra("videoIndex", videoIndex);
+                    intent.putExtra("wasSearched", wasSearched);
+                    intent.putExtra("videoData", videoData);
+                    intent.putExtra("shouldStart", true);
+                    intent.putExtra("startPosition", videoView.getCurrentPosition());
+
+                    startActivity(intent);
+                    finish();*/
                 }
                 return true;
             case R.id.menu_contact_form:
@@ -793,10 +808,8 @@ public class ViewVideo extends AppCompatActivity {
 
                 //set up a still image for the video
                 videoView.start();
-                if (!shouldStartPlayback || mLocation == PlaybackLocation.REMOTE)
+                if (!shouldStartPlayback || mLocation == PlaybackLocation.REMOTE || mPlaybackState == PlaybackState.PAUSED)
                     videoView.pause();
-
-
             }
         });
 
@@ -1101,6 +1114,7 @@ public class ViewVideo extends AppCompatActivity {
     }
 
     /* Prompts the user to try and reload pdf if pdf is unable to load on its own. */
+    //TODO Monitor Test and fix pdf reload counter if necessary.
     private void displayPDFReloadMessage() {
         //hide pdf view and display appropriate message.
         TextView noPdfMsg = findViewById(R.id.noSheetMsg);
@@ -1110,7 +1124,7 @@ public class ViewVideo extends AppCompatActivity {
         boolean requireRecipe = videoData.getFolderPath().equals(getString(R.string.DIRECTORY_ROOT) + FOODVIDEOPATH);
 
         if ((!appData.dbSuccess(GlobalAppData.STEPSHEETPATH) && requireStepsheet)
-                || (!appData.dbSuccess(GlobalAppData.RECIPEPATH) && requireRecipe) ) {
+                || (!appData.dbSuccess(GlobalAppData.RECIPEPATH) && requireRecipe) || (pdfTestAttempts >= PDFLOADRETRIES)) {
             findViewById(R.id.pdfReloadMessage).setVisibility(View.VISIBLE);
             TextView pdfReloadText = findViewById(R.id.pdfReloadText);
             if (requireStepsheet)
@@ -1202,17 +1216,24 @@ public class ViewVideo extends AppCompatActivity {
         });
     }
 
-    //Converts a View to Bitmap
-    private static Bitmap toBitmap(View view) {
-        Bitmap bitmap = Bitmap.createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        view.draw(canvas);
-        return bitmap;
+    //Converts a View to Bitmap. Returns null if the view is not visible to avoid crashing.
+    private Bitmap toBitmap(View view) {
+        try {
+            Bitmap bitmap = Bitmap.createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            view.draw(canvas);
+            return bitmap;
+        } catch (IllegalArgumentException iae) {
+            Log.d(TAG, "Test Failed.");
+            return null;
+        }
+
     }
 
     //TODO keyboard open will crash the application.
+    //TODO keyboard open fix but loading cursor is still visible after load.
     /*Tests the webview for an image. Should only run when webview is on the screen.
-    * This is based on the assumption that the first pixel is never white when the webview loads successfully.*/
+    * This is based on the assumption that the first pixel is never white when the webview loads successfully. */
     private void testWebview(final WebView view) {
         Log.d(TAG, "TESTING PDF ATTEMPT " + Integer.toString(pdfTestAttempts + 1));
         final Thread pdfWaitTask = new Thread() {
@@ -1227,22 +1248,35 @@ public class ViewVideo extends AppCompatActivity {
 
         final Thread pdfTestTask = new Thread() {
             public void run() {
-                int pixelDrawTest = toBitmap(view).getPixel(0,0);
+                Bitmap bitmap = toBitmap(view);
 
-                /*In this case the first pixel in the webview is never white so this can be used to test
-                if the webview has failed to load in case of a javascript loading issue. */
-                if(pixelDrawTest == Color.WHITE) {
-                    if (pdfTestAttempts < PDFLOADRETRIES) {
-                        findViewById(R.id.pdfProgressBar5).setVisibility(View.VISIBLE);
-                        loadWebview();
-                        pdfTestAttempts++;
+                if (bitmap != null) {
+                    int pixelDrawTest = bitmap.getPixel(0,0);
+
+                    /*In this case the first pixel in the webview is never white so this can be used to test
+                    if the webview has failed to load in case of a javascript loading issue. */
+                    if(pixelDrawTest == Color.WHITE) {
+                        if (pdfTestAttempts < PDFLOADRETRIES) {
+                            Log.d(TAG, "TESTING PDF ATTEMPT reload");
+                            findViewById(R.id.pdfProgressBar5).setVisibility(View.VISIBLE);
+                            loadWebview();
+                            if (findViewById(R.id.search_fragment).getVisibility() == View.GONE) {
+                                Log.d(TAG, "TESTING PDF ATTEMPT increment");
+                                pdfTestAttempts++;
+                            }
+                        } else {
+                            //show reload dialog message for pdf.
+                            displayPDFReloadMessage();
+                        }
                     } else {
-                        //show reload dialog message for pdf.
-                        displayPDFReloadMessage();
+                        findViewById(R.id.pdfProgressBar5).setVisibility(View.GONE);
                     }
                 } else {
+                    Log.d(TAG, "Illegal Argument for bitmap. Flaging for delayed test.");
+                    pdfPixelTestDelayedStart = true;
                     findViewById(R.id.pdfProgressBar5).setVisibility(View.GONE);
                 }
+
             }
         };
 
@@ -1254,13 +1288,17 @@ public class ViewVideo extends AppCompatActivity {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+                isTesting = false; //releases the method so it can be executed again.
                 runOnUiThread(pdfTestTask);
             }
         };
-        pdfTestExecuteTask.start();
 
-
-
+        if (!isTesting) {
+            isTesting = true; //locks the method so it can't be executed multiple times at once.
+            pdfTestExecuteTask.start();
+        } else {
+            Log.d("PDF test", "Simultaneous test execution blocked.");
+        }
     }
 
     /* Starts Google AdMob ads for this activity. */
@@ -1306,6 +1344,7 @@ public class ViewVideo extends AppCompatActivity {
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
                 //TODO toggle pdf test if not done
+                //loadPdf();
                 searchFragmentLayout.setVisibility(View.GONE);
                 if (portraitView) {
                     startDelayedPdfTest();
@@ -1317,6 +1356,7 @@ public class ViewVideo extends AppCompatActivity {
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
                 //TODO flag for pdf test if not yet done
+                //webview.loadUrl("about:blank");
                 searchFragmentLayout.setVisibility(View.VISIBLE);
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 if (imm != null) {
@@ -1548,7 +1588,7 @@ public class ViewVideo extends AppCompatActivity {
                 castSessionLoading = false;
             }
         };
-        Toast.makeText(getApplicationContext(), "Starting video cast...", Toast.LENGTH_SHORT).show();
+        appData.showToastMessage("Starting video cast...", true, getApplicationContext());
         startLoad.start();
     }
 

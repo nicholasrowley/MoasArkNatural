@@ -5,8 +5,6 @@ import android.media.MediaMetadataRetriever;
 import java.io.Serializable;
 import java.util.HashMap;
 
-import wseemann.media.FFmpegMediaMetadataRetriever;
-
 /**
  * This is a simple data object for storing information on Files that have been fetched from web server.
  * Created by Nicholas Rowley on 03/02/2020.

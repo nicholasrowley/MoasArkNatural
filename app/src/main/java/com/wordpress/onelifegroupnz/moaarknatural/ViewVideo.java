@@ -47,7 +47,6 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.google.android.gms.ads.AdRequest;
@@ -160,7 +159,6 @@ public class ViewVideo extends AppCompatActivity {
         PLAYING, PAUSED, BUFFERING, IDLE
     }
 
-    //TODO fix autoplay button state at start of activity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -234,7 +232,6 @@ public class ViewVideo extends AppCompatActivity {
         if (extras != null) {
             videoData = (FileDataListing) extras.getSerializable("videoData");
             videoIndex = extras.getInt("videoIndex", -1);
-            //TODO get searchList
             wasSearched = extras.getBoolean("wasSearched", false);
 
             if (wasSearched)
@@ -278,11 +275,10 @@ public class ViewVideo extends AppCompatActivity {
             videoTypePath = FOODVIDEOPATH;
         }
 
+        //sets up and enables / disables onclick functionality for next and previous buttons.
         if (videoTypePath != null) {
-            Log.d("index: ", Integer.toString(appData.getVideoData(videoTypePath).indexOf(videoData)));
             if (videoIndex > 0) {
                 mPreVidBtn.setTextColor(Color.WHITE);
-                //TODO DO NOT USE ONTOUCH!!!!
                 mPreVidBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -405,7 +401,6 @@ public class ViewVideo extends AppCompatActivity {
             progressBar.setVisibility(View.VISIBLE);
         }
         pdfIsRedirecting = false;
-        Log.d(TAG, "Video start position is " + Integer.toString(startPosition));
         loadActivity();
     }
 
@@ -419,8 +414,6 @@ public class ViewVideo extends AppCompatActivity {
 
         //save the current position of the video, used when activity is reopened
         outState.putInt("VideoTime", videoView.getCurrentPosition());
-
-        //outState.putBoolean("shouldStart", true);
         outState.putBoolean("fragment_added", true);
     }
 
@@ -475,17 +468,6 @@ public class ViewVideo extends AppCompatActivity {
                     refreshProgressbar.setVisibility(View.VISIBLE);
                     videoView.pause();
                     loadActivity();
-                    //TODO Add revised refresh code to reload the activity.
-                    //Proceed to View_Video
-                    /*intent = new Intent(ViewVideo.this, ViewVideo.class);
-                    intent.putExtra("videoIndex", videoIndex);
-                    intent.putExtra("wasSearched", wasSearched);
-                    intent.putExtra("videoData", videoData);
-                    intent.putExtra("shouldStart", true);
-                    intent.putExtra("startPosition", videoView.getCurrentPosition());
-
-                    startActivity(intent);
-                    finish();*/
                 }
                 return true;
             case R.id.menu_contact_form:
@@ -625,8 +607,6 @@ public class ViewVideo extends AppCompatActivity {
     }
 
     private void togglePlayback() {
-        Log.d(TAG, "playback state: " + mPlaybackState.toString());
-        Log.d(TAG, "location state: " + mLocation.toString());
         stopControllersTimer();
         switch (mPlaybackState) {
             case PAUSED:
@@ -934,7 +914,6 @@ public class ViewVideo extends AppCompatActivity {
                 mPlayCircle.setVisibility(isConnected ? View.VISIBLE : View.GONE);
                 break;
             case IDLE:
-                Log.d(TAG, "Controls: IDLE castSessionLoading = " + Boolean.toString(castSessionLoading));
                 mPlayCircle.setVisibility(!castSessionLoading ? View.VISIBLE : View.GONE);
                 mControllers.setVisibility(View.GONE);
                 break;
@@ -963,7 +942,8 @@ public class ViewVideo extends AppCompatActivity {
         setOrientation();
     }
 
-    /* Prepares the activity based on its orientation. Run this after a orientation change.*/
+    /* Prepares the activity based on its orientation. Configures objects and view items that may be sensitive to the screen orientation.
+    Run this after a orientation change.*/
     public void setOrientation() {
         portraitView = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
 
@@ -1016,6 +996,7 @@ public class ViewVideo extends AppCompatActivity {
         }
     }
 
+    /* starts a test to see if the pdf has loaded correctly. */
     private void startDelayedPdfTest() {
         //Webview testing is done on another thread to avoid pausing the UI Thread.
         final Thread waitForWebview = new Thread() {
@@ -1113,8 +1094,8 @@ public class ViewVideo extends AppCompatActivity {
         startLoad.start();
     }
 
-    /* Prompts the user to try and reload pdf if pdf is unable to load on its own. */
-    //TODO Monitor Test and fix pdf reload counter if necessary.
+    /* Prompts the user to try and reload pdf if pdf is unable to load on its own. Otherwise displays
+    * the no pdf message if a matching file is not found on a successful connection to server. */
     private void displayPDFReloadMessage() {
         //hide pdf view and display appropriate message.
         TextView noPdfMsg = findViewById(R.id.noSheetMsg);
@@ -1224,18 +1205,15 @@ public class ViewVideo extends AppCompatActivity {
             view.draw(canvas);
             return bitmap;
         } catch (IllegalArgumentException iae) {
-            Log.d(TAG, "Test Failed.");
+            Log.d(TAG, "PDF test failed to complete.");
             return null;
         }
 
     }
 
-    //TODO keyboard open will crash the application.
-    //TODO keyboard open fix but loading cursor is still visible after load.
     /*Tests the webview for an image. Should only run when webview is on the screen.
     * This is based on the assumption that the first pixel is never white when the webview loads successfully. */
     private void testWebview(final WebView view) {
-        Log.d(TAG, "TESTING PDF ATTEMPT " + Integer.toString(pdfTestAttempts + 1));
         final Thread pdfWaitTask = new Thread() {
             public void run() {
                 try {
@@ -1257,22 +1235,22 @@ public class ViewVideo extends AppCompatActivity {
                     if the webview has failed to load in case of a javascript loading issue. */
                     if(pixelDrawTest == Color.WHITE) {
                         if (pdfTestAttempts < PDFLOADRETRIES) {
-                            Log.d(TAG, "TESTING PDF ATTEMPT reload");
+                            Log.d(TAG, "PDF load timed out. Attempting to reload.");
                             findViewById(R.id.pdfProgressBar5).setVisibility(View.VISIBLE);
                             loadWebview();
                             if (findViewById(R.id.search_fragment).getVisibility() == View.GONE) {
-                                Log.d(TAG, "TESTING PDF ATTEMPT increment");
                                 pdfTestAttempts++;
                             }
                         } else {
                             //show reload dialog message for pdf.
+                            Log.d(TAG, "PDF load timed out too many times.");
                             displayPDFReloadMessage();
                         }
                     } else {
                         findViewById(R.id.pdfProgressBar5).setVisibility(View.GONE);
                     }
                 } else {
-                    Log.d(TAG, "Illegal Argument for bitmap. Flaging for delayed test.");
+                    Log.d(TAG, "Illegal Argument for bitmap. Flagging for delayed test.");
                     pdfPixelTestDelayedStart = true;
                     findViewById(R.id.pdfProgressBar5).setVisibility(View.GONE);
                 }
@@ -1296,8 +1274,6 @@ public class ViewVideo extends AppCompatActivity {
         if (!isTesting) {
             isTesting = true; //locks the method so it can't be executed multiple times at once.
             pdfTestExecuteTask.start();
-        } else {
-            Log.d("PDF test", "Simultaneous test execution blocked.");
         }
     }
 
@@ -1343,8 +1319,6 @@ public class ViewVideo extends AppCompatActivity {
         searchBar.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
-                //TODO toggle pdf test if not done
-                //loadPdf();
                 searchFragmentLayout.setVisibility(View.GONE);
                 if (portraitView) {
                     startDelayedPdfTest();
@@ -1355,8 +1329,6 @@ public class ViewVideo extends AppCompatActivity {
 
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
-                //TODO flag for pdf test if not yet done
-                //webview.loadUrl("about:blank");
                 searchFragmentLayout.setVisibility(View.VISIBLE);
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 if (imm != null) {
@@ -1615,6 +1587,8 @@ public class ViewVideo extends AppCompatActivity {
         finish();
     }
 
+    /*plays the video in a new activity instance based on the list of the relevant video gallery or
+    the search results of the last activity. */
     private void seekToVideoID(int index) {
         //Proceed to View_Video
         Intent intent = new Intent(ViewVideo.this, ViewVideo.class);

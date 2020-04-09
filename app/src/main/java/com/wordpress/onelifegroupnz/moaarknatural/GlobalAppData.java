@@ -334,16 +334,17 @@ public class GlobalAppData {
         return featureDanceInfo;
     }
 
+    //saves a new search as the last search result.
     public void setLastSearchResult(List<FileDataListing> searchResult) {
         lastSearchResult = searchResult;
-        Log.d("search list: ", "List Set");
     }
 
+    //gets the search results from the last saved search.
     public List<FileDataListing> getVideoListFromLastSearchResult() {
-        Log.d("search list: ", "List Get");
         return lastSearchResult;
     }
 
+    //method for displaying toast messages in the app and discarding the last message if needed.
     public void showToastMessage(String message, boolean cancelPrevious, Context context ) {
         if (toast != null) {
             if (cancelPrevious) {

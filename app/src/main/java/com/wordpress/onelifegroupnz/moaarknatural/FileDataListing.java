@@ -1,6 +1,8 @@
 package com.wordpress.onelifegroupnz.moaarknatural;
 
+import android.media.MediaMetadata;
 import android.media.MediaMetadataRetriever;
+import android.util.Log;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -48,7 +50,11 @@ public class FileDataListing implements Serializable {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         retriever.setDataSource(filePath.replaceAll(" ", "%20"), new HashMap<String, String>());
         String time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+        String test = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+        Log.d("duration of ", filePath.replaceAll(" ", "%20"));
         duration = Long.parseLong(time);
+        Log.d("duration", time);
+        Log.d("duration", test);
         retriever.release();
     }
 

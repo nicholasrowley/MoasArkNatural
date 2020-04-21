@@ -26,6 +26,7 @@ public class GlobalAppData {
     private FolderContentLister pdfFileLister;
     private FolderContentLister imageFileLister;
     private FolderContentLister foodVideoFileLister;
+    private FolderContentLister danceMusicContentLister;
     private List<FileDataListing> danceVideoInfoList;
     private List<FileDataListing> foodVideoInfoList;
     private List<FileDataListing> lastSearchResult;
@@ -39,6 +40,7 @@ public class GlobalAppData {
     public static final String FEATUREDANCETXTPATH = "/feature video/feature dance.txt";
     public static final String FEATUREFOODTXTPATH = "/feature video/feature food.txt";
     public static final String TAGLINETXTPATH = "/tagline/tagline.txt";
+    public static final String DANCEMUSICPATH = "/dance music/";
     public static final String ALLVIDEOSCODE = "ALLVIDEOS";
     private List<SearchSuggestion> searchSuggestions;
     public static final int DROPBOXTIMEOUTLIMIT = 60000; //Milliseconds
@@ -162,6 +164,8 @@ public class GlobalAppData {
                 return pdfFileLister.httpConnectionSuccessful();
             case CASTIMAGEPATH:
                 return imageFileLister.httpConnectionSuccessful();
+            case DANCEMUSICPATH:
+                return danceMusicContentLister.httpConnectionSuccessful();
             default:
                 return false;
         }
@@ -194,7 +198,7 @@ public class GlobalAppData {
         return pdfInfoList.get(0); //returns the latest step sheet
     }
 
-    /*method which returns a single image to display in cast videos (if one exists otherwise null)*/
+    /*method which returns a single image to display in cast videos (if one exists otherwise returns a blank entry)*/
     public FileDataListing getImageContent(String directoryRoot, String imageName) {
 
         List<FileDataListing> imageInfoList;
@@ -219,6 +223,34 @@ public class GlobalAppData {
             imageInfoList.add(new FileDataListing("", "", "", ""));
 
         return imageInfoList.get(0); //returns an image matching the search conditions
+    }
+
+    /*method which returns a single music file with the following name (if one exists otherwise returns a blank entry)*/
+    public FileDataListing getMusicContent(String directoryRoot, String fileName) {
+
+        List<FileDataListing> musicFileListing;
+
+        danceMusicContentLister = new FolderContentLister(directoryRoot, DANCEMUSICPATH, fileName, 0, new ArrayList<FileDataListing>());
+
+
+        danceMusicContentLister.execute();
+
+        try {
+            danceMusicContentLister.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        musicFileListing = danceMusicContentLister.getLoadData();
+
+        //if no result. declare with empty fields
+        if (musicFileListing.size() == 0) {
+            musicFileListing.add(new FileDataListing("", "", "", ""));
+        }
+
+        return musicFileListing.get(0); //returns an image matching the search conditions
     }
 
     public List<SearchSuggestion> getSearchSuggestions(){

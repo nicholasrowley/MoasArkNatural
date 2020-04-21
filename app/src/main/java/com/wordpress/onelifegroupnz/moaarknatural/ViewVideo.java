@@ -14,11 +14,14 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.appcompat.app.AlertDialog;
@@ -26,6 +29,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 
+import android.os.NetworkOnMainThreadException;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -56,6 +60,7 @@ import com.google.android.gms.cast.MediaSeekOptions;
 import com.google.android.gms.common.images.WebImage;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -73,7 +78,7 @@ import com.google.android.gms.cast.framework.media.RemoteMediaClient;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
 
-/*- Plays dropbox videos in Android videoview (Note: all videos must be encoded in H.264 Baseline to guarantee
+/*- Plays videos from Moa's Ark server in Android videoview (Note: all videos must be encoded in H.264 Baseline to guarantee
 * playability in Android 5.0 or lower.)
 * - Shows a pdf that matches the video content (if there is one)*/
 public class ViewVideo extends AppCompatActivity {
@@ -83,6 +88,9 @@ public class ViewVideo extends AppCompatActivity {
     private FileDataListing videoData; //single video data object
     private FileDataListing pdfData; //single stepsheet data object
     private FileDataListing castImageData; //single cast image data object
+    private FileDataListing musicData; //single music data object
+    private boolean playMusicRequested;
+    private boolean toggleMusicButtonClicked;
     private WebImage castImage;
     private Boolean dialogIsOpen; //ensure that only one video/wifi error dialog is displayed
     private Toolbar toolbar;
@@ -90,6 +98,7 @@ public class ViewVideo extends AppCompatActivity {
 
     private ProgressBar progressBar;
     private VideoView videoView;
+    private MediaPlayer mediaPlayer;
     private boolean refreshed;
     private boolean portraitView;
 
@@ -103,12 +112,14 @@ public class ViewVideo extends AppCompatActivity {
     private Timer mControllersTimer;
     private PlaybackLocation mLocation;
     private PlaybackState mPlaybackState;
+    private PlaybackType mMediaType;
     private Button mPreVidBtn;
     private Button mNextVidBtn;
+    private Button musicToggle;
     private final Handler mHandler = new Handler();
     private int mDuration;
     private boolean mControllersVisible;
-    private boolean videoReloadInProgress;
+    private boolean mediaReloadInProgress;
     boolean shouldStartPlayback;
     int startPosition; //the current position to start the video
     private boolean savedInstanceExists;
@@ -153,6 +164,14 @@ public class ViewVideo extends AppCompatActivity {
     }
 
     /**
+     * indicates whether we are playing music or video.
+     */
+    public enum PlaybackType {
+        VIDEO,
+        MUSIC
+    }
+
+    /**
      * List of various states that we can be in
      */
     public enum PlaybackState {
@@ -171,9 +190,12 @@ public class ViewVideo extends AppCompatActivity {
 
         findViewById(R.id.pdfReloadMessage).setVisibility(View.GONE);
 
-        //vid view imp onCreate code
+        //video view implementation onCreate code
         videoView = findViewById(R.id.videoView);
         refreshed = false;
+
+        //MediaPlayer implementation onCreate code
+        mediaPlayer = new MediaPlayer();
 
         mControllers = findViewById(R.id.controllers);
         mStartText = (TextView) findViewById(R.id.startText);
@@ -186,7 +208,7 @@ public class ViewVideo extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 togglePlayback();
-                videoReloadInProgress = true;
+                mediaReloadInProgress = true;
                 progressBar.setVisibility(View.VISIBLE);
             }
         });
@@ -220,8 +242,6 @@ public class ViewVideo extends AppCompatActivity {
                 return false;
             }
         });
-
-
 
         pdfPixelTestDelayedStart = false;
 
@@ -333,6 +353,68 @@ public class ViewVideo extends AppCompatActivity {
         updatePlayButton(mPlaybackState);
         castSessionLoading = false;
         pdfTestAttempts = 0;
+
+        //Sets up the media playback type
+        updatePlaybackType(PlaybackType.VIDEO);
+        musicToggle = findViewById(R.id.musicToggle);
+        musicToggle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Thread loadToggle = new Thread() {
+                    public void run() {
+                        //network operations go here
+                        //play the media that has been toggled
+                        if (mMediaType == PlaybackType.VIDEO) {
+                            updatePlaybackType(PlaybackType.MUSIC);
+                            videoView.stopPlayback();
+                            playAudio();
+                        } else {
+                            updatePlaybackType(PlaybackType.VIDEO);
+                            mediaPlayer.reset();
+                            playVideo();
+                        }
+                    }
+                };
+
+                /*final Thread setUpUi = new Thread() {
+                    public void run() {
+                        //run this before network operations
+                        //toggle video to music and vice versa
+                        if (mMediaType == PlaybackType.VIDEO) {
+                            updatePlaybackType(PlaybackType.MUSIC);
+                        } else {
+                            updatePlaybackType(PlaybackType.VIDEO);
+                        }
+                        progressBar.setVisibility(View.VISIBLE);
+                    }
+                };*/
+
+                /*final Thread finishUiLoad = new Thread() {
+                    public void run() {
+                        //ui tasks to run after network operations are complete
+                        if (mMediaType == PlaybackType.MUSIC) {
+                            prepareAudioUI();
+                        } else {
+                            prepareVideoUI();
+                        }
+                    }
+                };*/
+
+                final Thread toggle = new Thread() {
+                    public void run() {
+                        //run threads here
+                        toggleMusicButtonClicked = true;
+                        runOnUiThread(loadToggle);
+                        toggleMusicButtonClicked = false;
+                    }
+                };
+
+                //ignore further requests until the current request is finished
+                if (!toggleMusicButtonClicked) {
+                    toggle.start();
+                }
+            }
+        });
     }
 
     @Override
@@ -369,6 +451,8 @@ public class ViewVideo extends AppCompatActivity {
         //webview.pauseTimers(); //This also pauses ad banners on other activities
 
         videoView.pause();
+        //TODO implement audio as a system service.
+        mediaPlayer.stop();
 
         // Whenever application is paused, save the video position for future sessions.
         SharedPreferences.Editor editor = this.settings.edit();
@@ -493,14 +577,16 @@ public class ViewVideo extends AppCompatActivity {
     }
 
     //video view play method (runs when activity is started/resumed)
-    private void PlayVideo() {
+    private void playVideo() {
         progressBar.setVisibility(View.VISIBLE);
-        videoReloadInProgress = true;
+
+        mediaReloadInProgress = true;
         try {
             getWindow().setFormat(PixelFormat.TRANSLUCENT);
 
             //set up videoView
             final Uri video = Uri.parse(videoData.getfilePathURL().replaceAll(" ", "%20"));
+
             videoView.setVideoURI(video);
             videoView.requestFocus();
             videoView.pause();
@@ -513,28 +599,118 @@ public class ViewVideo extends AppCompatActivity {
                 shouldStartPlayback = false;
             }
 
-            if (shouldStartPlayback) {
-                mPlaybackState = PlaybackState.PLAYING;
-                updatePlaybackLocation(PlaybackLocation.LOCAL);
-                updatePlayButton(mPlaybackState);
-                if (startPosition > 0) {
-                    videoView.seekTo(startPosition);
-                }
-                videoView.start();
-                startControllersTimer();
-            } else {
-                // we should load the video but pause it
-                if (mCastSession != null && mCastSession.isConnected()) {
-                    updatePlaybackLocation(PlaybackLocation.REMOTE);
-                } else {
-                    updatePlaybackLocation(PlaybackLocation.LOCAL);
-                }
-                mPlaybackState = PlaybackState.IDLE;
-                updatePlayButton(mPlaybackState);
-            }
-        } catch (Exception e) {
-            System.out.println("Video Play Error :" + e.toString());
+            prepareVideoUI();
+        } catch (NetworkOnMainThreadException e) {
+            Log.d("Video Play Error :", e.toString());
             finish();
+        }
+    }
+
+    private void prepareVideoUI() {
+        if (shouldStartPlayback) {
+            mPlaybackState = PlaybackState.PLAYING;
+            updatePlaybackLocation(PlaybackLocation.LOCAL);
+            updatePlayButton(mPlaybackState);
+            if (startPosition > 0) {
+                videoView.seekTo(startPosition);
+                startPosition = 0;
+            }
+            videoView.start();
+            startControllersTimer();
+        } else {
+            // we should load the video but pause it
+            if (mCastSession != null && mCastSession.isConnected()) {
+                updatePlaybackLocation(PlaybackLocation.REMOTE);
+            } else {
+                updatePlaybackLocation(PlaybackLocation.LOCAL);
+            }
+            mPlaybackState = PlaybackState.IDLE;
+            updatePlayButton(mPlaybackState);
+        }
+    }
+
+    //media player play method (runs when activity is started/resumed)
+    private void playAudio() {
+        progressBar.setVisibility(View.VISIBLE);
+
+        if (musicData.getfilePathURL() == null || musicData.getfilePathURL().equals("")) {
+            Log.d(TAG, "Music not ready to play. waiting for data to load.");
+            playMusicRequested = true;
+        } else {
+            final Thread loadMusic = new Thread() {
+                public void run() {
+                    //network operations go here
+                    try {
+                        //set up audio player
+                        final Uri audio = Uri.parse(musicData.getfilePathURL());
+                        mediaPlayer.reset();
+                        mediaPlayer.setDataSource(getApplicationContext(), audio);
+                        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                        mediaPlayer.prepare(); //don't use prepareAsync for mp3 playback
+
+                        boolean isConnected = (mCastSession != null)
+                                && (mCastSession.isConnected() ||
+                                mCastSession.isConnecting());
+
+                        if (isConnected) {
+                            shouldStartPlayback = false;
+                        }
+                    } catch (IOException ioe) {
+                        Log.d("Audio Play Error :", ioe.toString());
+                        finish();
+                    }
+                }
+            };
+
+            final Thread prepareUI = new Thread() {
+                public void run() {
+                    //UI updates go here
+                    prepareAudioUI();
+                }
+            };
+
+            final Thread runInBackground = new Thread() {
+                public void run() {
+                    loadMusic.start();
+                    try {
+                        loadMusic.join();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    runOnUiThread(prepareUI);
+                }
+            };
+            if (!mediaReloadInProgress) {
+                Log.d(TAG, "Starting music player.");
+                mediaReloadInProgress = true;
+                runInBackground.start();
+            } else {
+                Log.d(TAG, "Music player is already loading. Ignoring.");
+            }
+        }
+    }
+
+    private void prepareAudioUI() {
+        if (shouldStartPlayback) {
+            mPlaybackState = PlaybackState.PLAYING;
+            updatePlaybackLocation(PlaybackLocation.LOCAL);
+            updatePlayButton(mPlaybackState);
+            if (startPosition > 0) {
+                videoView.seekTo(startPosition);
+                startPosition = 0;
+            }
+        } else {
+            mediaPlayer.pause();
+        }
+    }
+
+    //combines both playVideo() and playAudio() so that they can be played depending on the setting.
+    private void playMedia() {
+        fetchMusicData();
+        if (mMediaType == PlaybackType.VIDEO) {
+            playVideo();
+        } else {
+            playAudio();
         }
     }
 
@@ -563,7 +739,13 @@ public class ViewVideo extends AppCompatActivity {
                 @Override
                 public void run() {
                     if (mLocation == PlaybackLocation.LOCAL) {
-                        int currentPos = videoView.getCurrentPosition();
+                        int currentPos;
+                        if (mMediaType == PlaybackType.VIDEO) {
+                            currentPos = videoView.getCurrentPosition();
+                        } else {
+                            currentPos = mediaPlayer.getCurrentPosition();
+                        }
+
                         updateSeekbar(currentPos, mDuration);
                     }
                 }
@@ -597,6 +779,27 @@ public class ViewVideo extends AppCompatActivity {
         }
     }
 
+    /**
+     * updates medio controller in response to type of media played
+     * @param type - type of media being played.
+     */
+    private void updatePlaybackType(PlaybackType type) {
+        mMediaType = type;
+        if (mMediaType == PlaybackType.VIDEO) {
+            startControllersTimer();
+            updateControllersVisibility(true);
+            videoView.stopPlayback();
+            videoView.setVisibility(View.VISIBLE);
+            findViewById(R.id.musicToggle).setBackground(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_action_music_switch));
+        } else {
+            startControllersTimer();
+            updateControllersVisibility(true);
+            videoView.pause();
+            videoView.setVisibility(View.INVISIBLE);
+            findViewById(R.id.musicToggle).setBackground(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_action_video_switch));
+        }
+    }
+
     // should be called from the main thread
     private void updateControllersVisibility(boolean show) {
         if (show) {
@@ -613,7 +816,12 @@ public class ViewVideo extends AppCompatActivity {
                 switch (mLocation) {
                     case LOCAL:
                         shouldStartPlayback = true;
-                        videoView.start();
+                        if(mMediaType == PlaybackType.VIDEO) {
+                            videoView.start();
+                        } else {
+                            Log.d(TAG, "MEDIAPLAYER START RUN");
+                            mediaPlayer.start();
+                        }
                         Log.d(TAG, "Playing locally...");
                         mPlaybackState = PlaybackState.PLAYING;
                         startControllersTimer();
@@ -630,17 +838,26 @@ public class ViewVideo extends AppCompatActivity {
 
             case PLAYING:
                 mPlaybackState = PlaybackState.PAUSED;
-                videoView.pause();
+                if(mMediaType == PlaybackType.VIDEO) {
+                    videoView.pause();
+                } else {
+                    mediaPlayer.pause();
+                }
                 break;
 
             case IDLE:
                 switch (mLocation) {
                     case LOCAL:
                         Log.d(TAG, "Local state detected. Playing locally...");
-                        videoView.setVideoURI(Uri.parse(videoData.getfilePathURL().replaceAll(" ", "%20")));
-                        videoView.seekTo(0);
-                        shouldStartPlayback = true;
-                        videoView.start();
+                        if(mMediaType == PlaybackType.VIDEO) {
+                            videoView.setVideoURI(Uri.parse(videoData.getfilePathURL().replaceAll(" ", "%20")));
+                            videoView.seekTo(0);
+                            shouldStartPlayback = true;
+                            videoView.start();
+                        } else {
+                            mediaPlayer.reset();
+                            playAudio();
+                        }
                         mPlaybackState = PlaybackState.PLAYING;
                         restartTrickplayTimer();
                         updatePlaybackLocation(PlaybackLocation.LOCAL);
@@ -747,49 +964,126 @@ public class ViewVideo extends AppCompatActivity {
             }
         });
 
+        mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+
+            @Override
+            public boolean onError(MediaPlayer mp, int what, int extra) {
+                Log.e(TAG, "OnErrorListener.onError(): MediaPlayer encountered an "
+                        + "error, what: " + what + ", extra: " + extra);
+
+                if (!dialogIsOpen) {
+                    dialogIsOpen = true;
+                    new AlertDialog.Builder(ViewVideo.this)
+                            .setTitle("Media can't be played")
+                            .setMessage("Please check your connection and reload")
+                            .setPositiveButton("Reload", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    //Reload Media
+                                    dialogIsOpen = false;
+                                    loadActivity();
+                                }
+                            })
+                            .setNegativeButton("Return to Gallery", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialogIsOpen = false;
+                                    if (videoData.getFolderPath().equals(getString(R.string.DIRECTORY_ROOT) + DANCEVIDEOPATH)) {
+                                        //Proceed to Line Dance video gallery
+                                        Intent intent = new Intent(ViewVideo.this, VideoGallery.class);
+                                        intent.putExtra("videoPath", DANCEVIDEOPATH); //using video path to set the gallery
+                                        startActivity(intent);
+                                        finish();
+                                    } else if (videoData.getFolderPath().equals(getString(R.string.DIRECTORY_ROOT) + FOODVIDEOPATH)) {
+                                        //Proceed to Food video gallery
+                                        Intent intent = new Intent(ViewVideo.this, VideoGallery.class);
+                                        intent.putExtra("videoPath", FOODVIDEOPATH); //using video path to set the gallery
+                                        startActivity(intent);
+                                        finish();
+                                    }
+
+                                }
+                            })
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .setCancelable(false)
+                            .show();
+                }
+                mediaPlayer.stop();
+                mPlaybackState = PlaybackState.IDLE;
+                updatePlayButton(mPlaybackState);
+                return true;
+            }
+        });
+
         videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
 
             @Override
             public void onPrepared(MediaPlayer mp) {
                 Log.d(TAG, "onPrepared is reached");
-                mDuration = mp.getDuration();
-                mEndText.setText(formatMillis(mDuration));
-                mSeekbar.setMax(mDuration);
-                restartTrickplayTimer();
-                if (!castSessionLoading) {
-                    progressBar.setVisibility(View.GONE);
-                }
-                videoReloadInProgress = false;
+                if (mMediaType == PlaybackType.VIDEO) {
+                    mDuration = mp.getDuration();
+                    mEndText.setText(formatMillis(mDuration));
+                    mSeekbar.setMax(mDuration);
+                    restartTrickplayTimer();
+                    if (!castSessionLoading) {
+                        progressBar.setVisibility(View.GONE);
+                    }
+                    mediaReloadInProgress = false;
 
-                //set the video frame to match the video
-                DisplayMetrics displayMetrics = new DisplayMetrics();
-                getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-                ViewGroup.LayoutParams params = videoView.getLayoutParams();
-                ViewGroup.LayoutParams contParams = videoContainer.getLayoutParams();
-                if (portraitView) {
-                    params.height = MATCH_PARENT;
-                    contParams.height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                            200, getResources().getDisplayMetrics());
+                    //set the video frame to match the video
+                    DisplayMetrics displayMetrics = new DisplayMetrics();
+                    getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+                    ViewGroup.LayoutParams params = videoView.getLayoutParams();
+                    ViewGroup.LayoutParams contParams = videoContainer.getLayoutParams();
+                    if (portraitView) {
+                        params.height = MATCH_PARENT;
+                        contParams.height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                                200, getResources().getDisplayMetrics());
+                    } else {
+                        params.height = displayMetrics.heightPixels;
+                        contParams.height = displayMetrics.heightPixels;
+                    }
+
+                    videoView.setLayoutParams(params);
+                    videoContainer.setLayoutParams(contParams);
+
+                    // Obtain the FirebaseAnalytics instance.
+                    mFirebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
+
+                    //log when the video starts
+                    Bundle vsparams = new Bundle();
+                    vsparams.putDouble(FirebaseAnalytics.Param.VALUE, 1.0);
+                    mFirebaseAnalytics.logEvent(videoData.getVideoStatsName(), vsparams);
+
+                    //set up a still image for the video
+                    videoView.start();
+                    if (!shouldStartPlayback || mLocation == PlaybackLocation.REMOTE || mPlaybackState == PlaybackState.PAUSED)
+                        videoView.pause();
                 } else {
-                    params.height = displayMetrics.heightPixels;
-                    contParams.height = displayMetrics.heightPixels;
-                }
-
-                videoView.setLayoutParams(params);
-                videoContainer.setLayoutParams(contParams);
-
-                // Obtain the FirebaseAnalytics instance.
-                mFirebaseAnalytics = FirebaseAnalytics.getInstance(getApplicationContext());
-
-                //log when the video starts
-                Bundle vsparams = new Bundle();
-                vsparams.putDouble(FirebaseAnalytics.Param.VALUE, 1.0);
-                mFirebaseAnalytics.logEvent(videoData.getVideoStatsName(), vsparams);
-
-                //set up a still image for the video
-                videoView.start();
-                if (!shouldStartPlayback || mLocation == PlaybackLocation.REMOTE || mPlaybackState == PlaybackState.PAUSED)
+                    Log.d(TAG, "Player is set to Audio. Ignoring onPrepare for Video.");
                     videoView.pause();
+                }
+            }
+        });
+
+        mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+
+            @Override
+            public void onPrepared(MediaPlayer mp) {
+                Log.d(TAG, "onPrepared is reached");
+                if (mMediaType == PlaybackType.MUSIC) {
+                    mDuration = mp.getDuration();
+                    mEndText.setText(formatMillis(mDuration));
+                    mSeekbar.setMax(mDuration);
+                    restartTrickplayTimer();
+                    if (!castSessionLoading) {
+                        progressBar.setVisibility(View.GONE);
+                    }
+                    mediaReloadInProgress = false;
+
+                    mediaPlayer.start();
+                } else {
+                    Log.d(TAG, "Player is set to Video. Ignoring onPrepare for Audio.");
+                    mediaPlayer.pause();
+                }
             }
         });
 
@@ -797,9 +1091,35 @@ public class ViewVideo extends AppCompatActivity {
 
             @Override
             public void onCompletion(MediaPlayer mp) {
-                stopTrickplayTimer();
-                mPlaybackState = PlaybackState.IDLE;
-                updatePlayButton(mPlaybackState);
+                if (mMediaType == PlaybackType.MUSIC) {
+                    stopTrickplayTimer();
+                    mPlaybackState = PlaybackState.IDLE;
+                    updatePlayButton(mPlaybackState);
+                } else {
+                    Log.d(TAG, "Player is set to Audio. Ignoring onCompletion for Video.");
+                }
+            }
+        });
+
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                if (mMediaType == PlaybackType.MUSIC) {
+                    stopTrickplayTimer();
+                    mPlaybackState = PlaybackState.IDLE;
+                    updatePlayButton(mPlaybackState);
+                } else {
+                    Log.d(TAG, "Player is set to Video. Ignoring onCompletion for Audio.");
+                }
+            }
+        });
+
+        mediaPlayer.setOnVideoSizeChangedListener(new MediaPlayer.OnVideoSizeChangedListener() {
+            @Override
+            public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
+                // returns the correct value
+                Log.d(TAG, "duration size change: " + mp.getDuration());
             }
         });
 
@@ -822,7 +1142,11 @@ public class ViewVideo extends AppCompatActivity {
                 if (mPlaybackState == PlaybackState.PLAYING) {
                     play(seekBar.getProgress());
                 } else if (mPlaybackState != PlaybackState.IDLE) {
-                    videoView.seekTo(seekBar.getProgress());
+                    if (mMediaType == PlaybackType.VIDEO) {
+                        videoView.seekTo(seekBar.getProgress());
+                    } else {
+                        mediaPlayer.seekTo(seekBar.getProgress());
+                    }
                 }
                 startControllersTimer();
             }
@@ -830,7 +1154,11 @@ public class ViewVideo extends AppCompatActivity {
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
                 stopTrickplayTimer();
-                videoView.pause();
+                if (mMediaType == PlaybackType.VIDEO) {
+                    videoView.pause();
+                } else {
+                    mediaPlayer.pause();
+                }
                 stopControllersTimer();
             }
 
@@ -857,8 +1185,19 @@ public class ViewVideo extends AppCompatActivity {
         startControllersTimer();
         switch (mLocation) {
             case LOCAL:
-                videoView.seekTo(position);
-                videoView.start();
+                switch (mMediaType) {
+                    case VIDEO:
+                        videoView.seekTo(position);
+                        videoView.start();
+                        break;
+                    case MUSIC:
+                        mediaPlayer.seekTo(position);
+                        Log.d(TAG, "MEDIAPLAYER START RUN 2");
+                        mediaPlayer.start();
+                        break;
+                    default:
+                        break;
+                }
                 break;
             case REMOTE:
                 mPlaybackState = PlaybackState.BUFFERING;
@@ -905,7 +1244,7 @@ public class ViewVideo extends AppCompatActivity {
         mPlayCircle.setVisibility(isConnected ? View.GONE : View.VISIBLE);
         switch (state) {
             case PLAYING:
-                if(!videoReloadInProgress){
+                if(!mediaReloadInProgress){
                     progressBar.setVisibility(View.GONE);
                 }
                 mPlayPause.setVisibility(View.VISIBLE);
@@ -918,7 +1257,7 @@ public class ViewVideo extends AppCompatActivity {
                 mControllers.setVisibility(View.GONE);
                 break;
             case PAUSED:
-                if(!videoReloadInProgress && !castSessionLoading){
+                if(!mediaReloadInProgress && !castSessionLoading){
                     progressBar.setVisibility(View.GONE);
                 }
                 mPlayPause.setVisibility(View.VISIBLE);
@@ -1329,6 +1668,7 @@ public class ViewVideo extends AppCompatActivity {
 
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
+                //Log.d(TAG, "music duration: " + mediaPlayer.getDuration());
                 searchFragmentLayout.setVisibility(View.VISIBLE);
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 if (imm != null) {
@@ -1356,7 +1696,7 @@ public class ViewVideo extends AppCompatActivity {
         refreshProgressbar.startAnimation(anim);
 
         loadPdf();
-        PlayVideo();
+        playMedia();
         finishLoading();
     }
 
@@ -1467,7 +1807,11 @@ public class ViewVideo extends AppCompatActivity {
                 if (null != videoData) {
 
                     if (mPlaybackState == PlaybackState.PLAYING) {
-                        videoView.pause();
+                        if (mMediaType == PlaybackType.VIDEO) {
+                            videoView.pause();
+                        } else {
+                            mediaPlayer.pause();
+                        }
                         loadRemoteMedia(mSeekbar.getProgress(), true);
                         return;
                     } else {
@@ -1519,7 +1863,7 @@ public class ViewVideo extends AppCompatActivity {
             public void run() {
                 int loadAttempts = 0;
                 do {
-                    //check for pdf data
+                    //check for image data
                     castImageData = appData.getImageContent(getString(R.string.DIRECTORY_ROOT).replaceAll(" ", "%20"), videoData.getName());
                     loadAttempts++;
                 } while (loadAttempts < 5 && !appData.dbSuccess(GlobalAppData.CASTIMAGEPATH));
@@ -1603,5 +1947,37 @@ public class ViewVideo extends AppCompatActivity {
         intent.putExtra("shouldStart", true);
         startActivity(intent);
         finish();
+    }
+
+    private void fetchMusicData() {
+        musicToggle.setVisibility(View.GONE);
+
+        final Thread musicUISetTask = new Thread() {
+            public void run() {
+                musicToggle.setVisibility(View.VISIBLE);
+            }
+        };
+
+        final Thread musicLoadTask = new Thread() {
+            public void run() {
+                int loadAttempts = 0;
+                do {
+                    //check for music data
+                    musicData = appData.getMusicContent(getString(R.string.DIRECTORY_ROOT), videoData.getName());
+                    loadAttempts++;
+                } while (loadAttempts < 5 && !appData.dbSuccess(GlobalAppData.DANCEMUSICPATH));
+
+                if (!musicData.getfilePathURL().equals("")) {
+                    runOnUiThread(musicUISetTask);
+                }
+
+                //play audio when done if requirements are met
+                if (playMusicRequested && mMediaType == PlaybackType.MUSIC) {
+                    playAudio();
+                }
+            }
+        };
+
+        musicLoadTask.start();
     }
 }

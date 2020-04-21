@@ -18,6 +18,7 @@ tools:showIn="@layout/activity_view_video">
         android:id="@+id/videoViewElements">
 
         <RelativeLayout
+            android:id="@+id/videoElements"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
@@ -138,8 +139,8 @@ tools:showIn="@layout/activity_view_video">
                         android:id="@+id/endText"
                         android:layout_width="wrap_content"
                         android:layout_height="fill_parent"
-                        android:layout_alignParentRight="true"
                         android:layout_marginRight="16dp"
+                        android:layout_toLeftOf="@id/extraControls"
                         android:gravity="center_vertical"
                         android:maxLines="1"
                         android:text="0:00"
@@ -155,6 +156,25 @@ tools:showIn="@layout/activity_view_video">
                         android:layout_marginRight="5dp"
                         android:layout_toLeftOf="@+id/endText"
                         android:layout_toRightOf="@+id/startText" />
+
+                    <RelativeLayout
+                        android:id="@+id/extraControls"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_alignParentRight="true">
+
+                        <Button
+                            android:id="@+id/musicToggle"
+                            android:layout_width="@dimen/_20sdp"
+                            android:layout_height="match_parent"
+                            android:layout_alignParentRight="false"
+                            android:layout_marginTop="@dimen/_5sdp"
+                            android:layout_marginRight="@dimen/_5sdp"
+                            android:layout_marginBottom="@dimen/_5sdp"
+                            android:background="@drawable/ic_action_music_switch"
+                            android:visibility="visible" />
+                    </RelativeLayout>
+
                 </RelativeLayout>
             </RelativeLayout>
         </RelativeLayout>
@@ -169,15 +189,30 @@ tools:showIn="@layout/activity_view_video">
                 android:layout_height="match_parent"
                 android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/txtVideoTitle"
+                <RelativeLayout
+                    android:id="@+id/titleContainter"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                    android:layout_marginTop="5dp"
+                    android:layout_marginTop="@dimen/_5sdp"
                     android:layout_marginRight="@dimen/activity_horizontal_margin"
-                    android:gravity="center"
-                    android:textAppearance="?android:attr/textAppearanceLarge" />
+                    android:background="@color/colorPrimary">
+
+                    <TextView
+                        android:id="@+id/txtVideoTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/_1sdp"
+                        android:layout_marginStart="@dimen/_10sdp"
+                        android:layout_marginLeft="@dimen/_10sdp"
+                        android:layout_marginTop="@dimen/_10sdp"
+                        android:layout_marginEnd="@dimen/_10sdp"
+                        android:layout_marginRight="@dimen/_10sdp"
+                        android:layout_marginBottom="@dimen/_10sdp"
+                        android:background="@color/colorBody"
+                        android:gravity="center"
+                        android:textAppearance="?android:attr/textAppearanceLarge" />
+                </RelativeLayout>
 
                 <TextView
                     android:id="@+id/noSheetMsg"

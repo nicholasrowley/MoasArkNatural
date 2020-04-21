@@ -82,7 +82,7 @@
     <string name="hint_mobile_phone">Mobile Phone</string>
     <string name="hint_home_phone">Home Phone</string>
     <string name="available_forms_desc">Provide your registration details by clicking the button below</string>
-    <string name="bgp_account_form_title">BGP Package Account Registration</string>
+    <string name="bgp_account_form_title">BGP Information</string>
     <string name="text_country">(Select a Country)</string>
     <string name="email_warning_message">NOTE: A EMAIL CLIENT IS REQUIRED TO SEND THIS FORM!</string>
     <string name="email_info">(You need to have access to change Passwords etc)</string>

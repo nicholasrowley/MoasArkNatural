@@ -263,7 +263,8 @@ public class ViewVideo extends AppCompatActivity {
 
         //check if activity refreshed
         if (savedInstanceState != null) {
-            startPosition = savedInstanceState.getInt("VideoTime", 0);
+            startPosition = savedInstanceState.getInt("MediaTime", 0);
+            Log.d(TAG, "Media Start position " + startPosition);
             refreshed = true;
         }
 
@@ -452,11 +453,16 @@ public class ViewVideo extends AppCompatActivity {
 
         videoView.pause();
         //TODO implement audio as a system service.
-        mediaPlayer.stop();
+        if (mediaPlayer.isPlaying())
+            mediaPlayer.stop();
 
         // Whenever application is paused, save the video position for future sessions.
         SharedPreferences.Editor editor = this.settings.edit();
-        editor.putInt("videoPosition", videoView.getCurrentPosition());
+        if (mMediaType == PlaybackType.VIDEO) {
+            editor.putInt("MediaTime", videoView.getCurrentPosition());
+        } else {
+            editor.putInt("MediaTime", mediaPlayer.getCurrentPosition());
+        }
         editor.apply();
     }
 
@@ -479,7 +485,8 @@ public class ViewVideo extends AppCompatActivity {
         // Gets values from last session of your application, check video position
         // start at 0 if no saved value was found (first session of your app)
         this.settings = getPreferences(MODE_PRIVATE);
-        startPosition = settings.getInt("videoPosition", 0);
+        startPosition = settings.getInt("MediaTime", 0);
+        Log.d(TAG, "Media Start position " + startPosition);
 
         if (!videoView.isPlaying()) {
             progressBar.setVisibility(View.VISIBLE);
@@ -497,7 +504,12 @@ public class ViewVideo extends AppCompatActivity {
         super.onSaveInstanceState(outState);
 
         //save the current position of the video, used when activity is reopened
-        outState.putInt("VideoTime", videoView.getCurrentPosition());
+        if (mMediaType == PlaybackType.VIDEO) {
+            outState.putInt("MediaTime", videoView.getCurrentPosition());
+        } else {
+            Log.d(TAG, "Mediaplayer current position " + mediaPlayer.getCurrentPosition());
+            outState.putInt("MediaTime", mediaPlayer.getCurrentPosition());
+        }
         outState.putBoolean("fragment_added", true);
     }
 
@@ -611,10 +623,6 @@ public class ViewVideo extends AppCompatActivity {
             mPlaybackState = PlaybackState.PLAYING;
             updatePlaybackLocation(PlaybackLocation.LOCAL);
             updatePlayButton(mPlaybackState);
-            if (startPosition > 0) {
-                videoView.seekTo(startPosition);
-                startPosition = 0;
-            }
             videoView.start();
             startControllersTimer();
         } else {
@@ -662,13 +670,6 @@ public class ViewVideo extends AppCompatActivity {
                 }
             };
 
-            final Thread prepareUI = new Thread() {
-                public void run() {
-                    //UI updates go here
-                    prepareAudioUI();
-                }
-            };
-
             final Thread runInBackground = new Thread() {
                 public void run() {
                     loadMusic.start();
@@ -677,7 +678,7 @@ public class ViewVideo extends AppCompatActivity {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    runOnUiThread(prepareUI);
+                    //runOnUiThread(prepareUI);
                 }
             };
             if (!mediaReloadInProgress) {
@@ -695,8 +696,9 @@ public class ViewVideo extends AppCompatActivity {
             mPlaybackState = PlaybackState.PLAYING;
             updatePlaybackLocation(PlaybackLocation.LOCAL);
             updatePlayButton(mPlaybackState);
+            Log.d(TAG, "mediaplayer start position " + startPosition);
             if (startPosition > 0) {
-                videoView.seekTo(startPosition);
+                mediaPlayer.seekTo(startPosition);
                 startPosition = 0;
             }
         } else {
@@ -1057,6 +1059,11 @@ public class ViewVideo extends AppCompatActivity {
                     videoView.start();
                     if (!shouldStartPlayback || mLocation == PlaybackLocation.REMOTE || mPlaybackState == PlaybackState.PAUSED)
                         videoView.pause();
+
+                    if (startPosition > 0) {
+                        videoView.seekTo(startPosition);
+                        startPosition = 0;
+                    }
                 } else {
                     Log.d(TAG, "Player is set to Audio. Ignoring onPrepare for Video.");
                     videoView.pause();
@@ -1080,6 +1087,8 @@ public class ViewVideo extends AppCompatActivity {
                     mediaReloadInProgress = false;
 
                     mediaPlayer.start();
+
+                    prepareAudioUI();
                 } else {
                     Log.d(TAG, "Player is set to Video. Ignoring onPrepare for Audio.");
                     mediaPlayer.pause();
@@ -1407,7 +1416,9 @@ public class ViewVideo extends AppCompatActivity {
                     findViewById(R.id.pdfReloadMessage).setVisibility(View.GONE);
                     noPdfMsg.setVisibility(View.GONE);
 
-                    findViewById(R.id.pdfProgressBar5).setVisibility(View.VISIBLE);
+                    if (findViewById(R.id.pdfReloadMessage).getVisibility() == View.GONE)
+                        findViewById(R.id.pdfProgressBar5).setVisibility(View.VISIBLE);
+
                     pdfTestAttempts = 0;
                     loadWebview();
                 } else {
@@ -1575,7 +1586,10 @@ public class ViewVideo extends AppCompatActivity {
                     if(pixelDrawTest == Color.WHITE) {
                         if (pdfTestAttempts < PDFLOADRETRIES) {
                             Log.d(TAG, "PDF load timed out. Attempting to reload.");
-                            findViewById(R.id.pdfProgressBar5).setVisibility(View.VISIBLE);
+
+                            if (findViewById(R.id.pdfReloadMessage).getVisibility() == View.GONE)
+                                findViewById(R.id.pdfProgressBar5).setVisibility(View.VISIBLE);
+
                             loadWebview();
                             if (findViewById(R.id.search_fragment).getVisibility() == View.GONE) {
                                 pdfTestAttempts++;

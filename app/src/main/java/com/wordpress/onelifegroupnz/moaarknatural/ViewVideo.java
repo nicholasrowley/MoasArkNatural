@@ -78,6 +78,9 @@ import com.google.android.gms.cast.framework.media.RemoteMediaClient;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
 
+
+//TODO Fix improper seeking with chromecast
+//TODO Fix controlling the mediaplayer during a refresh operation
 /*- Plays videos from Moa's Ark server in Android videoview (Note: all videos must be encoded in H.264 Baseline to guarantee
 * playability in Android 5.0 or lower.)
 * - Shows a pdf that matches the video content (if there is one)*/
@@ -95,8 +98,9 @@ public class ViewVideo extends AppCompatActivity {
     private Boolean dialogIsOpen; //ensure that only one video/wifi error dialog is displayed
     private Toolbar toolbar;
     private SharedPreferences settings;
+    private boolean destroyActivity; //lets the application know when to clear specific values no longer in use.
 
-    private ProgressBar progressBar;
+    private ProgressBar mediaProgressBar;
     private VideoView videoView;
     private MediaPlayer mediaPlayer;
     private boolean refreshed;
@@ -178,6 +182,7 @@ public class ViewVideo extends AppCompatActivity {
         PLAYING, PAUSED, BUFFERING, IDLE
     }
 
+    //TODO MediaReloadInProgress is being used for both video and media and is causing issues with media switching.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -204,12 +209,16 @@ public class ViewVideo extends AppCompatActivity {
         mSeekbar = (SeekBar) findViewById(R.id.seekBar);
         mPlayPause = (ImageView) findViewById(R.id.imageView);
         mPlayCircle = (ImageButton) findViewById(R.id.play_circle);
+        mPlayCircle.setVisibility(View.GONE);
         mPlayCircle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                togglePlayback();
-                mediaReloadInProgress = true;
-                progressBar.setVisibility(View.VISIBLE);
+                Log.d(TAG, "PlaybackLoaction - Remote: " + (mLocation == PlaybackLocation.REMOTE) );
+                if (mediaProgressBar.getVisibility() == View.GONE || mLocation == PlaybackLocation.REMOTE) {
+                    togglePlayback();
+                    mediaReloadInProgress = true;
+                    mediaProgressBar.setVisibility(View.VISIBLE);
+                }
             }
         });
 
@@ -229,7 +238,7 @@ public class ViewVideo extends AppCompatActivity {
         webview = findViewById(R.id.webview);
 
         //progress bar shows when video is buffering
-        progressBar = findViewById(R.id.progressBar3);
+        mediaProgressBar = findViewById(R.id.videoProgressBar);
 
         videoContainer.setOnTouchListener(new View.OnTouchListener() {
 
@@ -264,7 +273,7 @@ public class ViewVideo extends AppCompatActivity {
         //check if activity refreshed
         if (savedInstanceState != null) {
             startPosition = savedInstanceState.getInt("MediaTime", 0);
-            Log.d(TAG, "Media Start position " + startPosition);
+            Log.d(TAG, "Media Start position from refresh " + startPosition);
             refreshed = true;
         }
 
@@ -323,9 +332,9 @@ public class ViewVideo extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         if (wasSearched) {
-                            appData.showToastMessage("Displaying next video in " + getString(R.string.title_activity_food_video_gallery), true, getApplicationContext());
+                            appData.showToastMessage("Displaying next video in search results", true, getApplicationContext());
                         } else if(videoTypePath.equals(DANCEVIDEOPATH)) {
-                            appData.showToastMessage("Displaying next video in " + getString(R.string.title_activity_food_video_gallery), true, getApplicationContext());
+                            appData.showToastMessage("Displaying next video in " + getString(R.string.title_activity_dance_video_gallery), true, getApplicationContext());
                         } else if(videoTypePath.equals(FOODVIDEOPATH)) {
                             appData.showToastMessage("Displaying next video in " + getString(R.string.title_activity_food_video_gallery), true, getApplicationContext());
                         }
@@ -349,6 +358,7 @@ public class ViewVideo extends AppCompatActivity {
 
         initialiseAds();
 
+        Log.d(TAG, "Setting playback state to IDLE 3.");
         mPlaybackState = PlaybackState.IDLE;
         updatePlaybackLocation(PlaybackLocation.LOCAL);
         updatePlayButton(mPlaybackState);
@@ -365,9 +375,11 @@ public class ViewVideo extends AppCompatActivity {
                     public void run() {
                         //network operations go here
                         //play the media that has been toggled
+                        mediaReloadInProgress = false;
                         if (mMediaType == PlaybackType.VIDEO) {
                             updatePlaybackType(PlaybackType.MUSIC);
                             videoView.stopPlayback();
+                            Log.d(TAG, "Audio checkpoint 3");
                             playAudio();
                         } else {
                             updatePlaybackType(PlaybackType.VIDEO);
@@ -458,12 +470,28 @@ public class ViewVideo extends AppCompatActivity {
 
         // Whenever application is paused, save the video position for future sessions.
         SharedPreferences.Editor editor = this.settings.edit();
-        if (mMediaType == PlaybackType.VIDEO) {
+        if (destroyActivity) {
+            editor.putInt("MediaTime", 0);
+        }
+        else if (mMediaType == PlaybackType.VIDEO) {
             editor.putInt("MediaTime", videoView.getCurrentPosition());
-        } else {
+        } else if (mediaPlayer.isPlaying()){
             editor.putInt("MediaTime", mediaPlayer.getCurrentPosition());
+        } else {
+            editor.putInt("MediaTime", 0);
         }
         editor.apply();
+    }
+
+    @Override
+    protected void onDestroy() {
+        //clear the mediatime when activity is destroyed.
+        SharedPreferences.Editor editor = this.settings.edit();
+        editor.putInt("MediaTime", 0);
+        editor.apply();
+        Log.d(TAG, "onDestroy called.");
+
+        super.onDestroy();
     }
 
     @Override
@@ -489,7 +517,7 @@ public class ViewVideo extends AppCompatActivity {
         Log.d(TAG, "Media Start position " + startPosition);
 
         if (!videoView.isPlaying()) {
-            progressBar.setVisibility(View.VISIBLE);
+            mediaProgressBar.setVisibility(View.VISIBLE);
         }
         pdfIsRedirecting = false;
         loadActivity();
@@ -504,11 +532,16 @@ public class ViewVideo extends AppCompatActivity {
         super.onSaveInstanceState(outState);
 
         //save the current position of the video, used when activity is reopened
-        if (mMediaType == PlaybackType.VIDEO) {
+        if (destroyActivity) {
+            outState.putInt("MediaTime", 0);
+        }
+        else if (mMediaType == PlaybackType.VIDEO) {
             outState.putInt("MediaTime", videoView.getCurrentPosition());
-        } else {
+        } else if (mediaPlayer.isPlaying()) {
             Log.d(TAG, "Mediaplayer current position " + mediaPlayer.getCurrentPosition());
             outState.putInt("MediaTime", mediaPlayer.getCurrentPosition());
+        } else {
+            outState.putInt("MediaTime", 0);
         }
         outState.putBoolean("fragment_added", true);
     }
@@ -562,6 +595,7 @@ public class ViewVideo extends AppCompatActivity {
             case R.id.menu_refresh:
                 if(!(refreshProgressbar.getVisibility() == View.VISIBLE)) {
                     refreshProgressbar.setVisibility(View.VISIBLE);
+                    mPlayCircle.setVisibility(View.GONE);
                     videoView.pause();
                     loadActivity();
                 }
@@ -590,7 +624,7 @@ public class ViewVideo extends AppCompatActivity {
 
     //video view play method (runs when activity is started/resumed)
     private void playVideo() {
-        progressBar.setVisibility(View.VISIBLE);
+        mediaProgressBar.setVisibility(View.VISIBLE);
 
         mediaReloadInProgress = true;
         try {
@@ -610,20 +644,18 @@ public class ViewVideo extends AppCompatActivity {
             if (isConnected) {
                 shouldStartPlayback = false;
             }
-
-            prepareVideoUI();
         } catch (NetworkOnMainThreadException e) {
             Log.d("Video Play Error :", e.toString());
-            finish();
+            exitActivity();
         }
     }
 
     private void prepareVideoUI() {
         if (shouldStartPlayback) {
+            Log.d(TAG, "Setting playback state to PLAYING.");
             mPlaybackState = PlaybackState.PLAYING;
             updatePlaybackLocation(PlaybackLocation.LOCAL);
             updatePlayButton(mPlaybackState);
-            videoView.start();
             startControllersTimer();
         } else {
             // we should load the video but pause it
@@ -632,6 +664,7 @@ public class ViewVideo extends AppCompatActivity {
             } else {
                 updatePlaybackLocation(PlaybackLocation.LOCAL);
             }
+            Log.d(TAG, "Setting playback state to IDLE 4.");
             mPlaybackState = PlaybackState.IDLE;
             updatePlayButton(mPlaybackState);
         }
@@ -639,34 +672,42 @@ public class ViewVideo extends AppCompatActivity {
 
     //media player play method (runs when activity is started/resumed)
     private void playAudio() {
-        progressBar.setVisibility(View.VISIBLE);
+        mediaProgressBar.setVisibility(View.VISIBLE);
 
         if (musicData.getfilePathURL() == null || musicData.getfilePathURL().equals("")) {
-            Log.d(TAG, "Music not ready to play. waiting for data to load.");
+            Log.d("Audio Play", "Music not ready to play. waiting for data to load.");
             playMusicRequested = true;
         } else {
             final Thread loadMusic = new Thread() {
                 public void run() {
                     //network operations go here
                     try {
+                        Log.d("Audio Play", "Setting up audio source.");
                         //set up audio player
                         final Uri audio = Uri.parse(musicData.getfilePathURL());
                         mediaPlayer.reset();
                         mediaPlayer.setDataSource(getApplicationContext(), audio);
                         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                         mediaPlayer.prepare(); //don't use prepareAsync for mp3 playback
-
-                        boolean isConnected = (mCastSession != null)
-                                && (mCastSession.isConnected() ||
-                                mCastSession.isConnecting());
-
-                        if (isConnected) {
-                            shouldStartPlayback = false;
-                        }
                     } catch (IOException ioe) {
                         Log.d("Audio Play Error :", ioe.toString());
-                        finish();
+                        exitActivity();
                     }
+                }
+            };
+
+            final Thread prepareUI = new Thread() {
+                public void run() {
+                    Log.d("Audio Play", "Preparing Audio UI");
+                    boolean isConnected = (mCastSession != null)
+                            && (mCastSession.isConnected() ||
+                            mCastSession.isConnecting());
+
+                    if (isConnected) {
+                        shouldStartPlayback = false;
+                        mediaProgressBar.setVisibility(View.GONE);
+                    }
+                    mediaReloadInProgress = false;
                 }
             };
 
@@ -678,28 +719,49 @@ public class ViewVideo extends AppCompatActivity {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    //runOnUiThread(prepareUI);
+                    runOnUiThread(prepareUI);
                 }
             };
+
             if (!mediaReloadInProgress) {
-                Log.d(TAG, "Starting music player.");
+                Log.d("Audio Play", "Starting music player.");
                 mediaReloadInProgress = true;
                 runInBackground.start();
             } else {
-                Log.d(TAG, "Music player is already loading. Ignoring.");
+                Log.d("Audio Play", "Music player is already loading. Ignoring.");
+                Log.d("Audio Play", "isConnected is: " + Boolean.toString((mCastSession != null)
+                        && (mCastSession.isConnected() ||
+                        mCastSession.isConnecting())));
+                Log.d("Audio Play", "mediaReloadInProgress is: " + mediaReloadInProgress);
+                if (mLocation == PlaybackLocation.REMOTE) {
+                    mPlayCircle.setVisibility(View.VISIBLE);
+                    mediaProgressBar.setVisibility(View.GONE);
+                }
             }
         }
     }
 
     private void prepareAudioUI() {
         if (shouldStartPlayback) {
-            mPlaybackState = PlaybackState.PLAYING;
-            updatePlaybackLocation(PlaybackLocation.LOCAL);
+            // we should load the video but pause it
+            if (mCastSession != null && mCastSession.isConnected()) {
+                updatePlaybackLocation(PlaybackLocation.REMOTE);
+                Log.d(TAG, "Setting playback state to IDLE 5.");
+                mPlaybackState = PlaybackState.IDLE;
+            } else {
+                updatePlaybackLocation(PlaybackLocation.LOCAL);
+                Log.d(TAG, "Setting playback state to PLAYING 2.");
+                mPlaybackState = PlaybackState.PLAYING;
+            }
             updatePlayButton(mPlaybackState);
             Log.d(TAG, "mediaplayer start position " + startPosition);
             if (startPosition > 0) {
+                Log.d(TAG, "Mediaplayer is seeking at point 3");
                 mediaPlayer.seekTo(startPosition);
                 startPosition = 0;
+                SharedPreferences.Editor editor = this.settings.edit();
+                editor.putInt("MediaTime", 0);
+                editor.apply();
             }
         } else {
             mediaPlayer.pause();
@@ -712,6 +774,7 @@ public class ViewVideo extends AppCompatActivity {
         if (mMediaType == PlaybackType.VIDEO) {
             playVideo();
         } else {
+            Log.d(TAG, "Audio checkpoint 4");
             playAudio();
         }
     }
@@ -757,16 +820,19 @@ public class ViewVideo extends AppCompatActivity {
 
     //updates the seekbar with new information.
     private void updateSeekbar(int position, int duration) {
-        mSeekbar.setProgress(position);
-        mSeekbar.setMax(duration);
-        mStartText.setText(formatMillis(position));
-        mEndText.setText(formatMillis(duration));
+        if (mediaProgressBar.getVisibility() == View.GONE) {
+            mSeekbar.setProgress(position);
+            mSeekbar.setMax(duration);
+            mStartText.setText(formatMillis(position));
+            mEndText.setText(formatMillis(duration));
+        }
     }
 
     /**
      * updates controllers in response to playback location
      */
     private void updatePlaybackLocation(PlaybackLocation location) {
+        Log.d(TAG, "Changing PlaybackLocation to remote: " + (location == PlaybackLocation.REMOTE));
         mLocation = location;
         if (location == PlaybackLocation.LOCAL) {
             if (mPlaybackState == PlaybackState.PLAYING
@@ -831,7 +897,8 @@ public class ViewVideo extends AppCompatActivity {
                         updatePlaybackLocation(PlaybackLocation.LOCAL);
                         break;
                     case REMOTE:
-                        finish();
+                        Log.d(TAG, "Detected Remote playback during PAUSED state: exiting activity.");
+                        exitActivity();
                         break;
                     default:
                         break;
@@ -839,12 +906,23 @@ public class ViewVideo extends AppCompatActivity {
                 break;
 
             case PLAYING:
-                mPlaybackState = PlaybackState.PAUSED;
-                if(mMediaType == PlaybackType.VIDEO) {
-                    videoView.pause();
-                } else {
-                    mediaPlayer.pause();
+                switch (mLocation) {
+                    case LOCAL:
+                        mPlaybackState = PlaybackState.PAUSED;
+                        if(mMediaType == PlaybackType.VIDEO) {
+                            videoView.pause();
+                        } else {
+                            mediaPlayer.pause();
+                        }
+                        break;
+                    case REMOTE:
+                        Log.d(TAG, "Detected Remote playback during PLAYING state: exiting activity.");
+                        exitActivity();
+                        break;
+                    default:
+                        break;
                 }
+
                 break;
 
             case IDLE:
@@ -857,7 +935,8 @@ public class ViewVideo extends AppCompatActivity {
                             shouldStartPlayback = true;
                             videoView.start();
                         } else {
-                            mediaPlayer.reset();
+                            //mediaPlayer.reset();
+                            Log.d(TAG, "Audio checkpoint 1");
                             playAudio();
                         }
                         mPlaybackState = PlaybackState.PLAYING;
@@ -865,7 +944,9 @@ public class ViewVideo extends AppCompatActivity {
                         updatePlaybackLocation(PlaybackLocation.LOCAL);
                         break;
                     case REMOTE:
+                        Log.d(TAG, "Test Remote play.");
                         if (mCastSession != null && mCastSession.isConnected()) {
+                            Log.d(TAG, "Remote play starting.");
                             loadRemoteMedia(mSeekbar.getProgress(), true);
                         }
                         break;
@@ -942,14 +1023,12 @@ public class ViewVideo extends AppCompatActivity {
                                         //Proceed to Line Dance video gallery
                                         Intent intent = new Intent(ViewVideo.this, VideoGallery.class);
                                         intent.putExtra("videoPath", DANCEVIDEOPATH); //using video path to set the gallery
-                                        startActivity(intent);
-                                        finish();
+                                        startNewActivity(intent);
                                     } else if (videoData.getFolderPath().equals(getString(R.string.DIRECTORY_ROOT) + FOODVIDEOPATH)) {
                                         //Proceed to Food video gallery
                                         Intent intent = new Intent(ViewVideo.this, VideoGallery.class);
                                         intent.putExtra("videoPath", FOODVIDEOPATH); //using video path to set the gallery
-                                        startActivity(intent);
-                                        finish();
+                                        startNewActivity(intent);
                                     }
 
                                 }
@@ -992,14 +1071,12 @@ public class ViewVideo extends AppCompatActivity {
                                         //Proceed to Line Dance video gallery
                                         Intent intent = new Intent(ViewVideo.this, VideoGallery.class);
                                         intent.putExtra("videoPath", DANCEVIDEOPATH); //using video path to set the gallery
-                                        startActivity(intent);
-                                        finish();
+                                        startNewActivity(intent);
                                     } else if (videoData.getFolderPath().equals(getString(R.string.DIRECTORY_ROOT) + FOODVIDEOPATH)) {
                                         //Proceed to Food video gallery
                                         Intent intent = new Intent(ViewVideo.this, VideoGallery.class);
                                         intent.putExtra("videoPath", FOODVIDEOPATH); //using video path to set the gallery
-                                        startActivity(intent);
-                                        finish();
+                                        startNewActivity(intent);
                                     }
 
                                 }
@@ -1026,9 +1103,8 @@ public class ViewVideo extends AppCompatActivity {
                     mSeekbar.setMax(mDuration);
                     restartTrickplayTimer();
                     if (!castSessionLoading) {
-                        progressBar.setVisibility(View.GONE);
+                        mediaProgressBar.setVisibility(View.GONE);
                     }
-                    mediaReloadInProgress = false;
 
                     //set the video frame to match the video
                     DisplayMetrics displayMetrics = new DisplayMetrics();
@@ -1054,6 +1130,8 @@ public class ViewVideo extends AppCompatActivity {
                     Bundle vsparams = new Bundle();
                     vsparams.putDouble(FirebaseAnalytics.Param.VALUE, 1.0);
                     mFirebaseAnalytics.logEvent(videoData.getVideoStatsName(), vsparams);
+
+                    prepareVideoUI();
 
                     //set up a still image for the video
                     videoView.start();
@@ -1082,11 +1160,14 @@ public class ViewVideo extends AppCompatActivity {
                     mSeekbar.setMax(mDuration);
                     restartTrickplayTimer();
                     if (!castSessionLoading) {
-                        progressBar.setVisibility(View.GONE);
+                        mediaProgressBar.setVisibility(View.GONE);
                     }
                     mediaReloadInProgress = false;
 
                     mediaPlayer.start();
+                    Log.d("Audio", "should start: "+ shouldStartPlayback + ", playbackstate: " + (mPlaybackState == PlaybackState.PAUSED));
+                    if (!shouldStartPlayback || mLocation == PlaybackLocation.REMOTE)
+                        mediaPlayer.pause();
 
                     prepareAudioUI();
                 } else {
@@ -1124,14 +1205,6 @@ public class ViewVideo extends AppCompatActivity {
             }
         });
 
-        mediaPlayer.setOnVideoSizeChangedListener(new MediaPlayer.OnVideoSizeChangedListener() {
-            @Override
-            public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
-                // returns the correct value
-                Log.d(TAG, "duration size change: " + mp.getDuration());
-            }
-        });
-
         videoView.setOnTouchListener(new View.OnTouchListener() {
 
             @Override
@@ -1150,10 +1223,11 @@ public class ViewVideo extends AppCompatActivity {
             public void onStopTrackingTouch(SeekBar seekBar) {
                 if (mPlaybackState == PlaybackState.PLAYING) {
                     play(seekBar.getProgress());
-                } else if (mPlaybackState != PlaybackState.IDLE) {
+                } else if (mPlaybackState != PlaybackState.IDLE && mediaProgressBar.getVisibility() == View.GONE) {
                     if (mMediaType == PlaybackType.VIDEO) {
                         videoView.seekTo(seekBar.getProgress());
                     } else {
+                        Log.d(TAG, "Mediaplayer is seeking at point 1");
                         mediaPlayer.seekTo(seekBar.getProgress());
                     }
                 }
@@ -1163,11 +1237,12 @@ public class ViewVideo extends AppCompatActivity {
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
                 stopTrickplayTimer();
-                if (mMediaType == PlaybackType.VIDEO) {
-                    videoView.pause();
-                } else {
-                    mediaPlayer.pause();
-                }
+                if (mediaProgressBar.getVisibility() == View.GONE)
+                    if (mMediaType == PlaybackType.VIDEO) {
+                        videoView.pause();
+                    } else {
+                        mediaPlayer.pause();
+                    }
                 stopControllersTimer();
             }
 
@@ -1182,7 +1257,7 @@ public class ViewVideo extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                if (mLocation == PlaybackLocation.LOCAL) {
+                if (mLocation == PlaybackLocation.LOCAL && mediaProgressBar.getVisibility() == View.GONE) {
                     togglePlayback();
                 }
             }
@@ -1194,18 +1269,21 @@ public class ViewVideo extends AppCompatActivity {
         startControllersTimer();
         switch (mLocation) {
             case LOCAL:
-                switch (mMediaType) {
-                    case VIDEO:
-                        videoView.seekTo(position);
-                        videoView.start();
-                        break;
-                    case MUSIC:
-                        mediaPlayer.seekTo(position);
-                        Log.d(TAG, "MEDIAPLAYER START RUN 2");
-                        mediaPlayer.start();
-                        break;
-                    default:
-                        break;
+                if (mediaProgressBar.getVisibility() == View.GONE) {
+                    switch (mMediaType) {
+                        case VIDEO:
+                            videoView.seekTo(position);
+                            videoView.start();
+                            break;
+                        case MUSIC:
+                            Log.d(TAG, "Mediaplayer is seeking at point 2");
+                            mediaPlayer.seekTo(position);
+                            Log.d(TAG, "MEDIAPLAYER START RUN 2");
+                            mediaPlayer.start();
+                            break;
+                        default:
+                            break;
+                    }
                 }
                 break;
             case REMOTE:
@@ -1244,39 +1322,54 @@ public class ViewVideo extends AppCompatActivity {
         }
     }
 
+    //TODO Fix play button issue. (Fixed?)
     private void updatePlayButton(PlaybackState state) {
         Log.d(TAG, "Controls: PlayBackState: " + state);
         boolean isConnected = (mCastSession != null)
                 && (mCastSession.isConnected() ||
                 mCastSession.isConnecting());
         mControllers.setVisibility(isConnected ? View.GONE : View.VISIBLE);
-        mPlayCircle.setVisibility(isConnected ? View.GONE : View.VISIBLE);
+        if (isConnected || shouldStartPlayback) {
+            mPlayCircle.setVisibility(View.GONE);
+        }else {
+            mPlayCircle.setVisibility(View.VISIBLE);
+            mediaProgressBar.setVisibility(View.GONE);
+        }
+
+        Log.d(TAG, "isConnected or shouldStartPlayback: " + (isConnected || shouldStartPlayback));
+        Log.d(TAG, "mPlayCircle state visible: " + (mPlayCircle.getVisibility() == View.VISIBLE));
         switch (state) {
             case PLAYING:
                 if(!mediaReloadInProgress){
-                    progressBar.setVisibility(View.GONE);
+                    mediaProgressBar.setVisibility(View.GONE);
                 }
                 mPlayPause.setVisibility(View.VISIBLE);
                 mPlayPause.setImageDrawable(
                         getResources().getDrawable(R.drawable.ic_pause));
                 mPlayCircle.setVisibility(isConnected ? View.VISIBLE : View.GONE);
+                Log.d(TAG, "isConnected: " + isConnected);
+                Log.d(TAG, "mPlayCircle state visible: " + (mPlayCircle.getVisibility() == View.VISIBLE));
                 break;
             case IDLE:
-                mPlayCircle.setVisibility(!castSessionLoading ? View.VISIBLE : View.GONE);
+                mPlayCircle.setVisibility(!castSessionLoading && isConnected ? View.VISIBLE : View.GONE);
+                Log.d(TAG, "!castSessionLoading & isConnected: " + (!castSessionLoading && isConnected));
+                Log.d(TAG, "mPlayCircle state visible: " + (mPlayCircle.getVisibility() == View.VISIBLE));
                 mControllers.setVisibility(View.GONE);
                 break;
             case PAUSED:
                 if(!mediaReloadInProgress && !castSessionLoading){
-                    progressBar.setVisibility(View.GONE);
+                    mediaProgressBar.setVisibility(View.GONE);
                 }
                 mPlayPause.setVisibility(View.VISIBLE);
                 mPlayPause.setImageDrawable(
                         getResources().getDrawable(R.drawable.ic_play));
                 mPlayCircle.setVisibility(!castSessionLoading && isConnected ? View.VISIBLE : View.GONE);
+                Log.d(TAG, "!castSessionLoading & isConnected: " + (!castSessionLoading && isConnected));
+                Log.d(TAG, "mPlayCircle state visible: " + (mPlayCircle.getVisibility() == View.VISIBLE));
                 break;
             case BUFFERING:
                 mPlayPause.setVisibility(View.INVISIBLE);
-                progressBar.setVisibility(View.VISIBLE);
+                mediaProgressBar.setVisibility(View.VISIBLE);
                 break;
             default:
                 break;
@@ -1416,8 +1509,12 @@ public class ViewVideo extends AppCompatActivity {
                     findViewById(R.id.pdfReloadMessage).setVisibility(View.GONE);
                     noPdfMsg.setVisibility(View.GONE);
 
-                    if (findViewById(R.id.pdfReloadMessage).getVisibility() == View.GONE)
+                    if (findViewById(R.id.pdfReloadMessage).getVisibility() == View.GONE) {
                         findViewById(R.id.pdfProgressBar5).setVisibility(View.VISIBLE);
+                    }
+                    else {
+                        findViewById(R.id.pdfProgressBar5).setVisibility(View.GONE);
+                    }
 
                     pdfTestAttempts = 0;
                     loadWebview();
@@ -1587,8 +1684,11 @@ public class ViewVideo extends AppCompatActivity {
                         if (pdfTestAttempts < PDFLOADRETRIES) {
                             Log.d(TAG, "PDF load timed out. Attempting to reload.");
 
-                            if (findViewById(R.id.pdfReloadMessage).getVisibility() == View.GONE)
+                            if (findViewById(R.id.pdfReloadMessage).getVisibility() == View.GONE) {
                                 findViewById(R.id.pdfProgressBar5).setVisibility(View.VISIBLE);
+                            } else {
+                                findViewById(R.id.pdfProgressBar5).setVisibility(View.GONE);
+                            }
 
                             loadWebview();
                             if (findViewById(R.id.search_fragment).getVisibility() == View.GONE) {
@@ -1682,7 +1782,6 @@ public class ViewVideo extends AppCompatActivity {
 
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
-                //Log.d(TAG, "music duration: " + mediaPlayer.getDuration());
                 searchFragmentLayout.setVisibility(View.VISIBLE);
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 if (imm != null) {
@@ -1704,6 +1803,7 @@ public class ViewVideo extends AppCompatActivity {
     public void loadActivity() {
         refreshProgressbar.setProgress(0);
         refreshProgressbar.setVisibility(View.VISIBLE);
+        mPlayCircle.setVisibility(View.GONE);
 
         final ProgressBarAnimation anim = new ProgressBarAnimation(refreshProgressbar, 0, 80);
         anim.setDuration(3040);
@@ -1829,6 +1929,7 @@ public class ViewVideo extends AppCompatActivity {
                         loadRemoteMedia(mSeekbar.getProgress(), true);
                         return;
                     } else {
+                        Log.d(TAG, "Setting playback state to IDLE.");
                         mPlaybackState = PlaybackState.IDLE;
                         updatePlaybackLocation(PlaybackLocation.REMOTE);
                     }
@@ -1837,11 +1938,19 @@ public class ViewVideo extends AppCompatActivity {
                 supportInvalidateOptionsMenu();
             }
 
+            //TODO always visible controller in music mode
             private void onApplicationDisconnected() {
+                Log.d(TAG, "Remote Application Disconnected.");
                 updatePlaybackLocation(PlaybackLocation.LOCAL);
+                Log.d(TAG, "Setting playback state to IDLE 2.");
+                //prepare UI for local playback
                 mPlaybackState = PlaybackState.IDLE;
                 mLocation = PlaybackLocation.LOCAL;
                 updatePlayButton(mPlaybackState);
+                shouldStartPlayback = true;
+                mediaReloadInProgress = false;
+                mPlayCircle.setVisibility(View.VISIBLE);
+                mediaProgressBar.setVisibility(View.GONE);
                 supportInvalidateOptionsMenu();
             }
         };
@@ -1888,8 +1997,10 @@ public class ViewVideo extends AppCompatActivity {
                     castImage = new WebImage(Uri.parse(castImageData.getfilePathURL().replaceAll(" ", "%20")));
                 }
 
-                if (videoData.getDurationInMilliseconds() == 0L) {
+                if (mMediaType == PlaybackType.VIDEO && videoData.getDurationInMilliseconds() == 0L) {
                     videoData.setDuration();
+                } else if (mMediaType == PlaybackType.MUSIC && musicData.getDurationInMilliseconds() == 0L) {
+                    musicData.setDuration();
                 }
             }
         };
@@ -1923,25 +2034,58 @@ public class ViewVideo extends AppCompatActivity {
     }
 
     private MediaInfo buildMediaInfo(WebImage castImage) {
-        MediaMetadata movieMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
+        MediaMetadata movieMetadata;
+        if (mMediaType == PlaybackType.VIDEO) {
+            movieMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
+        } else {
+            movieMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK);
+        }
 
         //information to display
         movieMetadata.putString(MediaMetadata.KEY_TITLE, videoData.getName());
 
         movieMetadata.addImage(castImage);
 
-        return new MediaInfo.Builder(videoData.getfilePathURL().replaceAll(" ", "%20"))
-                .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
-                .setContentType("videos/mp4")
-                .setMetadata(movieMetadata)
-                .setStreamDuration(videoData.getDurationInMilliseconds())
-                .build();
+        //finish preparing for remote cast
+        mediaProgressBar.setVisibility(View.GONE);
+        //mPlayCircle.setVisibility(View.VISIBLE);
+        if (mMediaType == PlaybackType.VIDEO) {
+            return new MediaInfo.Builder(videoData.getfilePathURL().replaceAll(" ", "%20"))
+                    .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
+                    .setContentType("videos/mp4")
+                    .setMetadata(movieMetadata)
+                    .setStreamDuration(videoData.getDurationInMilliseconds())
+                    .build();
+        } else {
+            if (mediaPlayer.isPlaying()) {
+                mediaPlayer.reset();
+            }
+            return new MediaInfo.Builder(musicData.getfilePathURL().replaceAll(" ", "%20"))
+                    .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
+                    .setContentType("audio/mpeg")
+                    .setMetadata(movieMetadata)
+                    .setStreamDuration(musicData.getDurationInMilliseconds())
+                    .build();
+        }
     }
 
     //starts new activity and destroys the current activity
     private void startNewActivity(Intent intent) {
         videoView.pause();
+
+        destroyActivity = true;
         startActivity(intent);
+        exitActivity();
+    }
+
+    //closes the current activity and clears values that are no longer needed.
+    private void exitActivity() {
+        //clear the mediatime when activity cleared.
+        SharedPreferences.Editor editor = this.settings.edit();
+        editor.putInt("MediaTime", 0);
+        editor.apply();
+        destroyActivity = true;
+
         finish();
     }
 
@@ -1959,8 +2103,7 @@ public class ViewVideo extends AppCompatActivity {
             intent.putExtra("videoData", appData.getVideoData(videoTypePath).get(index));
         }
         intent.putExtra("shouldStart", true);
-        startActivity(intent);
-        finish();
+        startNewActivity(intent);
     }
 
     private void fetchMusicData() {
@@ -1987,6 +2130,7 @@ public class ViewVideo extends AppCompatActivity {
 
                 //play audio when done if requirements are met
                 if (playMusicRequested && mMediaType == PlaybackType.MUSIC) {
+                    Log.d(TAG, "Audio checkpoint 2");
                     playAudio();
                 }
             }

@@ -367,6 +367,7 @@ public class ViewVideo extends AppCompatActivity {
         pdfTestAttempts = 0;
 
         //Sets up the media playback type
+        findViewById(R.id.musicBackground).setVisibility(View.GONE);
         updatePlaybackType(PlaybackType.VIDEO);
         musicToggle = findViewById(R.id.musicToggle);
         musicToggle.setOnClickListener(new View.OnClickListener() {
@@ -389,7 +390,9 @@ public class ViewVideo extends AppCompatActivity {
                             videoContainer.setLayoutParams(params);
                             Log.d(TAG, "Audio checkpoint 3");
                             playAudio();
+                            findViewById(R.id.musicBackground).setVisibility(View.VISIBLE);
                         } else {
+                            findViewById(R.id.musicBackground).setVisibility(View.GONE);
                             updatePlaybackType(PlaybackType.VIDEO);
                             mediaPlayer.reset();
                             //set the container height and orientation elements for viewing videos

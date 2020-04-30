@@ -41,17 +41,6 @@ tools:showIn="@layout/activity_view_video">
 
             </LinearLayout>
 
-            <ProgressBar
-                android:id="@+id/videoProgressBar"
-                style="?android:attr/progressBarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignTop="@id/videoContainer"
-                android:layout_alignBottom="@id/videoContainer"
-                android:indeterminateDrawable="@drawable/gradient_progress_circular"
-                android:scaleX="0.5"
-                android:scaleY="0.5" />
-
             <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -59,6 +48,15 @@ tools:showIn="@layout/activity_view_video">
                 android:layout_alignTop="@id/videoContainer"
                 android:layout_alignRight="@id/videoContainer"
                 android:layout_alignBottom="@id/videoContainer">
+
+                <ImageView
+                    android:id="@+id/musicBackground"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:scaleX="0.5"
+                    android:scaleY="0.5"
+                    android:visibility="visible"
+                    ads:srcCompat="@drawable/music_icon_green" />
 
                 <ImageButton
                     android:id="@+id/play_circle"
@@ -69,6 +67,17 @@ tools:showIn="@layout/activity_view_video">
                     android:scaleType="fitXY"
                     app:srcCompat="@drawable/ic_play_start_filled" />
             </RelativeLayout>
+
+            <ProgressBar
+                android:id="@+id/videoProgressBar"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/videoContainer"
+                android:layout_alignBottom="@id/videoContainer"
+                android:indeterminateDrawable="@drawable/gradient_progress_circular"
+                android:scaleX="0.5"
+                android:scaleY="0.5" />
 
             <RelativeLayout
                 android:id="@+id/controllers"

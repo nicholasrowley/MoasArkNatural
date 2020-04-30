@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -379,11 +380,24 @@ public class ViewVideo extends AppCompatActivity {
                         if (mMediaType == PlaybackType.VIDEO) {
                             updatePlaybackType(PlaybackType.MUSIC);
                             videoView.stopPlayback();
+                            //set the container height and orientation elements for listening to music
+                            //params uses dip (90dp = 180dip)
+                            setOrientation();
+                            ViewGroup.LayoutParams params = videoContainer.getLayoutParams();
+                            Log.d(TAG, "params height: " + params.height);
+                            params.height = 180;
+                            videoContainer.setLayoutParams(params);
                             Log.d(TAG, "Audio checkpoint 3");
                             playAudio();
                         } else {
                             updatePlaybackType(PlaybackType.VIDEO);
                             mediaPlayer.reset();
+                            //set the container height and orientation elements for viewing videos
+                            //params uses dip (200dp = 400dip)
+                            setOrientation();
+                            ViewGroup.LayoutParams params = videoContainer.getLayoutParams();
+                            params.height = 400;
+                            videoContainer.setLayoutParams(params);
                             playVideo();
                         }
                     }
@@ -987,8 +1001,10 @@ public class ViewVideo extends AppCompatActivity {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    updateControllersVisibility(false);
-                    mControllersVisible = false;
+                    if (!(mMediaType == PlaybackType.MUSIC)) {
+                        updateControllersVisibility(false);
+                        mControllersVisible = false;
+                    }
                 }
             });
 
@@ -1394,8 +1410,8 @@ public class ViewVideo extends AppCompatActivity {
         ViewGroup.LayoutParams params = videoView.getLayoutParams();
 
         TextView videoTitle;
-        //Check if screen is in portrait or landscape mode.
-        if (portraitView) {
+        //Check if screen is in portrait or landscape mode or music is being played.
+        if (portraitView || mMediaType == PlaybackType.MUSIC) {
 
             videoTitle = findViewById(R.id.txtVideoTitle);
             videoTitle.setText(videoData.getName());
@@ -1406,9 +1422,11 @@ public class ViewVideo extends AppCompatActivity {
 
             portraitItems.setVisibility(View.VISIBLE);
 
-            contParams.height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                    200, getResources().getDisplayMetrics());
-            params.height = MATCH_PARENT;
+            if (mMediaType == PlaybackType.VIDEO) {
+                contParams.height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                        200, getResources().getDisplayMetrics());
+                params.height = MATCH_PARENT;
+            }
 
             videoContainer.setLayoutParams(contParams);
             videoView.setLayoutParams(params);

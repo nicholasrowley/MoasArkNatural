@@ -109,4 +109,7 @@
     <string name="play_services_error_message">Could not find Google Play Services or Google Play Services is not installed. Please install the latest version of Google Play Services and try again. Some features of the app may not be available.</string>
     <string name="play_services_error_toast">Google Play Services is not installed. Some features of the app may not be available.</string>
 
+
+    <string name="button_download_media">Download media</string>
+
 </resources>

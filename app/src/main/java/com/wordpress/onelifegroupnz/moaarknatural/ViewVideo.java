@@ -214,7 +214,7 @@ public class ViewVideo extends AppCompatActivity {
         mPlayCircle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "PlaybackLoaction - Remote: " + (mLocation == PlaybackLocation.REMOTE) );
+                Log.d(TAG, "PlaybackLocation - Remote: " + (mLocation == PlaybackLocation.REMOTE) );
                 if (mediaProgressBar.getVisibility() == View.GONE || mLocation == PlaybackLocation.REMOTE) {
                     togglePlayback();
                     mediaReloadInProgress = true;
@@ -568,6 +568,7 @@ public class ViewVideo extends AppCompatActivity {
         MenuItem item;
         item = menu.findItem(R.id.menu_share_video);
         item.setVisible(true);
+        menu.findItem(R.id.menu_download_media).setVisible(true);
         return true;
     }
 
@@ -625,6 +626,7 @@ public class ViewVideo extends AppCompatActivity {
                 return true;
             case R.id.menu_share_video:
                 //Share video url with other apps
+                //TODO Implement custom popup tab for share options
                 if(videoData != null && !videoData.getfilePathURL().isEmpty()) {
                     Intent sendIntent = new Intent();
                     sendIntent.setAction(Intent.ACTION_SEND);
@@ -634,6 +636,10 @@ public class ViewVideo extends AppCompatActivity {
                     Intent shareIntent = Intent.createChooser(sendIntent, "Share Video URL with...");
                     startActivity(shareIntent);
                 }
+                return true;
+            case R.id.menu_download_media:
+                //Download media that is currently selected.
+                //TODO Implement custom popup tab for download options
                 return true;
         }
         return super.onOptionsItemSelected(item);

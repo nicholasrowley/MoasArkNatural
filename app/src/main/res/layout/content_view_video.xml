@@ -324,6 +324,58 @@ tools:showIn="@layout/activity_view_video">
 
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/noInputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true"
+        android:focusable="true"
+        android:orientation="vertical"
+        android:visibility="gone"></LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/shareMediaLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:background="@color/themeShader"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="@dimen/_2sdp"
+            android:layout_marginTop="@dimen/_2sdp"
+            android:layout_marginRight="@dimen/_2sdp"
+            android:layout_marginBottom="@dimen/_2sdp"
+            android:background="@color/white"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/shareMenuText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Share..." />
+
+            <Button
+                android:id="@+id/shareVideoBtn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Share Video" />
+
+            <Button
+                android:id="@+id/shareMusicBtn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Share Music" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
     <fragment
         android:id="@+id/castMiniController"
         android:layout_width="fill_parent"

@@ -111,5 +111,6 @@
 
 
     <string name="button_download_media">Download media</string>
+    <string name="share_menu_text_generic">Share…</string>
 
 </resources>

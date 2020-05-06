@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -45,6 +44,7 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -445,6 +445,27 @@ public class ViewVideo extends AppCompatActivity {
                 }
             }
         });
+
+        findViewById(R.id.cancelOverlayLayout).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideAllOverlays();
+            }
+        });
+
+        findViewById(R.id.shareVideoBtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                selectShareType(PlaybackType.VIDEO);
+            }
+        });
+
+        findViewById(R.id.shareMusicBtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                selectShareType(PlaybackType.MUSIC);
+            }
+        });
     }
 
     @Override
@@ -627,15 +648,7 @@ public class ViewVideo extends AppCompatActivity {
             case R.id.menu_share_video:
                 //Share video url with other apps
                 //TODO Implement custom popup tab for share options
-                if(videoData != null && !videoData.getfilePathURL().isEmpty()) {
-                    Intent sendIntent = new Intent();
-                    sendIntent.setAction(Intent.ACTION_SEND);
-                    sendIntent.putExtra(Intent.EXTRA_TEXT, "Shared " + videoData.getName() + " from Moa\'s Ark Natural NZ app. Download from " + getString(R.string.app_play_store_url) + "\n\n" + videoData.getfilePathURL().replaceAll(" ", "%20"));
-                    sendIntent.setType("text/plain");
-
-                    Intent shareIntent = Intent.createChooser(sendIntent, "Share Video URL with...");
-                    startActivity(shareIntent);
-                }
+                toggleShareMedia();
                 return true;
             case R.id.menu_download_media:
                 //Download media that is currently selected.
@@ -2164,5 +2177,62 @@ public class ViewVideo extends AppCompatActivity {
         };
 
         musicLoadTask.start();
+    }
+
+    private void toggleShareMedia() {
+        TextView shareMenuText = findViewById(R.id.shareMenuText);
+        shareMenuText.setText(getString(R.string.share_menu_text_generic));
+        findViewById(R.id.shareContentMenu).setVisibility(View.GONE);
+        findViewById(R.id.shareTypeSelector).setVisibility(View.VISIBLE);
+        if(musicToggle.getVisibility() == View.GONE) {
+            //Auto select video if music option is not available
+            selectShareType(PlaybackType.VIDEO);
+        }
+        if (findViewById(R.id.shareMediaLayout).getVisibility() == View.GONE) {
+            hideAllOverlays();
+            findViewById(R.id.shareMediaLayout).setVisibility(View.VISIBLE);
+            findViewById(R.id.cancelOverlayLayout).setVisibility(View.VISIBLE);
+        } else {
+            hideAllOverlays();
+        }
+    }
+
+    private void hideAllOverlays() {
+        findViewById(R.id.shareMediaLayout).setVisibility(View.GONE);
+        findViewById(R.id.cancelOverlayLayout).setVisibility(View.GONE);
+    }
+
+    private void selectShareType(PlaybackType type) {
+        TextView shareMenuText = findViewById(R.id.shareMenuText);
+        EditText shareText = findViewById(R.id.shareText);
+        String shareTitleString;
+        String shareString;
+        if (type == PlaybackType.VIDEO && (videoData != null && !videoData.getfilePathURL().isEmpty())) {
+            shareTitleString = "Sharing " + getString(R.string.search_type_dance) + " video";
+            shareMenuText.setText(shareTitleString);
+            shareString = "Shared " + videoData.getName() + " video from Moa\'s Ark Natural NZ app. Download from " + getString(R.string.app_play_store_url) + "\n\n" + videoData.getfilePathURL().replaceAll(" ", "%20");
+            shareText.setText(shareString);
+        } else if (type == PlaybackType.MUSIC && (musicData != null && !musicData.getfilePathURL().isEmpty())) {
+            shareTitleString = "Sharing " + getString(R.string.search_type_dance) + " music";
+            shareMenuText.setText(shareTitleString);
+            shareString = "Shared " + musicData.getName() + " music from Moa\'s Ark Natural NZ app. Download from " + getString(R.string.app_play_store_url) + "\n\n" + musicData.getfilePathURL().replaceAll(" ", "%20");
+            shareText.setText(shareString);
+        }
+        findViewById(R.id.shareContentMenu).setVisibility(View.VISIBLE);
+        findViewById(R.id.shareTypeSelector).setVisibility(View.GONE);
+    }
+
+    public void onClickSubmitShareRequest(View v) {
+        TextView shareMenuText = findViewById(R.id.shareMenuText);
+        EditText shareText = findViewById(R.id.shareText);
+        if(!shareMenuText.getText().equals(getString(R.string.share_menu_text_generic))) {
+            Intent sendIntent = new Intent();
+            sendIntent.setAction(Intent.ACTION_SEND);
+            sendIntent.putExtra(Intent.EXTRA_TEXT, shareText.getText().toString());
+            sendIntent.setType("text/plain");
+
+            Intent shareIntent = Intent.createChooser(sendIntent, "Share URL with...");
+            startActivity(shareIntent);
+        }
     }
 }

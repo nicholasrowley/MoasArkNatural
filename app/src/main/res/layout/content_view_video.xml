@@ -325,7 +325,7 @@ tools:showIn="@layout/activity_view_video">
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/noInputLayout"
+        android:id="@+id/cancelOverlayLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clickable="true"
@@ -341,7 +341,8 @@ tools:showIn="@layout/activity_view_video">
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
         android:background="@color/themeShader"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:visibility="gone">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -358,19 +359,52 @@ tools:showIn="@layout/activity_view_video">
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="Share..." />
+                android:text="@string/share_menu_text_generic"
+                android:textSize="22sp" />
 
-            <Button
-                android:id="@+id/shareVideoBtn"
+            <LinearLayout
+                android:id="@+id/shareContentMenu"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Share Video" />
+                android:layout_height="match_parent"
+                android:orientation="vertical">
 
-            <Button
-                android:id="@+id/shareMusicBtn"
+                <EditText
+                    android:id="@+id/shareText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:gravity="start|top"
+                    android:inputType="textMultiLine|textNoSuggestions"
+                    android:text="Share text" />
+
+                <Button
+                    android:id="@+id/shareSubmitBtn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:onClick="onClickSubmitShareRequest"
+                    android:text="Share" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/shareTypeSelector"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Share Music" />
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/shareVideoBtn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    android:text="Share Video" />
+
+                <Button
+                    android:id="@+id/shareMusicBtn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    android:text="Share Music" />
+            </LinearLayout>
 
         </LinearLayout>
 

@@ -112,5 +112,18 @@
 
     <string name="button_download_media">Download media</string>
     <string name="share_menu_text_generic">Share…</string>
+    <string name="download_menu_title">Download…</string>
 
+    <!-- Rate this app -->
+        <string name="rate_dialog_title">Rate this app</string>
+        <string name="rate_dialog_message">If you enjoy playing this app, would you mind taking a moment to rate it? It won\'t take more than a minute. Thanks for your support!</string>
+        <string name="rate_dialog_ok">Rate It Now</string>
+        <string name="rate_dialog_cancel">Remind Me Later</string>
+        <string name="rate_dialog_no">No, Thanks</string>
+    <string name="share_text">Share text</string>
+    <string name="share_video_btn">Share Video</string>
+    <string name="share_music_btn">Share Music</string>
+    <string name="download_video_btn">Download Video</string>
+    <string name="download_music_btn">Download Music</string>
+    <string name="share_submit_btn">Share</string>
 </resources>

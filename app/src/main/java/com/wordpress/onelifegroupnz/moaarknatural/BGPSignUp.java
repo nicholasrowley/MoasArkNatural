@@ -137,6 +137,14 @@ public class BGPSignUp extends AppCompatActivity {
                 intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 return true;
+            case R.id.menu_rate_app:
+                //Navigates to Google Play
+                try {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + getPackageName())));
+                } catch (android.content.ActivityNotFoundException anfe) {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + getPackageName())));
+                }
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }

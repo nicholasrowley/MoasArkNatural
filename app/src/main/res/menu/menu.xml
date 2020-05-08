@@ -56,19 +56,25 @@
                 android:id="@+id/menu_contact_form"
                 android:title="@string/title_activity_contact_form"
                 android:icon="@drawable/ic_contact_form_green"
-                android:orderInCategory="7"
+                android:orderInCategory="8"
+                app:showAsAction="never" />
+            <item
+                android:id="@+id/menu_rate_app"
+                android:title="@string/rate_dialog_title"
+                android:icon="@drawable/ic_action_rate_app"
+                android:orderInCategory="10"
                 app:showAsAction="never" />
             <item
                 android:id="@+id/menu_share_video"
                 android:icon="@drawable/ic_action_share_video"
-                android:orderInCategory="10"
+                android:orderInCategory="13"
                 android:title="@string/action_share_video"
                 android:visible="false"
                 app:showAsAction="never" />
             <item
                 android:id="@+id/menu_download_media"
                 android:icon="@drawable/ic_action_media_download"
-                android:orderInCategory="11"
+                android:orderInCategory="15"
                 android:title="@string/button_download_media"
                 android:visible="false"
                 app:showAsAction="never" />

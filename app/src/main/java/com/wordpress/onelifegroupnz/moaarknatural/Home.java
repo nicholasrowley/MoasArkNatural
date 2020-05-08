@@ -53,6 +53,8 @@ import com.google.android.gms.cast.framework.IntroductoryOverlay;
 import com.google.android.gms.cast.framework.CastState;
 import com.google.android.gms.cast.framework.CastStateListener;
 
+import hotchemi.android.rate.AppRate;
+
 /** This is the main activity for navigating to different areas of the app.*/
 public class Home extends AppCompatActivity {
 
@@ -144,6 +146,15 @@ public class Home extends AppCompatActivity {
         refreshContent();
 
         initialiseAds();
+
+        //App rating
+        AppRate.with(this)
+                .setInstallDays(1) //days passed before message can show
+                .setLaunchTimes(3) //launch times before message can show
+                .setRemindInterval(2) //launches required after clicking "Remind Me Later" before message can show again.
+                .monitor();
+
+        AppRate.showRateDialogIfMeetsConditions(this);
     }
 
     @Override
@@ -228,6 +239,15 @@ public class Home extends AppCompatActivity {
                 Uri uri = Uri.parse(getString(R.string.website_contact_form_url).replaceAll(" ", "%20"));
                 intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
+                return true;
+            case R.id.menu_rate_app:
+                //navigates to Google Play
+                //String googlePlayServicesPackage = "com.google.android.gms";
+                try {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + getPackageName())));
+                } catch (android.content.ActivityNotFoundException anfe) {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + getPackageName())));
+                }
                 return true;
         }
         return super.onOptionsItemSelected(item);

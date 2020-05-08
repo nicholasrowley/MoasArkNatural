@@ -187,6 +187,14 @@ public class SearchResults extends AppCompatActivity {
                 intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 return true;
+            case R.id.menu_rate_app:
+                //Navigates to Google Play
+                try {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + getPackageName())));
+                } catch (android.content.ActivityNotFoundException anfe) {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + getPackageName())));
+                }
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -259,9 +267,9 @@ public class SearchResults extends AppCompatActivity {
             final int sdk = android.os.Build.VERSION.SDK_INT;
             if(sdk < android.os.Build.VERSION_CODES.JELLY_BEAN) {
                 //noinspection deprecation
-                newButton.setBackgroundDrawable(ContextCompat.getDrawable(this, R.drawable.rounded_button) );
+                newButton.setBackgroundDrawable(ContextCompat.getDrawable(this, R.drawable.button) );
             } else {
-                newButton.setBackground(ContextCompat.getDrawable(this, R.drawable.rounded_button));
+                newButton.setBackground(ContextCompat.getDrawable(this, R.drawable.button));
             }
             LinearLayout.LayoutParams parameter =  (LinearLayout.LayoutParams) resultsView.getLayoutParams();
             parameter.setMargins(5, 5, 5, 5); // left, top, right, bottom margins

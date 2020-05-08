@@ -271,7 +271,7 @@ tools:showIn="@layout/activity_view_video">
                         android:layout_marginRight="5dp"
                         android:layout_marginBottom="5dp"
                         android:layout_weight="0.2"
-                        android:background="@drawable/rounded_button"
+                        android:background="@drawable/button"
                         android:contentDescription="@string/reload_pdf_button"
                         android:onClick="onClickPDFRefresh"
                         ads:srcCompat="@drawable/ic_refresh" />
@@ -340,7 +340,7 @@ tools:showIn="@layout/activity_view_video">
         android:layout_centerInParent="true"
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:background="@color/themeShader"
+        android:background="@drawable/rounded_border"
         android:orientation="vertical"
         android:visibility="gone">
 
@@ -351,7 +351,7 @@ tools:showIn="@layout/activity_view_video">
             android:layout_marginTop="@dimen/_2sdp"
             android:layout_marginRight="@dimen/_2sdp"
             android:layout_marginBottom="@dimen/_2sdp"
-            android:background="@color/white"
+            android:background="@drawable/rounded_menu"
             android:orientation="vertical">
 
             <TextView
@@ -375,14 +375,18 @@ tools:showIn="@layout/activity_view_video">
                     android:ems="10"
                     android:gravity="start|top"
                     android:inputType="textMultiLine|textNoSuggestions"
-                    android:text="Share text" />
+                    android:hint="@string/share_text"
+                    android:text="@string/share_text"
+                    android:textSize="12sp" />
 
                 <Button
                     android:id="@+id/shareSubmitBtn"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="@drawable/button"
+                    android:layout_margin="@dimen/_3sdp"
                     android:onClick="onClickSubmitShareRequest"
-                    android:text="Share" />
+                    android:text="@string/share_submit_btn" />
             </LinearLayout>
 
             <LinearLayout
@@ -396,14 +400,76 @@ tools:showIn="@layout/activity_view_video">
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="0.5"
-                    android:text="Share Video" />
+                    android:background="@drawable/button"
+                    android:layout_margin="@dimen/_3sdp"
+                    android:text="@string/share_video_btn" />
 
                 <Button
                     android:id="@+id/shareMusicBtn"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="0.5"
-                    android:text="Share Music" />
+                    android:background="@drawable/button"
+                    android:layout_margin="@dimen/_3sdp"
+                    android:text="@string/share_music_btn" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/downloadLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:background="@drawable/rounded_border"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="@dimen/_2sdp"
+            android:layout_marginTop="@dimen/_2sdp"
+            android:layout_marginRight="@dimen/_2sdp"
+            android:layout_marginBottom="@dimen/_2sdp"
+            android:background="@drawable/rounded_menu"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/downloadMenuText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/download_menu_title"
+                android:textSize="22sp" />
+
+            <LinearLayout
+                android:id="@+id/downloadTypeSelector"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/downloadVideoBtn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    android:text="@string/download_video_btn"
+                    android:background="@drawable/button"
+                    android:layout_margin="@dimen/_3sdp"/>
+
+                <Button
+                    android:id="@+id/downloadMusicBtn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    android:text="@string/download_music_btn"
+                    android:background="@drawable/button"
+                    android:layout_margin="@dimen/_3sdp" />
             </LinearLayout>
 
         </LinearLayout>

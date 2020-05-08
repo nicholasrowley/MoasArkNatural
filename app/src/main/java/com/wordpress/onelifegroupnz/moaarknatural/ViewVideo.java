@@ -645,6 +645,14 @@ public class ViewVideo extends AppCompatActivity {
                 intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 return true;
+            case R.id.menu_rate_app:
+                //Navigates to Google Play
+                try {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + getPackageName())));
+                } catch (android.content.ActivityNotFoundException anfe) {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + getPackageName())));
+                }
+                return true;
             case R.id.menu_share_video:
                 //Share video url with other apps
                 //TODO Implement custom popup tab for share options
@@ -653,6 +661,7 @@ public class ViewVideo extends AppCompatActivity {
             case R.id.menu_download_media:
                 //Download media that is currently selected.
                 //TODO Implement custom popup tab for download options
+                toggleDownloadMedia();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -2199,6 +2208,7 @@ public class ViewVideo extends AppCompatActivity {
 
     private void hideAllOverlays() {
         findViewById(R.id.shareMediaLayout).setVisibility(View.GONE);
+        findViewById(R.id.downloadLayout).setVisibility(View.GONE);
         findViewById(R.id.cancelOverlayLayout).setVisibility(View.GONE);
     }
 
@@ -2210,12 +2220,12 @@ public class ViewVideo extends AppCompatActivity {
         if (type == PlaybackType.VIDEO && (videoData != null && !videoData.getfilePathURL().isEmpty())) {
             shareTitleString = "Sharing " + getString(R.string.search_type_dance) + " video";
             shareMenuText.setText(shareTitleString);
-            shareString = "Shared " + videoData.getName() + " video from Moa\'s Ark Natural NZ app. Download from " + getString(R.string.app_play_store_url) + "\n\n" + videoData.getfilePathURL().replaceAll(" ", "%20");
+            shareString = "Shared " + videoData.getName() + " video from Moa\'s Ark Natural NZ app. Download and rate this app from " + getString(R.string.app_play_store_url) + "\n\n" + videoData.getfilePathURL().replaceAll(" ", "%20");
             shareText.setText(shareString);
         } else if (type == PlaybackType.MUSIC && (musicData != null && !musicData.getfilePathURL().isEmpty())) {
             shareTitleString = "Sharing " + getString(R.string.search_type_dance) + " music";
             shareMenuText.setText(shareTitleString);
-            shareString = "Shared " + musicData.getName() + " music from Moa\'s Ark Natural NZ app. Download from " + getString(R.string.app_play_store_url) + "\n\n" + musicData.getfilePathURL().replaceAll(" ", "%20");
+            shareString = "Shared " + musicData.getName() + " music from Moa\'s Ark Natural NZ app. Download and rate this app from " + getString(R.string.app_play_store_url) + "\n\n" + musicData.getfilePathURL().replaceAll(" ", "%20");
             shareText.setText(shareString);
         }
         findViewById(R.id.shareContentMenu).setVisibility(View.VISIBLE);
@@ -2233,6 +2243,22 @@ public class ViewVideo extends AppCompatActivity {
 
             Intent shareIntent = Intent.createChooser(sendIntent, "Share URL with...");
             startActivity(shareIntent);
+        }
+    }
+
+    private void toggleDownloadMedia() {
+        if (musicToggle.getVisibility() == View.GONE) {
+            findViewById(R.id.downloadMusicBtn).setVisibility(View.GONE);
+        } else {
+            findViewById(R.id.downloadMusicBtn).setVisibility(View.VISIBLE);
+        }
+
+        if (findViewById(R.id.downloadLayout).getVisibility() == View.GONE) {
+            hideAllOverlays();
+            findViewById(R.id.downloadLayout).setVisibility(View.VISIBLE);
+            findViewById(R.id.cancelOverlayLayout).setVisibility(View.VISIBLE);
+        } else {
+            hideAllOverlays();
         }
     }
 }

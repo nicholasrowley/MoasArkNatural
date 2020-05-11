@@ -1,15 +1,21 @@
 package com.wordpress.onelifegroupnz.moaarknatural;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.DownloadManager;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -19,8 +25,10 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -52,6 +60,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.google.android.gms.ads.AdRequest;
@@ -159,6 +168,10 @@ public class ViewVideo extends AppCompatActivity {
     private SessionManagerListener<CastSession> mSessionManagerListener;
     private boolean castSessionLoading;
 
+    //Download Manager
+    private DownloadManager mgr=null;
+    private long lastDownload=-1L;
+    private static final int WRITE_EXTERNAL_STORAGE = 459;
 
     /**
      * indicates whether we are doing a local or a remote playback
@@ -466,6 +479,13 @@ public class ViewVideo extends AppCompatActivity {
                 selectShareType(PlaybackType.MUSIC);
             }
         });
+
+        //Set up Download Manager
+        mgr=(DownloadManager)getSystemService(DOWNLOAD_SERVICE);
+        registerReceiver(onDLComplete,
+                new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+        registerReceiver(onDLNotificationClick,
+                new IntentFilter(DownloadManager.ACTION_NOTIFICATION_CLICKED));
     }
 
     @Override
@@ -530,6 +550,9 @@ public class ViewVideo extends AppCompatActivity {
         Log.d(TAG, "onDestroy called.");
 
         super.onDestroy();
+
+        unregisterReceiver(onDLComplete);
+        unregisterReceiver(onDLNotificationClick);
     }
 
     @Override
@@ -2261,4 +2284,158 @@ public class ViewVideo extends AppCompatActivity {
             hideAllOverlays();
         }
     }
+
+    BroadcastReceiver onDLComplete =new BroadcastReceiver() {
+        public void onReceive(Context ctxt, Intent intent) {
+            //findViewById(R.id.start).setEnabled(true);
+        }
+    };
+
+    BroadcastReceiver onDLNotificationClick =new BroadcastReceiver() {
+        public void onReceive(Context ctxt, Intent intent) {
+            Toast.makeText(ctxt, "Testing Download Notification", Toast.LENGTH_LONG).show();
+        }
+    };
+
+    public void startDownload(View v) {
+        int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, WRITE_EXTERNAL_STORAGE);
+        } else {
+            downloadContent();
+
+            //v.setEnabled(false);
+            //TODO Query Button
+            //findViewById(R.id.query).setEnabled(true);
+        }
+    }
+
+    public void downloadContent() {
+        //TODO Implement for audio and video
+        Uri uri=Uri.parse(videoData.getfilePathURL());
+
+        Environment
+                .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                .mkdirs();
+
+        lastDownload=
+                mgr.enqueue(new DownloadManager.Request(uri)
+                        .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI |
+                                DownloadManager.Request.NETWORK_MOBILE)
+                        .setAllowedOverRoaming(false)
+                        .setTitle(videoData.getName())
+                        .setDescription("Downloading Video from Moa's Ark Natural NZ")
+                        .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,
+                                videoData.getfilePathURL().replaceAll(".+/", "").replaceAll("%20", " ")));
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case WRITE_EXTERNAL_STORAGE:
+                if ((grantResults.length > 0) && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    //TODO
+                    downloadContent();
+                }
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    public void queryStatus(View v) {
+        Cursor c=mgr.query(new DownloadManager.Query().setFilterById(lastDownload));
+
+        if (c==null) {
+            Toast.makeText(this, "Download not found!", Toast.LENGTH_LONG).show();
+        }
+        else {
+            c.moveToFirst();
+
+            Log.d(getClass().getName(), "COLUMN_ID: "+
+                    c.getLong(c.getColumnIndex(DownloadManager.COLUMN_ID)));
+            Log.d(getClass().getName(), "COLUMN_BYTES_DOWNLOADED_SO_FAR: "+
+                    c.getLong(c.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR)));
+            Log.d(getClass().getName(), "COLUMN_LAST_MODIFIED_TIMESTAMP: "+
+                    c.getLong(c.getColumnIndex(DownloadManager.COLUMN_LAST_MODIFIED_TIMESTAMP)));
+            Log.d(getClass().getName(), "COLUMN_LOCAL_URI: "+
+                    c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI)));
+            Log.d(getClass().getName(), "COLUMN_STATUS: "+
+                    c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS)));
+            Log.d(getClass().getName(), "COLUMN_REASON: "+
+                    c.getInt(c.getColumnIndex(DownloadManager.COLUMN_REASON)));
+
+            Toast.makeText(this, statusMessage(c), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public void viewLog(View v) {
+        startActivity(new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS));
+    }
+
+    private String statusMessage(Cursor c) {
+        String msg="???";
+
+        switch(c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS))) {
+            case DownloadManager.STATUS_FAILED:
+                msg="Download failed!";
+                break;
+
+            case DownloadManager.STATUS_PAUSED:
+                msg="Download paused!";
+                break;
+
+            case DownloadManager.STATUS_PENDING:
+                msg="Download pending!";
+                break;
+
+            case DownloadManager.STATUS_RUNNING:
+                msg="Download in progress!";
+                break;
+
+            case DownloadManager.STATUS_SUCCESSFUL:
+                msg="Download complete!";
+                break;
+
+            default:
+                msg="Download is nowhere in sight";
+                break;
+        }
+
+        return(msg);
+    }
+
+    /*private long DownloadData (Uri uri, View v) {
+        long downloadReference;
+
+        // Create request for android download manager
+        downloadManager = (DownloadManager)getSystemService(DOWNLOAD_SERVICE);
+        DownloadManager.Request request = new DownloadManager.Request(uri);
+
+        //Setting title of request
+        request.setTitle("Data Download");
+
+        //Setting description of request
+        request.setDescription("Android Data download using DownloadManager.");
+
+        //Set the local destination for the downloaded file to a path
+        //within the application's external files directory
+        if(v.getId() == R.id.DownloadMusic)
+            request.setDestinationInExternalFilesDir(MainActivity.this,
+                    Environment.DIRECTORY_DOWNLOADS,"AndroidTutorialPoint.mp3");
+        else if(v.getId() == R.id.DownloadImage)
+            request.setDestinationInExternalFilesDir(MainActivity.this,
+                    Environment.DIRECTORY_DOWNLOADS,"AndroidTutorialPoint.jpg");
+
+        //Enqueue download and save into referenceId
+        downloadReference = downloadManager.enqueue(request);
+
+        Button DownloadStatus = (Button) findViewById(R.id.DownloadStatus);
+        DownloadStatus.setEnabled(true);
+        Button CancelDownload = (Button) findViewById(R.id.CancelDownload);
+        CancelDownload.setEnabled(true);
+        return downloadReference;
+    }*/
 }

@@ -460,7 +460,8 @@ tools:showIn="@layout/activity_view_video">
                     android:layout_weight="0.5"
                     android:text="@string/download_video_btn"
                     android:background="@drawable/button"
-                    android:layout_margin="@dimen/_3sdp"/>
+                    android:layout_margin="@dimen/_3sdp"
+                    android:onClick="startDownload"/>
 
                 <Button
                     android:id="@+id/downloadMusicBtn"

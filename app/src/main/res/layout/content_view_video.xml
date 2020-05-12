@@ -470,8 +470,19 @@ tools:showIn="@layout/activity_view_video">
                     android:layout_weight="0.5"
                     android:text="@string/download_music_btn"
                     android:background="@drawable/button"
-                    android:layout_margin="@dimen/_3sdp" />
+                    android:layout_margin="@dimen/_3sdp"
+                    android:onClick="startDownload" />
             </LinearLayout>
+
+            <Button
+                android:id="@+id/viewDownloadsBtn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="View Log"
+                android:background="@drawable/button"
+                android:layout_margin="@dimen/_3sdp"
+                android:onClick="queryStatus"
+                android:visibility="gone"/>
 
         </LinearLayout>
 

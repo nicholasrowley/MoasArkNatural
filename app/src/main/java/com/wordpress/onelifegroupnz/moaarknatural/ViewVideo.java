@@ -172,6 +172,7 @@ public class ViewVideo extends AppCompatActivity {
     private DownloadManager mgr=null;
     private long lastDownload=-1L;
     private static final int WRITE_EXTERNAL_STORAGE = 459;
+    private PlaybackType downloadRequested;
 
     /**
      * indicates whether we are doing a local or a remote playback
@@ -2288,6 +2289,7 @@ public class ViewVideo extends AppCompatActivity {
     BroadcastReceiver onDLComplete =new BroadcastReceiver() {
         public void onReceive(Context ctxt, Intent intent) {
             //findViewById(R.id.start).setEnabled(true);
+            Toast.makeText(ctxt, "Download Complete", Toast.LENGTH_LONG).show();
         }
     };
 
@@ -2299,6 +2301,12 @@ public class ViewVideo extends AppCompatActivity {
 
     public void startDownload(View v) {
         int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (v == findViewById(R.id.downloadVideoBtn)) {
+            downloadRequested = PlaybackType.VIDEO;
+        } else if (v == findViewById(R.id.downloadMusicBtn)) {
+            downloadRequested = PlaybackType.MUSIC;
+        }
 
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, WRITE_EXTERNAL_STORAGE);
@@ -2313,21 +2321,46 @@ public class ViewVideo extends AppCompatActivity {
 
     public void downloadContent() {
         //TODO Implement for audio and video
-        Uri uri=Uri.parse(videoData.getfilePathURL());
+        hideAllOverlays();
+
+        Uri uri;
 
         Environment
                 .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
                 .mkdirs();
 
-        lastDownload=
-                mgr.enqueue(new DownloadManager.Request(uri)
-                        .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI |
-                                DownloadManager.Request.NETWORK_MOBILE)
-                        .setAllowedOverRoaming(false)
-                        .setTitle(videoData.getName())
-                        .setDescription("Downloading Video from Moa's Ark Natural NZ")
-                        .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,
-                                videoData.getfilePathURL().replaceAll(".+/", "").replaceAll("%20", " ")));
+        switch (downloadRequested) {
+            case VIDEO:
+                uri = Uri.parse(videoData.getfilePathURL());
+
+                lastDownload =
+                        mgr.enqueue(new DownloadManager.Request(uri)
+                                .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI |
+                                        DownloadManager.Request.NETWORK_MOBILE)
+                                .setAllowedOverRoaming(false)
+                                .setTitle(videoData.getName())
+                                .setDescription("Downloading Video")
+                                .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,
+                                        videoData.getfilePathURL().replaceAll(".+/", "").replaceAll("%20", " ")));
+                break;
+            case MUSIC:
+                uri = Uri.parse(musicData.getfilePathURL());
+
+                lastDownload =
+                        mgr.enqueue(new DownloadManager.Request(uri)
+                                .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI |
+                                        DownloadManager.Request.NETWORK_MOBILE)
+                                .setAllowedOverRoaming(false)
+                                .setTitle(musicData.getName())
+                                .setDescription("Downloading Music")
+                                .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,
+                                        musicData.getfilePathURL().replaceAll(".+/", "").replaceAll("%20", " ")));
+                break;
+            default:
+                Toast.makeText(this, "Error: Unknown download.", Toast.LENGTH_LONG).show();
+                break;
+        }
+
     }
 
     @Override
@@ -2352,22 +2385,26 @@ public class ViewVideo extends AppCompatActivity {
             Toast.makeText(this, "Download not found!", Toast.LENGTH_LONG).show();
         }
         else {
-            c.moveToFirst();
+            try {
+                c.moveToFirst();
 
-            Log.d(getClass().getName(), "COLUMN_ID: "+
-                    c.getLong(c.getColumnIndex(DownloadManager.COLUMN_ID)));
-            Log.d(getClass().getName(), "COLUMN_BYTES_DOWNLOADED_SO_FAR: "+
-                    c.getLong(c.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR)));
-            Log.d(getClass().getName(), "COLUMN_LAST_MODIFIED_TIMESTAMP: "+
-                    c.getLong(c.getColumnIndex(DownloadManager.COLUMN_LAST_MODIFIED_TIMESTAMP)));
-            Log.d(getClass().getName(), "COLUMN_LOCAL_URI: "+
-                    c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI)));
-            Log.d(getClass().getName(), "COLUMN_STATUS: "+
-                    c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS)));
-            Log.d(getClass().getName(), "COLUMN_REASON: "+
-                    c.getInt(c.getColumnIndex(DownloadManager.COLUMN_REASON)));
+                Log.d(getClass().getName(), "COLUMN_ID: " +
+                        c.getLong(c.getColumnIndex(DownloadManager.COLUMN_ID)));
+                Log.d(getClass().getName(), "COLUMN_BYTES_DOWNLOADED_SO_FAR: " +
+                        c.getLong(c.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR)));
+                Log.d(getClass().getName(), "COLUMN_LAST_MODIFIED_TIMESTAMP: " +
+                        c.getLong(c.getColumnIndex(DownloadManager.COLUMN_LAST_MODIFIED_TIMESTAMP)));
+                Log.d(getClass().getName(), "COLUMN_LOCAL_URI: " +
+                        c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI)));
+                Log.d(getClass().getName(), "COLUMN_STATUS: " +
+                        c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS)));
+                Log.d(getClass().getName(), "COLUMN_REASON: " +
+                        c.getInt(c.getColumnIndex(DownloadManager.COLUMN_REASON)));
 
-            Toast.makeText(this, statusMessage(c), Toast.LENGTH_LONG).show();
+                Toast.makeText(this, statusMessage(c), Toast.LENGTH_LONG).show();
+            } catch (IndexOutOfBoundsException ioobe) {
+                Toast.makeText(this, "Download not found! Nothing here.", Toast.LENGTH_LONG).show();
+            }
         }
     }
 

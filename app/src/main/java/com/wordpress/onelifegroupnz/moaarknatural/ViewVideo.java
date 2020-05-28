@@ -105,7 +105,8 @@ public class ViewVideo extends AppCompatActivity {
     private boolean playMusicRequested;
     private boolean toggleMusicButtonClicked;
     private WebImage castImage;
-    private Boolean dialogIsOpen; //ensure that only one video/wifi error dialog is displayed
+    private Boolean errorDialogIsOpen; //ensure that only one video/wifi error dialog is displayed
+    private Boolean playlistDialogIsOpen; //ensure that only one playlist exists dialog is displayed
     private Toolbar toolbar;
     private SharedPreferences settings;
     private boolean destroyActivity; //lets the application know when to clear specific values no longer in use.
@@ -140,8 +141,10 @@ public class ViewVideo extends AppCompatActivity {
     private String videoTypePath;
     private int videoIndex;
     private boolean wasSearched;
-    private List<FileDataListing> searchList;
+    private boolean fromPlaylist;
+    private List<FileDataListing> videoList;
     private MenuItem searchBar;
+    private MenuItem addToPlaylistMenuItem;
 
     private SearchView searchView;
     private LinearLayout portraitItems;
@@ -277,9 +280,13 @@ public class ViewVideo extends AppCompatActivity {
             videoData = (FileDataListing) extras.getSerializable("videoData");
             videoIndex = extras.getInt("videoIndex", -1);
             wasSearched = extras.getBoolean("wasSearched", false);
+            fromPlaylist = extras.getBoolean("fromPlaylist", false);
 
-            if (wasSearched)
-                searchList = appData.getVideoListFromLastSearchResult();
+            if (wasSearched) {
+                videoList = appData.getLastVideoViewingList();
+            } else if (fromPlaylist) {
+                videoList = appData.getPlaylist().getVideoListFromPlaylistData();
+            }
 
             shouldStartPlayback = extras.getBoolean("shouldStart");
             startPosition = extras.getInt("startPosition", 0);
@@ -298,7 +305,7 @@ public class ViewVideo extends AppCompatActivity {
         editor.putInt("videoPosition", startPosition);
         editor.apply();
 
-        dialogIsOpen = false;
+        errorDialogIsOpen = false;
 
         setupControlsCallbacks();
 
@@ -333,6 +340,8 @@ public class ViewVideo extends AppCompatActivity {
                             appData.showToastMessage("Displaying previous video in " + getString(R.string.title_activity_dance_video_gallery), true, getApplicationContext());
                         } else if(videoTypePath.equals(FOODVIDEOPATH)) {
                             appData.showToastMessage("Displaying previous video in " + getString(R.string.title_activity_food_video_gallery), true, getApplicationContext());
+                        } else if (fromPlaylist) {
+                            appData.showToastMessage("Displaying previous video in playlist", true, getApplicationContext());
                         }
                         seekToVideoID(videoIndex - 1);
                     }
@@ -341,7 +350,7 @@ public class ViewVideo extends AppCompatActivity {
                 mPreVidBtn.setTextColor(Color.GRAY);
             }
 
-            if ((!wasSearched && (videoIndex < appData.getVideoData(videoTypePath).size() - 1)) || (wasSearched && (videoIndex < searchList.size() - 1))) {
+            if ((!(wasSearched || fromPlaylist) && (videoIndex < appData.getVideoData(videoTypePath).size() - 1)) || ((wasSearched || fromPlaylist) && (videoIndex < videoList.size() - 1))) {
                 mNextVidBtn.setTextColor(Color.WHITE);
                 mNextVidBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -352,6 +361,8 @@ public class ViewVideo extends AppCompatActivity {
                             appData.showToastMessage("Displaying next video in " + getString(R.string.title_activity_dance_video_gallery), true, getApplicationContext());
                         } else if(videoTypePath.equals(FOODVIDEOPATH)) {
                             appData.showToastMessage("Displaying next video in " + getString(R.string.title_activity_food_video_gallery), true, getApplicationContext());
+                        } else if(fromPlaylist) {
+                            appData.showToastMessage("Displaying next video in playlist", true, getApplicationContext());
                         }
                         seekToVideoID(videoIndex + 1);
                     }
@@ -487,6 +498,8 @@ public class ViewVideo extends AppCompatActivity {
                 new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
         registerReceiver(onDLNotificationClick,
                 new IntentFilter(DownloadManager.ACTION_NOTIFICATION_CLICKED));
+
+        playlistDialogIsOpen = false;
     }
 
     @Override
@@ -610,10 +623,21 @@ public class ViewVideo extends AppCompatActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem item;
-        item = menu.findItem(R.id.menu_share_video);
-        item.setVisible(true);
+        MenuItem shareVideoMenuItem;
+        shareVideoMenuItem = menu.findItem(R.id.menu_share_video);
+        shareVideoMenuItem.setVisible(true);
+
         menu.findItem(R.id.menu_download_media).setVisible(true);
+
+        addToPlaylistMenuItem = menu.findItem(R.id.add_to_playlist);
+
+        //prepare playlist icon
+        if(appData.getPlayListEntry(videoData.getName()) == null) {
+            addToPlaylistMenuItem.setIcon(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_playlist_add));
+        } else {
+            addToPlaylistMenuItem.setIcon(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_playlist_add_check));
+        }
+        addToPlaylistMenuItem.setVisible(true);
         return true;
     }
 
@@ -667,6 +691,45 @@ public class ViewVideo extends AppCompatActivity {
                 //Proceed to contact form on Moa's Ark website
                 Uri uri = Uri.parse(getString(R.string.website_contact_form_url).replaceAll(" ", "%20"));
                 intent = new Intent(Intent.ACTION_VIEW, uri);
+                startActivity(intent);
+                return true;
+            case R.id.add_to_playlist:
+                //add video data to playlist
+                if(appData.getPlayListEntry(videoData.getName()) == null) {
+                    appData.addToPlayList(getApplicationContext(), videoData, videoTypePath);
+                    addToPlaylistMenuItem.setIcon(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_playlist_add_check));
+                    appData.showToastMessage("Added to playlist", false, getApplicationContext());
+                } else {
+                    //prompt to remove playlist entry
+                    if (!playlistDialogIsOpen) {
+                        playlistDialogIsOpen = true;
+                        //TODO make playlist dialog cancelable
+                        new AlertDialog.Builder(ViewVideo.this)
+                                .setTitle("Playlist entry found")
+                                .setMessage("Remove from playlist?")
+                                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        //remove playlist entry
+                                        playlistDialogIsOpen = false;
+                                        appData.removeFromPlayList(getApplicationContext(), videoData.getName());
+                                        addToPlaylistMenuItem.setIcon(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_playlist_add));
+                                        appData.showToastMessage("Removed from playlist", false, getApplicationContext());
+                                    }
+                                })
+                                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        playlistDialogIsOpen = false;
+                                    }
+                                })
+                                .setIcon(android.R.drawable.ic_dialog_alert)
+                                .setCancelable(false)
+                                .show();
+                    }
+                }
+                return true;
+            case R.id.menu_playlist_gallery:
+                //Proceed to playlist gallery
+                intent = new Intent(ViewVideo.this, PlaylistGallery.class);
                 startActivity(intent);
                 return true;
             case R.id.menu_rate_app:
@@ -1075,21 +1138,21 @@ public class ViewVideo extends AppCompatActivity {
                 Log.e(TAG, "OnErrorListener.onError(): VideoView encountered an "
                         + "error, what: " + what + ", extra: " + extra);
 
-                if (!dialogIsOpen) {
-                    dialogIsOpen = true;
+                if (!errorDialogIsOpen) {
+                    errorDialogIsOpen = true;
                     new AlertDialog.Builder(ViewVideo.this)
                             .setTitle("Video can't be played")
                             .setMessage("Please check your connection and reload video")
                             .setPositiveButton("Reload Video", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
                                     //Reload ViewVideo
-                                    dialogIsOpen = false;
+                                    errorDialogIsOpen = false;
                                     loadActivity();
                                 }
                             })
                             .setNegativeButton("Return to Gallery", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
-                                    dialogIsOpen = false;
+                                    errorDialogIsOpen = false;
                                     if (videoData.getFolderPath().equals(getString(R.string.DIRECTORY_ROOT) + DANCEVIDEOPATH)) {
                                         //Proceed to Line Dance video gallery
                                         Intent intent = new Intent(ViewVideo.this, VideoGallery.class);
@@ -1123,21 +1186,21 @@ public class ViewVideo extends AppCompatActivity {
                 Log.e(TAG, "OnErrorListener.onError(): MediaPlayer encountered an "
                         + "error, what: " + what + ", extra: " + extra);
 
-                if (!dialogIsOpen) {
-                    dialogIsOpen = true;
+                if (!errorDialogIsOpen) {
+                    errorDialogIsOpen = true;
                     new AlertDialog.Builder(ViewVideo.this)
                             .setTitle("Media can't be played")
                             .setMessage("Please check your connection and reload")
                             .setPositiveButton("Reload", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
                                     //Reload Media
-                                    dialogIsOpen = false;
+                                    errorDialogIsOpen = false;
                                     loadActivity();
                                 }
                             })
                             .setNegativeButton("Return to Gallery", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
-                                    dialogIsOpen = false;
+                                    errorDialogIsOpen = false;
                                     if (videoData.getFolderPath().equals(getString(R.string.DIRECTORY_ROOT) + DANCEVIDEOPATH)) {
                                         //Proceed to Line Dance video gallery
                                         Intent intent = new Intent(ViewVideo.this, VideoGallery.class);
@@ -2168,10 +2231,11 @@ public class ViewVideo extends AppCompatActivity {
         //Proceed to View_Video
         Intent intent = new Intent(ViewVideo.this, ViewVideo.class);
         intent.putExtra("videoIndex", index);
-        if (wasSearched) {
-            appData.setLastSearchResult(searchList);
-            intent.putExtra("wasSearched", true);
-            intent.putExtra("videoData", searchList.get(index));
+        if (wasSearched || fromPlaylist) {
+            appData.setVideoViewList(videoList);
+            intent.putExtra("wasSearched", wasSearched);
+            intent.putExtra("fromPlaylist",  fromPlaylist);
+            intent.putExtra("videoData", videoList.get(index));
         } else {
             intent.putExtra("videoData", appData.getVideoData(videoTypePath).get(index));
         }

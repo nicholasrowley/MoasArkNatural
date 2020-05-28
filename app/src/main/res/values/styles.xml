@@ -55,6 +55,7 @@
     <style name="CustomMediaRouterTheme" parent="Theme.MediaRouter.Light">
         <item name="mediaRouteButtonStyle">@style/CustomMediaRouteButtonStyle</item>
     </style>
+
     <style name="CustomMediaRouteButtonStyle" parent="Widget.MediaRouter.Light.MediaRouteButton">
         <item name="mediaRouteButtonTint">@color/colorPrimary</item>
     </style>
@@ -62,12 +63,16 @@
 
     <!-- Customize Introductory Overlay -->
     <style name="CustomCastIntroOverlay" parent="CastIntroOverlay">
-        <item name="castButtonTextAppearance">@style/TextAppearance.CustomCastIntroOverlay.Button</item>
-        <item name="castTitleTextAppearance">@style/TextAppearance.CustomCastIntroOverlay.Title</item>
+        <item name="castButtonTextAppearance">@style/TextAppearance.CustomCastIntroOverlay.Button
+        </item>
+        <item name="castTitleTextAppearance">@style/TextAppearance.CustomCastIntroOverlay.Title
+        </item>
     </style>
+
     <style name="TextAppearance.CustomCastIntroOverlay.Button" parent="android:style/TextAppearance">
         <item name="android:textColor">@color/colorPrimary</item>
     </style>
+
     <style name="TextAppearance.CustomCastIntroOverlay.Title" parent="android:style/TextAppearance.Large">
         <item name="android:textColor">#FFFFFF</item>
     </style>
@@ -88,6 +93,11 @@
         <item name="castPlayButtonDrawable">@drawable/cast_ic_expanded_controller_play</item>
         <item name="castPauseButtonDrawable">@drawable/cast_ic_expanded_controller_pause</item>
         <item name="castStopButtonDrawable">@drawable/cast_ic_expanded_controller_stop</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
     </style>
 
 </resources>

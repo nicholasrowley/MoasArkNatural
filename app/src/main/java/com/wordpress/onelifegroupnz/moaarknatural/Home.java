@@ -240,6 +240,11 @@ public class Home extends AppCompatActivity {
                 intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 return true;
+            case R.id.menu_playlist_gallery:
+                //Proceed to playlist gallery
+                intent = new Intent(Home.this, PlaylistGallery.class);
+                startActivity(intent);
+                return true;
             case R.id.menu_rate_app:
                 //navigates to Google Play
                 //String googlePlayServicesPackage = "com.google.android.gms";

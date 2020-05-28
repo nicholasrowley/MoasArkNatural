@@ -53,7 +53,6 @@ import com.google.android.gms.cast.framework.CastButtonFactory;
  */
 
 public class VideoGallery extends AppCompatActivity {
-
     private GlobalAppData appData;
     private boolean refreshing;
     private Button loadMore;
@@ -196,6 +195,11 @@ public class VideoGallery extends AppCompatActivity {
                 //Proceed to contact form on Moa's Ark website
                 Uri uri = Uri.parse(getString(R.string.website_contact_form_url).replaceAll(" ", "%20"));
                 intent = new Intent(Intent.ACTION_VIEW, uri);
+                startActivity(intent);
+                return true;
+            case R.id.menu_playlist_gallery:
+                //Proceed to playlist gallery
+                intent = new Intent(VideoGallery.this, PlaylistGallery.class);
                 startActivity(intent);
                 return true;
             case R.id.menu_rate_app:

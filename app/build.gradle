@@ -27,12 +27,15 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.navigation:navigation-fragment:2.0.0'
+    implementation 'androidx.navigation:navigation-ui:2.0.0'
     androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
     implementation 'androidx.appcompat:appcompat:1.0.2' //appcompat 1.1.0 breaks webview in API 22
-    implementation 'com.google.android.material:material:1.0.0' //android material 1.1.0 breaks webview in API 22
+    implementation 'com.google.android.material:material:1.0.0'
+    //android material 1.1.0 breaks webview in API 22
     implementation 'androidx.legacy:legacy-support-core-utils:1.0.0'
     implementation 'com.google.firebase:firebase-ads:19.1.0'
     implementation 'com.google.firebase:firebase-analytics:17.4.0'

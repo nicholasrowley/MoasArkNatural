@@ -1,18 +1,23 @@
 package com.wordpress.onelifegroupnz.moaarknatural;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.InvalidClassException;
+import java.io.ObjectStreamClass;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * This class stores app data that can be accessed by any activity in the app.
@@ -29,7 +34,8 @@ public class GlobalAppData {
     private FolderContentLister danceMusicContentLister;
     private List<FileDataListing> danceVideoInfoList;
     private List<FileDataListing> foodVideoInfoList;
-    private List<FileDataListing> lastSearchResult;
+    private List<FileDataListing> lastViewingList;
+    private PlayListData savedPlayList;
     private int danceVideosLoaded;
     private int foodVideosLoaded;
     public static final String DANCEVIDEOPATH = "/line dance videos/";
@@ -42,6 +48,7 @@ public class GlobalAppData {
     public static final String TAGLINETXTPATH = "/tagline/tagline.txt";
     public static final String DANCEMUSICPATH = "/dance music/";
     public static final String ALLVIDEOSCODE = "ALLVIDEOS";
+    public static final String PLAYLISTCODE = "PLAYLIST";
     private List<SearchSuggestion> searchSuggestions;
     public static final int DROPBOXTIMEOUTLIMIT = 60000; //Milliseconds
     private Toast toast;
@@ -50,11 +57,15 @@ public class GlobalAppData {
     private FileDataListing featureDanceInfo;
     private FileDataListing featureFoodInfo;
 
+    //Shared Preferences
+    public static final String SHARED_PREFS = "com.wordpress.onelifegroupnz.moasarknatural";
+
     private GlobalAppData(String directoryRoot, Context context, String searchString) {
 
         //execute FolderContentLister and get web server directory listing content over https
         refreshIISDirectoryVideoFiles(directoryRoot, context, searchString, ALLVIDEOSCODE);
         populateSearchSuggestions(context);
+        initialisePlaylist(context);
     }
 
     public static GlobalAppData getInstance(String directoryRoot, Context context, String searchString) {
@@ -366,14 +377,14 @@ public class GlobalAppData {
         return featureDanceInfo;
     }
 
-    //saves a new search as the last search result.
-    public void setLastSearchResult(List<FileDataListing> searchResult) {
-        lastSearchResult = searchResult;
+    //saves a custom list for video viewing through the next and previous buttons.
+    public void setVideoViewList(List<FileDataListing> list) {
+        lastViewingList = list;
     }
 
-    //gets the search results from the last saved search.
-    public List<FileDataListing> getVideoListFromLastSearchResult() {
-        return lastSearchResult;
+    //gets the last custom list saved for the video view activity.
+    public List<FileDataListing> getLastVideoViewingList() {
+        return lastViewingList;
     }
 
     //method for displaying toast messages in the app and discarding the last message if needed.
@@ -392,4 +403,71 @@ public class GlobalAppData {
             toast.show();
         }
     }
+
+    public void initialisePlaylist(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE);
+        try {
+            long currentSerialVersionID = ObjectStreamClass.lookup(PlayListData.class).getSerialVersionUID();
+            Log.d("Initialise Playlist", "Current playlist class serial ID is " + currentSerialVersionID);
+            //TODO if Playlist object is updated in the future then use the network to deserialise the playlist
+            savedPlayList = (PlayListData) ObjectSerializer.deserialize(prefs.getString("PlayList", ObjectSerializer.serialize(new PlayListData())));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        if (savedPlayList == null) {
+            //TODO avoid overwriting playlist data if corrupt.
+            savedPlayList = new PlayListData();
+            Log.d("Initialise Playlist", "Playlist not found. Creating blank playlist.");
+        } else {
+            Log.d("Initialise Playlist", "Playlist initialised. Found " + savedPlayList.getSize() + " entries.");
+        }
+    }
+
+    public void removeFromPlayList(Context context, String entryName) {
+        savedPlayList.removePlayListEntry(entryName);
+        SharedPreferences.Editor editor = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE).edit();
+        try {
+            editor.putString("PlayList", ObjectSerializer.serialize(savedPlayList));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        editor.apply();
+        Log.d("Remove from Playlist", "Playlist entry removed. Found " + savedPlayList.getSize() + " remaining entries.");
+    }
+
+    /** adds a new entry to the app playlist and saves it for access when the app is reopened.
+     * videoData - the data for the video being accessed.
+     * videoType - can be either FOODVIDEOPATH or DANCEVIDEOPATH values.*/
+    public void addToPlayList(Context context, FileDataListing videoData, String videoType) {
+        if (videoType.equals(FOODVIDEOPATH) || videoType.equals(DANCEVIDEOPATH)) {
+            PlaylistEntry entry = new PlaylistEntry(videoData, videoType);
+            savedPlayList.addPlayListEntry(entry);
+            SharedPreferences.Editor editor = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE).edit();
+            try {
+                editor.putString("PlayList", ObjectSerializer.serialize(savedPlayList));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            editor.apply();
+            Log.d("Add to Playlist", "Playlist entry added. Found " + savedPlayList.getSize() + " entries.");
+        } else {
+            Log.d("Add to Playlist", "Playlist Entry invalid. videoType must be either FOODVIDEOPATH or DANCEVIDEOPATH");
+        }
+    }
+
+    public PlaylistEntry getPlayListEntry(String entryName) {
+        return savedPlayList.getPlayListEntry(entryName);
+    }
+
+    public PlaylistEntry getPlayListEntry(int index) {
+        return savedPlayList.getPlayListEntry(index);
+    }
+
+    public PlayListData getPlaylist() {
+        return savedPlayList;
+    }
+
+
 }

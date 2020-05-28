@@ -137,6 +137,11 @@ public class BGPSignUp extends AppCompatActivity {
                 intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 return true;
+            case R.id.menu_playlist_gallery:
+                //Proceed to playlist gallery
+                intent = new Intent(BGPSignUp.this, PlaylistGallery.class);
+                startActivity(intent);
+                return true;
             case R.id.menu_rate_app:
                 //Navigates to Google Play
                 try {

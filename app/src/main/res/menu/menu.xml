@@ -53,28 +53,41 @@
                 android:orderInCategory="7"
                 app:showAsAction="never" />
             <item
+                android:id="@+id/add_to_playlist"
+                android:title="Add to Playlist"
+                android:icon="@drawable/ic_playlist_add"
+                android:orderInCategory="8"
+                android:visible="false"
+                app:showAsAction="never" />
+            <item
+                android:id="@+id/menu_playlist_gallery"
+                android:title="Playlist"
+                android:icon="@drawable/ic_action_playlist"
+                android:orderInCategory="9"
+                app:showAsAction="never" />
+            <item
                 android:id="@+id/menu_contact_form"
                 android:title="@string/title_activity_contact_form"
                 android:icon="@drawable/ic_contact_form_green"
-                android:orderInCategory="8"
+                android:orderInCategory="12"
                 app:showAsAction="never" />
             <item
                 android:id="@+id/menu_rate_app"
                 android:title="@string/rate_dialog_title"
                 android:icon="@drawable/ic_action_rate_app"
-                android:orderInCategory="10"
+                android:orderInCategory="16"
                 app:showAsAction="never" />
             <item
                 android:id="@+id/menu_share_video"
                 android:icon="@drawable/ic_action_share_video"
-                android:orderInCategory="13"
+                android:orderInCategory="21"
                 android:title="@string/action_share_video"
                 android:visible="false"
                 app:showAsAction="never" />
             <item
                 android:id="@+id/menu_download_media"
                 android:icon="@drawable/ic_action_media_download"
-                android:orderInCategory="15"
+                android:orderInCategory="22"
                 android:title="@string/button_download_media"
                 android:visible="false"
                 app:showAsAction="never" />

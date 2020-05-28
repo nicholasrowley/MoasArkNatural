@@ -187,6 +187,11 @@ public class SearchResults extends AppCompatActivity {
                 intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 return true;
+            case R.id.menu_playlist_gallery:
+                //Proceed to playlist gallery
+                intent = new Intent(SearchResults.this, PlaylistGallery.class);
+                startActivity(intent);
+                return true;
             case R.id.menu_rate_app:
                 //Navigates to Google Play
                 try {
@@ -299,7 +304,7 @@ public class SearchResults extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     //Proceed to View_Video
-                    appData.setLastSearchResult(videoInfoResults);
+                    appData.setVideoViewList(videoInfoResults);
                     Intent intent = new Intent(SearchResults.this, ViewVideo.class);
                     intent.putExtra("videoData", videoInfoResults.get(view.getId()));
                     intent.putExtra("videoIndex", view.getId());

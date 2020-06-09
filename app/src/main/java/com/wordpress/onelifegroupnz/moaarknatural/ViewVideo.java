@@ -327,53 +327,43 @@ public class ViewVideo extends AppCompatActivity {
             videoTypePath = FOODVIDEOPATH;
         }
 
-        //sets up and enables / disables onclick functionality for next and previous buttons.
-        if (videoTypePath != null) {
-            if (videoIndex > 0) {
-                mPreVidBtn.setTextColor(Color.WHITE);
-                mPreVidBtn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (wasSearched) {
-                            appData.showToastMessage("Displaying previous video in search results", true, getApplicationContext());
-                        } else if(videoTypePath.equals(DANCEVIDEOPATH)) {
-                            appData.showToastMessage("Displaying previous video in " + getString(R.string.title_activity_dance_video_gallery), true, getApplicationContext());
-                        } else if(videoTypePath.equals(FOODVIDEOPATH)) {
-                            appData.showToastMessage("Displaying previous video in " + getString(R.string.title_activity_food_video_gallery), true, getApplicationContext());
-                        } else if (fromPlaylist) {
-                            appData.showToastMessage("Displaying previous video in playlist", true, getApplicationContext());
-                        }
-                        seekToVideoID(videoIndex - 1);
+        mPreVidBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (videoIndex > 0) {
+                    if (wasSearched) {
+                        appData.showToastMessage("Displaying previous video in search results", true, getApplicationContext());
+                    } else if (videoTypePath.equals(DANCEVIDEOPATH)) {
+                        appData.showToastMessage("Displaying previous video in " + getString(R.string.title_activity_dance_video_gallery), true, getApplicationContext());
+                    } else if (videoTypePath.equals(FOODVIDEOPATH)) {
+                        appData.showToastMessage("Displaying previous video in " + getString(R.string.title_activity_food_video_gallery), true, getApplicationContext());
+                    } else if (fromPlaylist) {
+                        appData.showToastMessage("Displaying previous video in playlist", true, getApplicationContext());
                     }
-                });
-            } else {
-                mPreVidBtn.setTextColor(Color.GRAY);
+                    seekToVideoID(videoIndex - 1);
+                }
             }
+        });
 
-            if ((!(wasSearched || fromPlaylist) && (videoIndex < appData.getVideoData(videoTypePath).size() - 1)) || ((wasSearched || fromPlaylist) && (videoIndex < videoList.size() - 1))) {
-                mNextVidBtn.setTextColor(Color.WHITE);
-                mNextVidBtn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (wasSearched) {
-                            appData.showToastMessage("Displaying next video in search results", true, getApplicationContext());
-                        } else if(videoTypePath.equals(DANCEVIDEOPATH)) {
-                            appData.showToastMessage("Displaying next video in " + getString(R.string.title_activity_dance_video_gallery), true, getApplicationContext());
-                        } else if(videoTypePath.equals(FOODVIDEOPATH)) {
-                            appData.showToastMessage("Displaying next video in " + getString(R.string.title_activity_food_video_gallery), true, getApplicationContext());
-                        } else if(fromPlaylist) {
-                            appData.showToastMessage("Displaying next video in playlist", true, getApplicationContext());
-                        }
-                        seekToVideoID(videoIndex + 1);
+        mNextVidBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if ((!(wasSearched || fromPlaylist) && (videoIndex < appData.getVideoData(videoTypePath).size() - 1)) || ((wasSearched || fromPlaylist) && (videoIndex < videoList.size() - 1))) {
+                    if (wasSearched) {
+                        appData.showToastMessage("Displaying next video in search results", true, getApplicationContext());
+                    } else if (videoTypePath.equals(DANCEVIDEOPATH)) {
+                        appData.showToastMessage("Displaying next video in " + getString(R.string.title_activity_dance_video_gallery), true, getApplicationContext());
+                    } else if (videoTypePath.equals(FOODVIDEOPATH)) {
+                        appData.showToastMessage("Displaying next video in " + getString(R.string.title_activity_food_video_gallery), true, getApplicationContext());
+                    } else if (fromPlaylist) {
+                        appData.showToastMessage("Displaying next video in playlist", true, getApplicationContext());
                     }
-                });
-            } else {
-                mNextVidBtn.setTextColor(Color.GRAY);
+                    seekToVideoID(videoIndex + 1);
+                }
             }
-        } else {
-            mPreVidBtn.setTextColor(Color.GRAY);
-            mNextVidBtn.setTextColor(Color.GRAY);
-        }
+        });
+
+        refreshVideoSeekBtnUI();
 
         setOrientation();
 
@@ -699,6 +689,13 @@ public class ViewVideo extends AppCompatActivity {
                     appData.addToPlayList(getApplicationContext(), videoData, videoTypePath);
                     addToPlaylistMenuItem.setIcon(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_playlist_add_check));
                     appData.showToastMessage("Added to playlist", false, getApplicationContext());
+
+                    //if playlist is currently open then update the list as required.
+                    if(fromPlaylist) {
+                        videoList.add(videoData);
+                        videoIndex = videoList.size() - 1;
+                        refreshVideoSeekBtnUI();
+                    }
                 } else {
                     //prompt to remove playlist entry
                     if (!playlistDialogIsOpen) {
@@ -712,6 +709,14 @@ public class ViewVideo extends AppCompatActivity {
                                         //remove playlist entry
                                         playlistDialogIsOpen = false;
                                         appData.removeFromPlayList(getApplicationContext(), videoData.getName());
+
+                                        //remove entry from current video list if playlist is currently open
+                                        if(fromPlaylist) {
+                                            videoList.remove(videoIndex);
+                                            videoIndex -= 1;
+                                            refreshVideoSeekBtnUI();
+                                        }
+
                                         addToPlaylistMenuItem.setIcon(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_playlist_add));
                                         appData.showToastMessage("Removed from playlist", false, getApplicationContext());
                                     }
@@ -730,7 +735,7 @@ public class ViewVideo extends AppCompatActivity {
             case R.id.menu_playlist_gallery:
                 //Proceed to playlist gallery
                 intent = new Intent(ViewVideo.this, PlaylistGallery.class);
-                startActivity(intent);
+                startNewActivity(intent);
                 return true;
             case R.id.menu_rate_app:
                 //Navigates to Google Play
@@ -2539,4 +2544,24 @@ public class ViewVideo extends AppCompatActivity {
         CancelDownload.setEnabled(true);
         return downloadReference;
     }*/
+
+    private void refreshVideoSeekBtnUI() {
+        //sets up and enables / disables onclick functionality for next and previous buttons.
+        if (videoTypePath != null) {
+            if (videoIndex > 0) {
+                mPreVidBtn.setTextColor(Color.WHITE);
+            } else {
+                mPreVidBtn.setTextColor(Color.GRAY);
+            }
+
+            if ((!(wasSearched || fromPlaylist) && (videoIndex < appData.getVideoData(videoTypePath).size() - 1)) || ((wasSearched || fromPlaylist) && (videoIndex < videoList.size() - 1))) {
+                mNextVidBtn.setTextColor(Color.WHITE);
+            } else {
+                mNextVidBtn.setTextColor(Color.GRAY);
+            }
+        } else {
+            mPreVidBtn.setTextColor(Color.GRAY);
+            mNextVidBtn.setTextColor(Color.GRAY);
+        }
+    }
 }

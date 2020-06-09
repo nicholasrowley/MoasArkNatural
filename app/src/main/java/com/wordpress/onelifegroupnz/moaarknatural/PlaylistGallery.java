@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DANCEVIDEOPATH;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.FOODVIDEOPATH;
 
@@ -59,6 +60,14 @@ public class PlaylistGallery extends AppCompatActivity {
 
     private CastContext mCastContext;
     private MenuItem mediaRouteMenuItem;
+
+    //ensures the ids for each view are unique.
+    private static final int GALLERY_BUTTONS_START_ID = 47375;
+    private static final int GALLERY_REMOVE_BUTTONS_START_ID = 94758;
+    private static final int GALLERY_ITEM_LAYOUT_START_ID = 29374;
+
+    //ensures the ids for each deleted view are stored so that the proper id can be calculated for each playlist entry
+    private List<Integer> deletedViews;
 
 
     @Override
@@ -92,6 +101,7 @@ public class PlaylistGallery extends AppCompatActivity {
         });
 
         galleryViewButtonsLoaded = 0;
+        deletedViews = new ArrayList<>();
 
         savedInstanceExists = savedInstanceState != null;
         if (!savedInstanceExists) {
@@ -182,6 +192,14 @@ public class PlaylistGallery extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(PlaylistGallery.this, Home.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 
     //Opens the app setting so the user can turn notifications on or off
@@ -460,6 +478,8 @@ public class PlaylistGallery extends AppCompatActivity {
     //This method loads the buttons for the Video Gallery after video data is found.
     public void loadGallery(boolean loadFromScratch) {
         List<Button> galleryLinks;
+        List<Button> galleryItemRemoveButtons;
+        List<LinearLayout> playlistButtons;
         LinearLayout galleryView;
 
         //create video gallery buttons
@@ -472,6 +492,8 @@ public class PlaylistGallery extends AppCompatActivity {
         }
 
         galleryLinks = new ArrayList<>();
+        galleryItemRemoveButtons = new ArrayList<>();
+        playlistButtons = new ArrayList<>();
         int buttonsToBeLoaded;
 
         //checks how many buttons need to be loaded up to the LOADAMOUNT specified by FolderContentLister
@@ -484,38 +506,66 @@ public class PlaylistGallery extends AppCompatActivity {
         for (int i = galleryViewButtonsLoaded; i < buttonsToBeLoaded; i++) {
             //create the button for the video link with the correct characteristics
             Button newButton = new Button(this);
+            Button newRemoveButton = new Button(this);
+            LinearLayout newPlaylistItem = new LinearLayout(this);
             final int sdk = android.os.Build.VERSION.SDK_INT;
             if(sdk < android.os.Build.VERSION_CODES.JELLY_BEAN) {
                 //noinspection deprecation
-                newButton.setBackgroundDrawable(ContextCompat.getDrawable(this, R.drawable.button) );
+                newButton.setBackgroundDrawable(ContextCompat.getDrawable(this, R.drawable.button));
+                //noinspection deprecation
+                newRemoveButton.setBackgroundDrawable(ContextCompat.getDrawable(this, R.drawable.button));
             } else {
                 newButton.setBackground(ContextCompat.getDrawable(this, R.drawable.button));
+                newRemoveButton.setBackground(ContextCompat.getDrawable(this, R.drawable.button));
             }
             LinearLayout.LayoutParams parameter =  (LinearLayout.LayoutParams) galleryView.getLayoutParams();
             parameter.setMargins(5, 5, 5, 5); // left, top, right, bottom margins
             newButton.setLayoutParams(parameter);
+            newRemoveButton.setLayoutParams(parameter);
+            newPlaylistItem.setLayoutParams(parameter);
+
+            newPlaylistItem.setOrientation(LinearLayout.HORIZONTAL);
 
             galleryLinks.add(newButton);
+            galleryItemRemoveButtons.add(newRemoveButton);
+            playlistButtons.add(newPlaylistItem);
 
             //TODO modify gallery code to work for playlist
             String buttonText = appData.getPlaylist().getPlayListEntry(i).getFileData().getName();
+            String removeText = "Remove";
             galleryLinks.get(i % FolderContentLister.LOADAMOUNT).setText(buttonText);
-            galleryLinks.get(i % FolderContentLister.LOADAMOUNT).setId(i);
+            galleryItemRemoveButtons.get(i % FolderContentLister.LOADAMOUNT).setText(removeText);
+            //give each view a unique id
+            galleryLinks.get(i % FolderContentLister.LOADAMOUNT).setId(GALLERY_BUTTONS_START_ID + i);
+            galleryItemRemoveButtons.get(i % FolderContentLister.LOADAMOUNT).setId(GALLERY_REMOVE_BUTTONS_START_ID + i);
+            playlistButtons.get(i % FolderContentLister.LOADAMOUNT).setId(GALLERY_ITEM_LAYOUT_START_ID + i);
 
             //use this for pre v21 devices
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
                 //noinspection deprecation
                 galleryLinks.get(i % FolderContentLister.LOADAMOUNT).setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                galleryItemRemoveButtons.get(i % FolderContentLister.LOADAMOUNT).setBackgroundColor(getResources().getColor(R.color.colorPrimary));
             }
 
-            //set button size
-            LinearLayout.LayoutParams layoutParams =
+            //set views and button sizes
+            LinearLayout.LayoutParams layoutParamsLink =
+                    new LinearLayout.LayoutParams(0, MATCH_PARENT, 0.8f);
+            galleryLinks.get(i % FolderContentLister.LOADAMOUNT).setLayoutParams(layoutParamsLink);
+
+            LinearLayout.LayoutParams layoutParamsRemoveButton =
+                    new LinearLayout.LayoutParams(0, MATCH_PARENT, 0.2f);
+            galleryItemRemoveButtons.get(i % FolderContentLister.LOADAMOUNT).setLayoutParams(layoutParamsRemoveButton);
+
+            LinearLayout.LayoutParams layoutParamsMatch =
                     new LinearLayout.LayoutParams(MATCH_PARENT,
                             MATCH_PARENT);
-            layoutParams.setMargins(0, 0, 0, 20);
-            galleryLinks.get(i % FolderContentLister.LOADAMOUNT).setLayoutParams(layoutParams);
+            layoutParamsMatch.setMargins(0, 0, 0, 20);
+            playlistButtons.get(i % FolderContentLister.LOADAMOUNT).setLayoutParams(layoutParamsMatch);
 
-            galleryView.addView(galleryLinks.get(i % FolderContentLister.LOADAMOUNT));
+            //add views to the gallery view
+            galleryView.addView(playlistButtons.get(i % FolderContentLister.LOADAMOUNT));
+            playlistButtons.get(i % FolderContentLister.LOADAMOUNT).addView(galleryLinks.get(i % FolderContentLister.LOADAMOUNT));
+            playlistButtons.get(i % FolderContentLister.LOADAMOUNT).addView(galleryItemRemoveButtons.get(i % FolderContentLister.LOADAMOUNT));
 
             //set the link for the video button
             galleryLinks.get(i % FolderContentLister.LOADAMOUNT).setOnClickListener(new View.OnClickListener() {
@@ -523,11 +573,30 @@ public class PlaylistGallery extends AppCompatActivity {
                 public void onClick(View view) {
                     //Proceed to ViewVideo
                     Intent intent = new Intent(PlaylistGallery.this, ViewVideo.class);
-                    intent.putExtra("videoData", appData.getPlayListEntry(view.getId()).getFileData());
+                    Integer viewId = view.getId();
+                    int playlistId = viewId - GALLERY_BUTTONS_START_ID; //the real index of the video in the playlist
+                    //find the real index of the video in the playlist by checking what playlist items were deleted.
+                    for(Integer deletedViewId : deletedViews) {
+                        if(deletedViewId < viewId){
+                            playlistId -= 1;
+                        }
+                    }
+                    intent.putExtra("videoData", appData.getPlayListEntry(playlistId).getFileData());
                     intent.putExtra("fromPlaylist", true);
-                    intent.putExtra("videoIndex", view.getId());
+                    intent.putExtra("videoIndex", playlistId);
                     intent.putExtra("shouldStart", true);
                     startActivity(intent);
+                }
+            });
+
+            //set the delete button to remove a playlist entry
+            galleryItemRemoveButtons.get(i % FolderContentLister.LOADAMOUNT).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    //TODO deal with removing playlist entries and recalculating ids for all existing views
+                    ((ViewGroup) view.getParent()).setVisibility(View.GONE);
+                    deletedViews.add(((ViewGroup) view.getParent()).getId());
+                    appData.removeFromPlayList(getApplicationContext(), appData.getPlayListEntry(view.getId() - GALLERY_REMOVE_BUTTONS_START_ID).getFileData().getName());
                 }
             });
             galleryViewButtonsLoaded++;

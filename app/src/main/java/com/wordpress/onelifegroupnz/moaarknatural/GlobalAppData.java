@@ -65,7 +65,7 @@ public class GlobalAppData {
         //execute FolderContentLister and get web server directory listing content over https
         refreshIISDirectoryVideoFiles(directoryRoot, context, searchString, ALLVIDEOSCODE);
         populateSearchSuggestions(context);
-        initialisePlaylist(context);
+        initialiseSharedPreferences(context);
     }
 
     public static GlobalAppData getInstance(String directoryRoot, Context context, String searchString) {
@@ -73,6 +73,14 @@ public class GlobalAppData {
             instance = new GlobalAppData(directoryRoot, context, searchString);
         }
         return instance;
+    }
+
+    public void initialiseSharedPreferences(Context context) {
+        initialisePlaylist(context);
+        //set values to zero if app no longer needs the value from the previous app session.
+        SharedPreferences.Editor editor = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE).edit();
+        editor.putInt("MediaTime", 0);
+        editor.apply();
     }
 
     public List<FileDataListing> getVideoData(String videoPath) {

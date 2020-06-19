@@ -37,6 +37,7 @@ public class FolderContentLister extends AsyncTask<Object, Void, Object> {
         searchString = searchInput;
         currentDirectoryListing = sourceDirectoryData;
         loadedFiles = filesLoaded;
+        isValid = false;
     }
 
     @Override

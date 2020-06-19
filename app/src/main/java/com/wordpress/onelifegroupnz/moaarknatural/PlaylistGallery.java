@@ -25,6 +25,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,11 +37,15 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.ALLVIDEOSCODE;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DANCEVIDEOPATH;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.FOODVIDEOPATH;
 
@@ -109,6 +114,7 @@ public class PlaylistGallery extends AppCompatActivity {
         }
 
         refreshProgressbar = findViewById(R.id.refreshProgress);
+        findViewById(R.id.playlistUpdateMessage).setVisibility(View.GONE);
 
         refreshContent();
 
@@ -309,7 +315,7 @@ public class PlaylistGallery extends AppCompatActivity {
                     if (appData == null)
                         appData = GlobalAppData.getInstance(getString(R.string.DIRECTORY_ROOT), PlaylistGallery.this, "");
                     else {
-                        appData.loadIISDirectoryFiles(getString(R.string.DIRECTORY_ROOT), "", targetFolder);
+                        appData.loadIISDirectoryFiles(getString(R.string.DIRECTORY_ROOT), "", ALLVIDEOSCODE);
                         refreshDialog.show();
                     }
                     sleep(100);
@@ -357,6 +363,7 @@ public class PlaylistGallery extends AppCompatActivity {
     /*Checks server side for videos in another thread and shows a progress bar.
      * Run when tbe activity needs to be loaded from scratch when opened or by refresh button. */
     public void refreshContent() {
+        //TODO display popup message to resolve internet connection if conditions for playlist update are not met.
         if (!refreshing) {
             refreshing = true;
             findViewById(R.id.gallery).setVisibility(View.GONE);
@@ -394,9 +401,12 @@ public class PlaylistGallery extends AppCompatActivity {
             //Loading UI Elements in this thread
             final Thread setTask = new Thread() {
                 public void run() {
+                    Log.d("Initialise Playlist", "Set task called.");
                     loadGallery(true);
                     findViewById(R.id.gallery).setVisibility(View.VISIBLE);
                     progressBar.setVisibility(View.GONE);
+
+                    Log.d("Initialise Playlist", "playlist null = " + (appData.getPlaylist() == null));
 
                     //if server side connection has failed.
                     if (appData.getPlaylist() == null) {
@@ -448,26 +458,119 @@ public class PlaylistGallery extends AppCompatActivity {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    runOnUiThread(setTask);
+                    Log.d("Initialise Playlist", "playlist requires update = " + appData.playlistNeedsUpdate());
+                    if(appData.playlistNeedsUpdate()) {
+                        appData.rebuildPlaylistDatabase();
+                        List<String> invalidEntries = appData.getPlaylist().getInvalidEntries();
+                        Log.d("Initialise Playlist", "invalid entries = " + invalidEntries.size());
+                        if(appData.getPlaylist().getInvalidEntries().size() > 0 && appData.isPlaylistBcMode()){
+                            //TODO popup display with invalid entries and prompt the user to delete or return to home screen. (must handle videoview activity playlist functions as well)
+                            //prompt to remove playlist entry
+                                new AlertDialog.Builder(PlaylistGallery.this)
+                                        .setTitle(appData.getPlaylist().getInvalidEntries().size() + " invalid entries found")
+                                        .setMessage("Some entries no longer exist in the online database and must be removed to use the playlist. Continue?")
+                                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                findViewById(R.id.playlistUpdateMessage).setVisibility(View.GONE);
+                                                for (String invalidEntry : invalidEntries) {
+                                                    appData.removeBcEntry(invalidEntry);
+                                                }
+                                                try {
+                                                    appData.savePlaylistDataInSharedPreferences(getApplicationContext());
+                                                    runOnUiThread(setTask);
+                                                    try {
+                                                        setTask.join();
+                                                    } catch (InterruptedException e) {
+                                                        e.printStackTrace();
+                                                    }
+                                                } catch (IOException e) {
+                                                    findViewById(R.id.playlistUpdateMessage).setVisibility(View.VISIBLE);
+                                                    e.printStackTrace();
+                                                }
+                                                runOnUiThread(finishLoading);
+                                                try {
+                                                    finishLoading.join();
+                                                } catch (InterruptedException e) {
+                                                    e.printStackTrace();
+                                                }
+                                                try {
+                                                    sleep(1000);
+                                                } catch (InterruptedException e) {
+                                                    e.printStackTrace();
+                                                }
+                                                runOnUiThread(setProgressComplete);
+                                            }
+                                        })
+                                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                findViewById(R.id.playlistUpdateMessage).setVisibility(View.VISIBLE);
+                                                runOnUiThread(finishLoading);
+                                                try {
+                                                    finishLoading.join();
+                                                } catch (InterruptedException e) {
+                                                    e.printStackTrace();
+                                                }
+                                                try {
+                                                    sleep(1000);
+                                                } catch (InterruptedException e) {
+                                                    e.printStackTrace();
+                                                }
+                                                runOnUiThread(setProgressComplete);
+                                            }
+                                        })
+                                        .setIcon(android.R.drawable.ic_dialog_alert)
+                                        .setCancelable(false)
+                                        .show();
+                            } else {
+                            try {
+                                appData.savePlaylistDataInSharedPreferences(getApplicationContext());
+                                runOnUiThread(setTask);
 
-                    try {
-                        setTask.join();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                                try {
+                                    setTask.join();
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                findViewById(R.id.playlistUpdateMessage).setVisibility(View.VISIBLE);
+                            }
 
-                    runOnUiThread(finishLoading);
-                    try {
-                        finishLoading.join();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                            runOnUiThread(finishLoading);
+                            try {
+                                finishLoading.join();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            try {
+                                sleep(1000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            runOnUiThread(setProgressComplete);
+                        }
+                    } else {
+                        runOnUiThread(setTask);
+
+                        try {
+                            setTask.join();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
+                        runOnUiThread(finishLoading);
+                        try {
+                            finishLoading.join();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        try {
+                            sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        runOnUiThread(setProgressComplete);
                     }
-                    try {
-                        sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    runOnUiThread(setProgressComplete);
                 }
             };
             refreshTask.start();
@@ -611,5 +714,9 @@ public class PlaylistGallery extends AppCompatActivity {
         } else {
             loadMore.setVisibility(View.VISIBLE);
         }
+    }
+
+    public void onClickPlaylistUpdate(View view) {
+        loadGallery(true);
     }
 }

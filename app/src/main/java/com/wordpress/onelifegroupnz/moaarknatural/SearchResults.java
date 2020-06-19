@@ -40,7 +40,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DANCEVIDEOPATH;
-import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.DROPBOXTIMEOUTLIMIT;
+import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.SERVERTIMEOUTLIMIT;
 import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.FOODVIDEOPATH;
 
 import com.google.android.gms.cast.framework.CastContext;
@@ -358,7 +358,7 @@ public class SearchResults extends AppCompatActivity {
 
                         searchVideoLister.execute();
                         try {
-                            searchVideoLister.get(DROPBOXTIMEOUTLIMIT, TimeUnit.MILLISECONDS);
+                            searchVideoLister.get(SERVERTIMEOUTLIMIT, TimeUnit.MILLISECONDS);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         } catch (ExecutionException e) {
@@ -470,7 +470,7 @@ public class SearchResults extends AppCompatActivity {
 
                     searchVideoLister.execute();
                     try {
-                        searchVideoLister.get(DROPBOXTIMEOUTLIMIT, TimeUnit.MILLISECONDS);
+                        searchVideoLister.get(SERVERTIMEOUTLIMIT, TimeUnit.MILLISECONDS);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     } catch (ExecutionException e) {

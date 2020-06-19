@@ -684,53 +684,7 @@ public class ViewVideo extends AppCompatActivity {
                 startActivity(intent);
                 return true;
             case R.id.add_to_playlist:
-                //add video data to playlist
-                if(appData.getPlayListEntry(videoData.getName()) == null) {
-                    appData.addToPlayList(getApplicationContext(), videoData, videoTypePath);
-                    addToPlaylistMenuItem.setIcon(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_playlist_add_check));
-                    appData.showToastMessage("Added to playlist", false, getApplicationContext());
-
-                    //if playlist is currently open then update the list as required.
-                    if(fromPlaylist) {
-                        videoList.add(videoData);
-                        videoIndex = videoList.size() - 1;
-                        refreshVideoSeekBtnUI();
-                    }
-                } else {
-                    //prompt to remove playlist entry
-                    if (!playlistDialogIsOpen) {
-                        playlistDialogIsOpen = true;
-                        //TODO make playlist dialog cancelable
-                        new AlertDialog.Builder(ViewVideo.this)
-                                .setTitle("Playlist entry found")
-                                .setMessage("Remove from playlist?")
-                                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        //remove playlist entry
-                                        playlistDialogIsOpen = false;
-                                        appData.removeFromPlayList(getApplicationContext(), videoData.getName());
-
-                                        //remove entry from current video list if playlist is currently open
-                                        if(fromPlaylist) {
-                                            videoList.remove(videoIndex);
-                                            videoIndex -= 1;
-                                            refreshVideoSeekBtnUI();
-                                        }
-
-                                        addToPlaylistMenuItem.setIcon(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_playlist_add));
-                                        appData.showToastMessage("Removed from playlist", false, getApplicationContext());
-                                    }
-                                })
-                                .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        playlistDialogIsOpen = false;
-                                    }
-                                })
-                                .setIcon(android.R.drawable.ic_dialog_alert)
-                                .setCancelable(false)
-                                .show();
-                    }
-                }
+                addCurrentVideoToPlaylist();
                 return true;
             case R.id.menu_playlist_gallery:
                 //Proceed to playlist gallery
@@ -2437,7 +2391,7 @@ public class ViewVideo extends AppCompatActivity {
         switch (requestCode) {
             case WRITE_EXTERNAL_STORAGE:
                 if ((grantResults.length > 0) && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    //TODO
+                    //TODO ???
                     downloadContent();
                 }
                 break;
@@ -2562,6 +2516,98 @@ public class ViewVideo extends AppCompatActivity {
         } else {
             mPreVidBtn.setTextColor(Color.GRAY);
             mNextVidBtn.setTextColor(Color.GRAY);
+        }
+    }
+
+    private void addCurrentVideoToPlaylist() {
+        //add video data to playlist
+        Log.d("Initialise Playlist", "playlist still in bc mode = " + appData.isPlaylistBcMode());
+        if(appData.isPlaylistBcMode()) {
+            //TODO run playlist update process here.
+            appData.rebuildPlaylistDatabase();
+            List<String> invalidEntries = appData.getPlaylist().getInvalidEntries();
+            if(appData.getPlaylist().getInvalidEntries().size() > 0 && appData.isPlaylistBcMode()) {
+                //prompt to remove playlist entry
+                new AlertDialog.Builder(ViewVideo.this)
+                        .setTitle(appData.getPlaylist().getInvalidEntries().size() + " invalid entries found")
+                        .setMessage("Some entries no longer exist in the online database and must be removed to use the playlist. Continue?")
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                findViewById(R.id.playlistUpdateMessage).setVisibility(View.GONE);
+                                for (String invalidEntry : invalidEntries) {
+                                    appData.removeBcEntry(invalidEntry);
+                                }
+                                try {
+                                    appData.savePlaylistDataInSharedPreferences(getApplicationContext());
+                                    addCurrentVideoToPlaylist();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        })
+                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        })
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setCancelable(false)
+                        .show();
+            } else {
+                try {
+                    appData.savePlaylistDataInSharedPreferences(getApplicationContext());
+                    addCurrentVideoToPlaylist();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        } else {
+            if (appData.getPlayListEntry(videoData.getName()) == null) {
+                appData.addToPlayList(getApplicationContext(), videoData, videoTypePath);
+                addToPlaylistMenuItem.setIcon(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_playlist_add_check));
+                appData.showToastMessage("Added to playlist", false, getApplicationContext());
+
+                //if playlist is currently open then update the list as required.
+                if (fromPlaylist) {
+                    videoList.add(videoData);
+                    videoIndex = videoList.size() - 1;
+                    refreshVideoSeekBtnUI();
+                }
+            } else {
+                //prompt to remove playlist entry
+                if (!playlistDialogIsOpen) {
+                    playlistDialogIsOpen = true;
+
+                    new AlertDialog.Builder(ViewVideo.this)
+                            .setTitle("Playlist entry found")
+                            .setMessage("Remove from playlist?")
+                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    //remove playlist entry
+                                    playlistDialogIsOpen = false;
+                                    appData.removeFromPlayList(getApplicationContext(), videoData.getName());
+
+                                    //remove entry from current video list if playlist is currently open
+                                    if (fromPlaylist) {
+                                        videoList.remove(videoIndex);
+                                        videoIndex -= 1;
+                                        refreshVideoSeekBtnUI();
+                                    }
+
+                                    addToPlaylistMenuItem.setIcon(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_playlist_add));
+                                    appData.showToastMessage("Removed from playlist", false, getApplicationContext());
+                                }
+                            })
+                            .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    playlistDialogIsOpen = false;
+                                }
+                            })
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .setCancelable(false)
+                            .show();
+                }
+            }
         }
     }
 }

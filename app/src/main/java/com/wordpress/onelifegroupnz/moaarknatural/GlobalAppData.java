@@ -8,11 +8,12 @@ import android.widget.Toast;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.InvalidClassException;
 import java.io.ObjectStreamClass;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -36,6 +37,8 @@ public class GlobalAppData {
     private List<FileDataListing> foodVideoInfoList;
     private List<FileDataListing> lastViewingList;
     private PlayListData savedPlayList;
+    private Set<String> bcPlaylistData;
+    private boolean playlistBcMode;
     private int danceVideosLoaded;
     private int foodVideosLoaded;
     public static final String DANCEVIDEOPATH = "/line dance videos/";
@@ -49,8 +52,10 @@ public class GlobalAppData {
     public static final String DANCEMUSICPATH = "/dance music/";
     public static final String ALLVIDEOSCODE = "ALLVIDEOS";
     public static final String PLAYLISTCODE = "PLAYLIST";
+    public static final String PLAYLISTBCV001 = "PlaylistBcV001";
+    public static final String CURRENTPLAYLISTVERSION = PLAYLISTBCV001;
     private List<SearchSuggestion> searchSuggestions;
-    public static final int DROPBOXTIMEOUTLIMIT = 60000; //Milliseconds
+    public static final int SERVERTIMEOUTLIMIT = 60000; //Milliseconds
     private Toast toast;
 
     //name of featured videos & featured video
@@ -113,13 +118,13 @@ public class GlobalAppData {
         Thread refreshDanceVideoTask = new Thread() {
             public void run() {
                 danceVideoFileLister.execute();
-                waitForDanceVideoFileListerExecution(DROPBOXTIMEOUTLIMIT);
+                waitForDanceVideoFileListerExecution(SERVERTIMEOUTLIMIT);
             }
         };
         Thread refreshFoodVideoTask = new Thread() {
             public void run() {
                 foodVideoFileLister.execute();
-                waitForFoodVideoFileListerExecution(DROPBOXTIMEOUTLIMIT);
+                waitForFoodVideoFileListerExecution(SERVERTIMEOUTLIMIT);
             }
         };
 
@@ -424,17 +429,29 @@ public class GlobalAppData {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+        bcPlaylistData = prefs.getStringSet(CURRENTPLAYLISTVERSION, null);
+        playlistBcMode = false;
         if (savedPlayList == null) {
             //TODO avoid overwriting playlist data if corrupt.
             savedPlayList = new PlayListData();
+            playlistBcMode = bcPlaylistData != null; //if old version data exists then activate backwards compatibility mode.
             Log.d("Initialise Playlist", "Playlist not found. Creating blank playlist.");
+            Log.d("Initialise Playlist", "bcPlaylist = " + playlistBcMode);
         } else {
             Log.d("Initialise Playlist", "Playlist initialised. Found " + savedPlayList.getSize() + " entries.");
         }
+        if (bcPlaylistData == null) {
+            bcPlaylistData = new HashSet<String>();
+        }
+    }
+
+    public void removeBcEntry(String entry) {
+        bcPlaylistData.remove(entry);
     }
 
     public void removeFromPlayList(Context context, String entryName) {
         savedPlayList.removePlayListEntry(entryName);
+        bcPlaylistData.remove(entryName);
         SharedPreferences.Editor editor = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE).edit();
         try {
             editor.putString("PlayList", ObjectSerializer.serialize(savedPlayList));
@@ -452,12 +469,15 @@ public class GlobalAppData {
         if (videoType.equals(FOODVIDEOPATH) || videoType.equals(DANCEVIDEOPATH)) {
             PlaylistEntry entry = new PlaylistEntry(videoData, videoType);
             savedPlayList.addPlayListEntry(entry);
-            SharedPreferences.Editor editor = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE).edit();
+            bcPlaylistData.add(entry.getFileData().getName());
+            SharedPreferences prefs = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
             try {
                 editor.putString("PlayList", ObjectSerializer.serialize(savedPlayList));
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            editor.putStringSet(CURRENTPLAYLISTVERSION, bcPlaylistData);
             editor.apply();
             Log.d("Add to Playlist", "Playlist entry added. Found " + savedPlayList.getSize() + " entries.");
         } else {
@@ -477,5 +497,34 @@ public class GlobalAppData {
         return savedPlayList;
     }
 
+    /** Checks if the playlist is in backwards compatibility mode. (Failed to initialise a recent version of the playlist database) */
+    public boolean playlistNeedsUpdate() {
+        return playlistBcMode;
+    }
 
+    /** If the playlist fails to load or is incompatible due to an update then run this method to rebuild the database. */
+    public void rebuildPlaylistDatabase() {
+        Log.d("Playlist update", "run playlist update = " + (danceVideoFileLister != null && foodVideoFileLister != null && danceVideoInfoList != null && foodVideoInfoList != null && danceVideoFileLister.httpConnectionSuccessful() && foodVideoFileLister.httpConnectionSuccessful() && bcPlaylistData != null));
+        //checks that the following variables are not null before running
+        if (danceVideoFileLister != null && foodVideoFileLister != null && danceVideoInfoList != null && foodVideoInfoList != null && danceVideoFileLister.httpConnectionSuccessful() && foodVideoFileLister.httpConnectionSuccessful() && bcPlaylistData != null) {
+            savedPlayList.updatePlaylistData(bcPlaylistData, danceVideoInfoList, foodVideoInfoList);
+        }
+    }
+
+    //TODO method to save changes and disable backwards compatibility mode. (allow for rebuild database function in video view activity.)
+    public void savePlaylistDataInSharedPreferences(Context context) throws IOException {
+        //TODO do not run if playlist update is invalid
+        if (danceVideoFileLister != null && foodVideoFileLister != null && danceVideoInfoList != null && foodVideoInfoList != null && danceVideoFileLister.httpConnectionSuccessful() && foodVideoFileLister.httpConnectionSuccessful() && bcPlaylistData != null) {
+            SharedPreferences prefs = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putString("PlayList", ObjectSerializer.serialize(savedPlayList));
+            editor.putStringSet(CURRENTPLAYLISTVERSION, bcPlaylistData);
+            editor.apply();
+            playlistBcMode = false;
+        }
+    }
+
+    public boolean isPlaylistBcMode() {
+        return playlistBcMode;
+    }
 }

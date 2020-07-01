@@ -155,6 +155,11 @@ public class Home extends AppCompatActivity {
                 .monitor();
 
         AppRate.showRateDialogIfMeetsConditions(this);
+
+        featureDanceVideo.setVisibility(View.GONE);
+        featureFoodVideo.setVisibility(View.GONE);
+        blogsTitleText.setVisibility(View.GONE);
+        tagLineText.setVisibility(View.GONE);
     }
 
     @Override

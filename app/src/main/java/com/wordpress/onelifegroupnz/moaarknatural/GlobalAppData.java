@@ -114,7 +114,7 @@ public class GlobalAppData {
     * searchString - search query
     * videoPath - Path to the folder storing the videos.*/
     public void refreshIISDirectoryVideoFiles(String directoryRoot, Context context, String searchString, String videoPath) {
-
+        Log.d("Playlist debug", "refreshIISDirectoryVideoFiles called");
         Thread refreshDanceVideoTask = new Thread() {
             public void run() {
                 danceVideoFileLister.execute();
@@ -159,12 +159,15 @@ public class GlobalAppData {
     /*This method is for loading web server files in the background until fully loaded. This method
     * uses partially loaded files and is run when more results need to be loaded into the app display.*/
     public void loadIISDirectoryFiles(String directoryRoot, String searchString, String videoPath) {
-        if (videoPath.equals(DANCEVIDEOPATH)) {
+        Log.d("Playlist debug", "loadIISDirectoryFiles called");
+        if (videoPath.equals(DANCEVIDEOPATH) || videoPath.equals(ALLVIDEOSCODE)) {
             danceVideoFileLister = new FolderContentLister(directoryRoot, DANCEVIDEOPATH, searchString, danceVideosLoaded, danceVideoInfoList);
             danceVideoFileLister.execute();
 
             waitForDanceVideoFileListerExecution(0);
-        } else if (videoPath.equals(FOODVIDEOPATH)) {
+        }
+
+        if (videoPath.equals(FOODVIDEOPATH) || videoPath.equals(ALLVIDEOSCODE)) {
             foodVideoFileLister = new FolderContentLister(directoryRoot, FOODVIDEOPATH, searchString, foodVideosLoaded, foodVideoInfoList);
             foodVideoFileLister.execute();
 
@@ -514,6 +517,16 @@ public class GlobalAppData {
     //TODO method to save changes and disable backwards compatibility mode. (allow for rebuild database function in video view activity.)
     public void savePlaylistDataInSharedPreferences(Context context) throws IOException {
         //TODO do not run if playlist update is invalid
+        Log.d("Playlist", "dancevideofilelister is not null: " + (danceVideoFileLister != null));
+        Log.d("Playlist", "foodVideoFileLister is not null: " + (foodVideoFileLister != null));
+        Log.d("Playlist", "danceVideoInfoList is not null: " + (danceVideoInfoList != null));
+        Log.d("Playlist", "foodVideoInfoList is not null: " + (foodVideoInfoList != null));
+        Log.d("Playlist", "danceVideoFileLister is successful: " + danceVideoFileLister.httpConnectionSuccessful());
+        Log.d("Playlist", "foodVideoFileLister is successful: " + foodVideoFileLister.httpConnectionSuccessful());
+        Log.d("Playlist", "danceVideoFileLister size: " + danceVideoFileLister.getLoadData().size());
+        Log.d("Playlist", "foodVideoFileLister size: " + foodVideoFileLister.getLoadData().size());
+        Log.d("Playlist", "bcPlaylistData is not null: " + (bcPlaylistData != null));
+
         if (danceVideoFileLister != null && foodVideoFileLister != null && danceVideoInfoList != null && foodVideoInfoList != null && danceVideoFileLister.httpConnectionSuccessful() && foodVideoFileLister.httpConnectionSuccessful() && bcPlaylistData != null) {
             SharedPreferences prefs = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
             SharedPreferences.Editor editor = prefs.edit();
@@ -521,10 +534,7 @@ public class GlobalAppData {
             editor.putStringSet(CURRENTPLAYLISTVERSION, bcPlaylistData);
             editor.apply();
             playlistBcMode = false;
+            Log.d("Initialise Playlist", "playlist bc still on: " + playlistNeedsUpdate());
         }
-    }
-
-    public boolean isPlaylistBcMode() {
-        return playlistBcMode;
     }
 }

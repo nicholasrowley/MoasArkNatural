@@ -142,6 +142,7 @@ public class ViewVideo extends AppCompatActivity {
     private int videoIndex;
     private boolean wasSearched;
     private boolean fromPlaylist;
+    private boolean currentRemovedFromPlaylist; //checks if the playlist entry was removed so that it can find the next video in the playlist.
     private List<FileDataListing> videoList;
     private MenuItem searchBar;
     private MenuItem addToPlaylistMenuItem;
@@ -275,6 +276,8 @@ public class ViewVideo extends AppCompatActivity {
         appData = GlobalAppData.getInstance(getString(R.string.DIRECTORY_ROOT),
                 ViewVideo.this, "");
 
+        currentRemovedFromPlaylist = false;
+
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             videoData = (FileDataListing) extras.getSerializable("videoData");
@@ -348,17 +351,21 @@ public class ViewVideo extends AppCompatActivity {
         mNextVidBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if ((!(wasSearched || fromPlaylist) && (videoIndex < appData.getVideoData(videoTypePath).size() - 1)) || ((wasSearched || fromPlaylist) && (videoIndex < videoList.size() - 1))) {
-                    if (wasSearched) {
-                        appData.showToastMessage("Displaying next video in search results", true, getApplicationContext());
-                    } else if (videoTypePath.equals(DANCEVIDEOPATH)) {
-                        appData.showToastMessage("Displaying next video in " + getString(R.string.title_activity_dance_video_gallery), true, getApplicationContext());
-                    } else if (videoTypePath.equals(FOODVIDEOPATH)) {
-                        appData.showToastMessage("Displaying next video in " + getString(R.string.title_activity_food_video_gallery), true, getApplicationContext());
-                    } else if (fromPlaylist) {
-                        appData.showToastMessage("Displaying next video in playlist", true, getApplicationContext());
+                if ((currentRemovedFromPlaylist && fromPlaylist && (videoIndex < videoList.size())) || (currentRemovedFromPlaylist && fromPlaylist && (videoList.contains(videoData)))) {
+                    seekToVideoID(videoIndex);
+                } else {
+                    if ((!(wasSearched || fromPlaylist) && (videoIndex < appData.getVideoData(videoTypePath).size() - 1)) || ((wasSearched || fromPlaylist) && (videoIndex < videoList.size() - 1))) {
+                        if (wasSearched) {
+                            appData.showToastMessage("Displaying next video in search results", true, getApplicationContext());
+                        }  else if (fromPlaylist) {
+                            appData.showToastMessage("Displaying next video in playlist", true, getApplicationContext());
+                        } else if (videoTypePath.equals(DANCEVIDEOPATH)) {
+                            appData.showToastMessage("Displaying next video in " + getString(R.string.title_activity_dance_video_gallery), true, getApplicationContext());
+                        } else if (videoTypePath.equals(FOODVIDEOPATH)) {
+                            appData.showToastMessage("Displaying next video in " + getString(R.string.title_activity_food_video_gallery), true, getApplicationContext());
+                        }
+                        seekToVideoID(videoIndex + 1);
                     }
-                    seekToVideoID(videoIndex + 1);
                 }
             }
         });
@@ -2499,6 +2506,7 @@ public class ViewVideo extends AppCompatActivity {
         return downloadReference;
     }*/
 
+    //TODO check if next button functionality is being changed by looking for the video existing in the list.
     private void refreshVideoSeekBtnUI() {
         //sets up and enables / disables onclick functionality for next and previous buttons.
         if (videoTypePath != null) {
@@ -2508,11 +2516,15 @@ public class ViewVideo extends AppCompatActivity {
                 mPreVidBtn.setTextColor(Color.GRAY);
             }
 
-            if ((!(wasSearched || fromPlaylist) && (videoIndex < appData.getVideoData(videoTypePath).size() - 1)) || ((wasSearched || fromPlaylist) && (videoIndex < videoList.size() - 1))) {
+            if (currentRemovedFromPlaylist && fromPlaylist && (videoIndex < videoList.size()) || (currentRemovedFromPlaylist && fromPlaylist && (videoList.contains(videoData)))) {
                 mNextVidBtn.setTextColor(Color.WHITE);
             } else {
                 mNextVidBtn.setTextColor(Color.GRAY);
+                if ((!(wasSearched || fromPlaylist) && (videoIndex < appData.getVideoData(videoTypePath).size() - 1)) || ((wasSearched || fromPlaylist) && (videoIndex < videoList.size() - 1))) {
+                    mNextVidBtn.setTextColor(Color.WHITE);
+                }
             }
+
         } else {
             mPreVidBtn.setTextColor(Color.GRAY);
             mNextVidBtn.setTextColor(Color.GRAY);
@@ -2521,12 +2533,13 @@ public class ViewVideo extends AppCompatActivity {
 
     private void addCurrentVideoToPlaylist() {
         //add video data to playlist
-        Log.d("Initialise Playlist", "playlist still in bc mode = " + appData.isPlaylistBcMode());
-        if(appData.isPlaylistBcMode()) {
+        Log.d("Initialise Playlist", "playlist still in bc mode = " + appData.playlistNeedsUpdate());
+        if(appData.playlistNeedsUpdate()) {
             //TODO run playlist update process here.
+            //TODO change previous video button the load the same video id (if 0 or higher otherwise load 0) if current video is removed
             appData.rebuildPlaylistDatabase();
             List<String> invalidEntries = appData.getPlaylist().getInvalidEntries();
-            if(appData.getPlaylist().getInvalidEntries().size() > 0 && appData.isPlaylistBcMode()) {
+            if(appData.getPlaylist().getInvalidEntries().size() > 0 && appData.playlistNeedsUpdate()) {
                 //prompt to remove playlist entry
                 new AlertDialog.Builder(ViewVideo.this)
                         .setTitle(appData.getPlaylist().getInvalidEntries().size() + " invalid entries found")
@@ -2571,6 +2584,7 @@ public class ViewVideo extends AppCompatActivity {
                 if (fromPlaylist) {
                     videoList.add(videoData);
                     videoIndex = videoList.size() - 1;
+                    currentRemovedFromPlaylist = false;
                     refreshVideoSeekBtnUI();
                 }
             } else {
@@ -2590,7 +2604,8 @@ public class ViewVideo extends AppCompatActivity {
                                     //remove entry from current video list if playlist is currently open
                                     if (fromPlaylist) {
                                         videoList.remove(videoIndex);
-                                        videoIndex -= 1;
+                                        //videoIndex -= 1;
+                                        currentRemovedFromPlaylist = true;
                                         refreshVideoSeekBtnUI();
                                     }
 

@@ -12,7 +12,7 @@ import java.util.Set;
 public class PlayListData implements Serializable {
     private Map<String, PlaylistEntry> playlistData;
     private List<String> invalidEntries;
-    private boolean placeholder8;
+    private boolean placeholder15;
 
     public PlayListData() {
         playlistData = new LinkedHashMap<>();

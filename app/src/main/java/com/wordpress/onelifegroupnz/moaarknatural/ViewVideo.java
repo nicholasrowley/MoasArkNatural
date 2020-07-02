@@ -241,6 +241,9 @@ public class ViewVideo extends AppCompatActivity {
             }
         });
 
+        appData = GlobalAppData.getInstance(getString(R.string.DIRECTORY_ROOT),
+                ViewVideo.this, "");
+
         setupControlsCallbacks();
         setupCastListener();
         try {
@@ -272,9 +275,6 @@ public class ViewVideo extends AppCompatActivity {
         });
 
         pdfPixelTestDelayedStart = false;
-
-        appData = GlobalAppData.getInstance(getString(R.string.DIRECTORY_ROOT),
-                ViewVideo.this, "");
 
         currentRemovedFromPlaylist = false;
 

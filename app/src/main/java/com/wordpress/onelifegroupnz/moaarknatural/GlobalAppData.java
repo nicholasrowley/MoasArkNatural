@@ -51,7 +51,7 @@ public class GlobalAppData {
     public static final String TAGLINETXTPATH = "/tagline/tagline.txt";
     public static final String DANCEMUSICPATH = "/dance music/";
     public static final String ALLVIDEOSCODE = "ALLVIDEOS";
-    public static final String PLAYLISTCODE = "PLAYLIST";
+    public static final String PLAYLISTCODE = "PLAYLISTV001";
     public static final String PLAYLISTBCV001 = "PlaylistBcV001";
     public static final String CURRENTPLAYLISTVERSION = PLAYLISTBCV001;
     private List<SearchSuggestion> searchSuggestions;
@@ -457,7 +457,7 @@ public class GlobalAppData {
         bcPlaylistData.remove(entryName);
         SharedPreferences.Editor editor = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE).edit();
         try {
-            editor.putString("PlayList", ObjectSerializer.serialize(savedPlayList));
+            editor.putString(PLAYLISTCODE, ObjectSerializer.serialize(savedPlayList));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -476,7 +476,7 @@ public class GlobalAppData {
             SharedPreferences prefs = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
             SharedPreferences.Editor editor = prefs.edit();
             try {
-                editor.putString("PlayList", ObjectSerializer.serialize(savedPlayList));
+                editor.putString(PLAYLISTCODE, ObjectSerializer.serialize(savedPlayList));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -530,7 +530,7 @@ public class GlobalAppData {
         if (danceVideoFileLister != null && foodVideoFileLister != null && danceVideoInfoList != null && foodVideoInfoList != null && danceVideoFileLister.httpConnectionSuccessful() && foodVideoFileLister.httpConnectionSuccessful() && bcPlaylistData != null) {
             SharedPreferences prefs = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
             SharedPreferences.Editor editor = prefs.edit();
-            editor.putString("PlayList", ObjectSerializer.serialize(savedPlayList));
+            editor.putString(PLAYLISTCODE, ObjectSerializer.serialize(savedPlayList));
             editor.putStringSet(CURRENTPLAYLISTVERSION, bcPlaylistData);
             editor.apply();
             playlistBcMode = false;

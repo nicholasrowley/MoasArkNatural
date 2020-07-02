@@ -393,6 +393,7 @@ public class PlaylistGallery extends AppCompatActivity {
                     Log.d("Initialise Playlist", "Set task called.");
                     loadGallery(true);
                     findViewById(R.id.gallery).setVisibility(View.VISIBLE);
+                    findViewById(R.id.playlistUpdateMessage).setVisibility(View.GONE);
                     progressBar.setVisibility(View.GONE);
 
                     Log.d("Initialise Playlist", "playlist null = " + (appData.getPlaylist() == null));
@@ -452,6 +453,9 @@ public class PlaylistGallery extends AppCompatActivity {
                             .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
                                     //close popup without performing any action.
+                                    progressBar.setVisibility(View.GONE);
+                                    findViewById(R.id.playlistUpdateMessage).setVisibility(View.VISIBLE);
+
                                 }
                             })
                             .setIcon(android.R.drawable.ic_dialog_alert)
@@ -501,6 +505,7 @@ public class PlaylistGallery extends AppCompatActivity {
                                 })
                                 .setNegativeButton("No", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {
+                                        progressBar.setVisibility(View.GONE);
                                         findViewById(R.id.playlistUpdateMessage).setVisibility(View.VISIBLE);
                                         runOnUiThread(finishLoading);
                                         try {
@@ -536,10 +541,11 @@ public class PlaylistGallery extends AppCompatActivity {
                             e.printStackTrace();
                         }
                         runOnUiThread(setProgressComplete);
-                    }
-                    Log.d("Initialise Playlist", "playlist update error: " + appData.playlistNeedsUpdate());
-                    if (appData.playlistNeedsUpdate()) {
-                        runOnUiThread(playlistUpdateError);
+
+                        Log.d("Initialise Playlist", "playlist update error: " + appData.playlistNeedsUpdate());
+                        if (appData.playlistNeedsUpdate()) {
+                            runOnUiThread(playlistUpdateError);
+                        }
                     }
                 }
             };
@@ -724,6 +730,9 @@ public class PlaylistGallery extends AppCompatActivity {
     }
 
     public void onClickPlaylistUpdate(View view) {
-        loadGallery(true);
+        if(!(refreshProgressbar.getVisibility() == View.VISIBLE)) {
+            refreshProgressbar.setVisibility(View.VISIBLE);
+            refreshContent();
+        }
     }
 }

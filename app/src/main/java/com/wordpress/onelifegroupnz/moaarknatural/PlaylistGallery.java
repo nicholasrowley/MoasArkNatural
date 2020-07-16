@@ -6,6 +6,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -35,6 +36,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -593,6 +595,7 @@ public class PlaylistGallery extends AppCompatActivity {
     //This method loads the buttons for the Video Gallery after video data is found.
     public void loadGallery(boolean loadFromScratch) {
         List<Button> galleryLinks;
+        List<RelativeLayout> galleryItemRemoveContainer;
         List<Button> galleryItemRemoveButtons;
         List<LinearLayout> playlistButtons;
         LinearLayout galleryView;
@@ -607,6 +610,7 @@ public class PlaylistGallery extends AppCompatActivity {
         }
 
         galleryLinks = new ArrayList<>();
+        //galleryItemRemoveContainer = new ArrayList<>();
         galleryItemRemoveButtons = new ArrayList<>();
         playlistButtons = new ArrayList<>();
         int buttonsToBeLoaded;
@@ -618,50 +622,68 @@ public class PlaylistGallery extends AppCompatActivity {
             buttonsToBeLoaded = galleryViewButtonsLoaded + FolderContentLister.LOADAMOUNT;
         }
 
+        //TODO create pressed versions of the cancel variation of the rounded button in drawable XML
+
         for (int i = galleryViewButtonsLoaded; i < buttonsToBeLoaded; i++) {
             //create the button for the video link with the correct characteristics
             Button newButton = new Button(this);
+            //RelativeLayout newRemoveButtonContainer = new RelativeLayout(this);
             Button newRemoveButton = new Button(this);
             LinearLayout newPlaylistItem = new LinearLayout(this);
             final int sdk = android.os.Build.VERSION.SDK_INT;
-            if(sdk < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+            Log.d("ANDROID VERSION = ", Integer.toString(sdk));
+            Log.d( "JELLYBEAN", Integer.toString(android.os.Build.VERSION_CODES.JELLY_BEAN));
+            /*if(sdk < Build.VERSION_CODES.LOLLIPOP) {
+                Log.d("Button create:", "Running legacy code");
+                newButton.setBackgroundResource(0);
+                newRemoveButton.setBackgroundResource(0);
                 //noinspection deprecation
-                newButton.setBackgroundDrawable(ContextCompat.getDrawable(this, R.drawable.button));
+                //newRemoveButtonContainer.setBackgroundDrawable(ContextCompat.getDrawable(this, R.drawable.delete_remove_icon));
                 //noinspection deprecation
-                newRemoveButton.setBackgroundDrawable(ContextCompat.getDrawable(this, R.drawable.button));
-            } else {
+                //newButton.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(this, R.drawable.button), null, null, null);
+                //noinspection deprecation
+                //newRemoveButton.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(this, R.drawable.button_cancel), null, null, null);
+            } else {*/
+                //Log.d("Button create:", "Running default code");
+                //newRemoveButtonContainer.setBackground(ContextCompat.getDrawable(this, R.drawable.delete_remove_icon));
                 newButton.setBackground(ContextCompat.getDrawable(this, R.drawable.button));
-                newRemoveButton.setBackground(ContextCompat.getDrawable(this, R.drawable.button));
-            }
+                newRemoveButton.setBackground(ContextCompat.getDrawable(this, R.drawable.button_cancel));
+            //}
             LinearLayout.LayoutParams parameter =  (LinearLayout.LayoutParams) galleryView.getLayoutParams();
             parameter.setMargins(5, 5, 5, 5); // left, top, right, bottom margins
             newButton.setLayoutParams(parameter);
             newRemoveButton.setLayoutParams(parameter);
+            //newRemoveButton.setLayoutParams(parameter);
             newPlaylistItem.setLayoutParams(parameter);
 
             newPlaylistItem.setOrientation(LinearLayout.HORIZONTAL);
 
             galleryLinks.add(newButton);
+            //galleryItemRemoveContainer.add(newRemoveButtonContainer);
             galleryItemRemoveButtons.add(newRemoveButton);
             playlistButtons.add(newPlaylistItem);
 
             //TODO modify gallery code to work for playlist
             //TODO modify gallery code so that it works when entries are deleted.
+            //TODO test for potential issue with backwards compatibility in android 4.1
+            //TODO fix delete button icon // in progress...
             String buttonText = appData.getPlaylist().getPlayListEntry(i - deletedViews.size()).getFileData().getName();
-            String removeText = "Remove";
+            String removeText = "";
             galleryLinks.get(i % FolderContentLister.LOADAMOUNT).setText(buttonText);
             galleryItemRemoveButtons.get(i % FolderContentLister.LOADAMOUNT).setText(removeText);
+            //galleryItemRemoveButtons.get(i % FolderContentLister.LOADAMOUNT).setCompoundDrawablesWithIntrinsicBounds(getApplicationContext().getResources().getDrawable(R.drawable.delete_remove_icon), null, null, null);
+            //galleryItemRemoveButtons.get(i % FolderContentLister.LOADAMOUNT).setPadding(galleryItemRemoveButtons.get(i % FolderContentLister.LOADAMOUNT).getWidth(),0,0,0);
             //give each view a unique id
             galleryLinks.get(i % FolderContentLister.LOADAMOUNT).setId(GALLERY_BUTTONS_START_ID + i);
             galleryItemRemoveButtons.get(i % FolderContentLister.LOADAMOUNT).setId(GALLERY_REMOVE_BUTTONS_START_ID + i);
             playlistButtons.get(i % FolderContentLister.LOADAMOUNT).setId(GALLERY_ITEM_LAYOUT_START_ID + i);
 
             //use this for pre v21 devices
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            /*if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
                 //noinspection deprecation
                 galleryLinks.get(i % FolderContentLister.LOADAMOUNT).setBackgroundColor(getResources().getColor(R.color.colorPrimary));
                 galleryItemRemoveButtons.get(i % FolderContentLister.LOADAMOUNT).setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-            }
+            }*/
 
             //set views and button sizes
             LinearLayout.LayoutParams layoutParamsLink =

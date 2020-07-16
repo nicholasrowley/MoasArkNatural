@@ -266,11 +266,11 @@ public class VideoGallery extends AppCompatActivity {
             galleryLinks.get(i % FolderContentLister.LOADAMOUNT).setText(buttonText);
             galleryLinks.get(i % FolderContentLister.LOADAMOUNT).setId(i);
 
-            //use this for pre v21 devices
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            //use this for pre v21 devices (no longer needed with custom buttons)
+            /*if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
                 //noinspection deprecation
                 galleryLinks.get(i % FolderContentLister.LOADAMOUNT).setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-            }
+            }*/
 
             //set button size
             LinearLayout.LayoutParams layoutParams =

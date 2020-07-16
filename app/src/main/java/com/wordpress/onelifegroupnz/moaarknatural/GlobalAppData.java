@@ -426,7 +426,7 @@ public class GlobalAppData {
             long currentSerialVersionID = ObjectStreamClass.lookup(PlayListData.class).getSerialVersionUID();
             Log.d("Initialise Playlist", "Current playlist class serial ID is " + currentSerialVersionID);
             //TODO if Playlist object is updated in the future then use the network to deserialise the playlist
-            savedPlayList = (PlayListData) ObjectSerializer.deserialize(prefs.getString("PlayList", ObjectSerializer.serialize(new PlayListData())));
+            savedPlayList = (PlayListData) ObjectSerializer.deserialize(prefs.getString(PLAYLISTCODE, ObjectSerializer.serialize(new PlayListData())));
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {

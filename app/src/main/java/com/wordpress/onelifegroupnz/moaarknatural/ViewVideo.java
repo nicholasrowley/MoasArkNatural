@@ -336,12 +336,12 @@ public class ViewVideo extends AppCompatActivity {
                 if (videoIndex > 0) {
                     if (wasSearched) {
                         appData.showToastMessage("Displaying previous video in search results", true, getApplicationContext());
+                    } else if (fromPlaylist) {
+                        appData.showToastMessage("Displaying previous video in playlist", true, getApplicationContext());
                     } else if (videoTypePath.equals(DANCEVIDEOPATH)) {
                         appData.showToastMessage("Displaying previous video in " + getString(R.string.title_activity_dance_video_gallery), true, getApplicationContext());
                     } else if (videoTypePath.equals(FOODVIDEOPATH)) {
                         appData.showToastMessage("Displaying previous video in " + getString(R.string.title_activity_food_video_gallery), true, getApplicationContext());
-                    } else if (fromPlaylist) {
-                        appData.showToastMessage("Displaying previous video in playlist", true, getApplicationContext());
                     }
                     seekToVideoID(videoIndex - 1);
                 }

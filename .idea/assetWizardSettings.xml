@@ -35,7 +35,7 @@
                                           <PersistentState>
                                             <option name="values">
                                               <map>
-                                                <entry key="url" value="jar:file:/C:/Program%20Files/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material_design_icons/av/ic_playlist_play_black_24dp.xml" />
+                                                <entry key="url" value="jar:file:/C:/Program%20Files/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material_design_icons/content/ic_remove_black_24dp.xml" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -58,8 +58,8 @@
                                   <option name="values">
                                     <map>
                                       <entry key="assetType" value="IMAGE" />
-                                      <entry key="imageAsset" value="C:\Users\Gorilla Rig\Pictures\Moas Ark\custom-app-assets\delete_remove_icon.png" />
-                                      <entry key="outputName" value="delete_remove_icon" />
+                                      <entry key="imageAsset" value="C:\Users\Gorilla Rig\Pictures\Moas Ark\custom-app-assets\Del_icon_text.png" />
+                                      <entry key="outputName" value="delete_remove_icon_text" />
                                       <entry key="theme" value="CUSTOM" />
                                       <entry key="themeColor" value="000000" />
                                     </map>

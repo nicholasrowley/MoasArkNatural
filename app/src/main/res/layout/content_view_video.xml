@@ -277,32 +277,87 @@ tools:showIn="@layout/activity_view_video">
                         ads:srcCompat="@drawable/ic_refresh" />
                 </LinearLayout>
 
-                <WebView
-                    android:id="@+id/webview"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1">
-                </WebView>
-
-                <ImageView
-                    android:id="@+id/webviewBottomUnderline"
-                    android:layout_width="match_parent"
-                    android:layout_height="3dp"
-                    app:srcCompat="@color/themeShader"
-                    tools:ignore="ContentDescription" />
-
                 <RelativeLayout
+                    android:id="@+id/webviewOverlay"
                     android:layout_width="match_parent"
-                    android:layout_height="50dp">
+                    android:layout_height="match_parent">
 
-                    <com.google.android.gms.ads.AdView xmlns:ads="http://schemas.android.com/apk/res-auto"
-                        android:id="@+id/adView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentBottom="true"
-                        android:layout_centerHorizontal="true"
-                        ads:adSize="BANNER"
-                        ads:adUnitId="@string/banner_ad_unit_id"></com.google.android.gms.ads.AdView>
+                    <LinearLayout
+                        android:id="@+id/webviewLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical">
+
+                        <WebView
+                            android:id="@+id/webview"
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:layout_weight="1"></WebView>
+
+                        <ImageView
+                            android:id="@+id/webviewBottomUnderline"
+                            android:layout_width="match_parent"
+                            android:layout_height="3dp"
+                            app:srcCompat="@color/themeShader"
+                            tools:ignore="ContentDescription" />
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="50dp">
+
+                            <com.google.android.gms.ads.AdView xmlns:ads="http://schemas.android.com/apk/res-auto"
+                                android:id="@+id/adView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentBottom="true"
+                                android:layout_centerHorizontal="true"
+                                ads:adSize="BANNER"
+                                ads:adUnitId="@string/banner_ad_unit_id"></com.google.android.gms.ads.AdView>
+                        </RelativeLayout>
+                    </LinearLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/webviewSettingsBar"
+                        android:layout_width="fill_parent"
+                        android:layout_height="45dp"
+                        android:background="#262626">
+
+                        <ImageView
+                            android:id="@+id/pdfIcon"
+                            android:layout_width="@dimen/_30sdp"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentLeft="true"
+                            android:layout_margin="@dimen/_5sdp"
+                            ads:srcCompat="@drawable/pdf_icon" />
+
+                        <TextView
+                            android:id="@+id/pdfWebviewTitle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_toLeftOf="@id/openPdfInViewerBtn"
+                            android:layout_toRightOf="@id/pdfIcon"
+                            android:text="Untitled PDF"
+                            android:textColor="@color/white"
+                            android:textSize="14dp" />
+
+                        <Button
+                            android:id="@+id/openPdfInViewerBtn"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentRight="true"
+                            android:layout_marginStart="5dp"
+                            android:layout_marginLeft="5dp"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginEnd="5dp"
+                            android:layout_marginRight="5dp"
+                            android:layout_marginBottom="5dp"
+                            android:background="@drawable/button"
+                            android:onClick="openPdfViewer"
+                            android:padding="5dp"
+                            android:text="Open PDF Viewer" />
+                    </RelativeLayout>
+
                 </RelativeLayout>
 
             </LinearLayout>

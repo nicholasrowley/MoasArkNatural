@@ -22,6 +22,7 @@ import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.widget.MediaController.MediaPlayerControl;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -113,6 +114,7 @@ public class ViewVideo extends AppCompatActivity {
 
     private ProgressBar mediaProgressBar;
     private VideoView videoView;
+    private int videoViewHeight;
     private MediaPlayer mediaPlayer;
     private boolean refreshed;
     private boolean portraitView;
@@ -149,6 +151,7 @@ public class ViewVideo extends AppCompatActivity {
 
     private SearchView searchView;
     private LinearLayout portraitItems;
+    private RelativeLayout webviewOverlay;
     private WebView webview;
     private int pdfTestAttempts; //prevents running to many tests
     private boolean isTesting; //prevents the test counter from incrementing if a prior test was executed.
@@ -202,6 +205,7 @@ public class ViewVideo extends AppCompatActivity {
     }
 
     //TODO MediaReloadInProgress is being used for both video and media and is causing issues with media switching.
+    //TODO Get pdf title bar to hide properly.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -216,6 +220,7 @@ public class ViewVideo extends AppCompatActivity {
 
         //video view implementation onCreate code
         videoView = findViewById(R.id.videoView);
+        videoViewHeight = videoView.getLayoutParams().height;
         refreshed = false;
 
         //MediaPlayer implementation onCreate code
@@ -257,6 +262,7 @@ public class ViewVideo extends AppCompatActivity {
 
         portraitItems = findViewById(R.id.portraitItems);
         videoContainer = findViewById(R.id.videoContainer);
+        webviewOverlay = findViewById(R.id.webviewSettingsBar);
         webview = findViewById(R.id.webview);
 
         //progress bar shows when video is buffering
@@ -404,11 +410,10 @@ public class ViewVideo extends AppCompatActivity {
                             updatePlaybackType(PlaybackType.MUSIC);
                             videoView.stopPlayback();
                             //set the container height and orientation elements for listening to music
-                            //params uses dip (90dp = 180dip)
                             setOrientation();
                             ViewGroup.LayoutParams params = videoContainer.getLayoutParams();
                             Log.d(TAG, "params height: " + params.height);
-                            params.height = 180;
+                            params.height = findViewById(R.id.playlist_bar).getLayoutParams().height + findViewById(R.id.control_bar).getLayoutParams().height;
                             videoContainer.setLayoutParams(params);
                             Log.d(TAG, "Audio checkpoint 3");
                             playAudio();
@@ -418,11 +423,10 @@ public class ViewVideo extends AppCompatActivity {
                             updatePlaybackType(PlaybackType.VIDEO);
                             mediaPlayer.reset();
                             //set the container height and orientation elements for viewing videos
-                            //params uses dip (200dp = 400dip)
                             setOrientation();
-                            ViewGroup.LayoutParams params = videoContainer.getLayoutParams();
-                            params.height = 400;
-                            videoContainer.setLayoutParams(params);
+                            /*ViewGroup.LayoutParams params = videoContainer.getLayoutParams();
+                            params.height = videoViewHeight;
+                            videoContainer.setLayoutParams(params);*/
                             playVideo();
                         }
                     }
@@ -788,8 +792,10 @@ public class ViewVideo extends AppCompatActivity {
                         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                         mediaPlayer.prepare(); //don't use prepareAsync for mp3 playback
                     } catch (IOException ioe) {
+                        //TODO replace with error message prompt instead.
                         Log.d("Audio Play Error :", ioe.toString());
-                        exitActivity();
+                        //exitActivity();
+                        displayMusicErrorDialog();
                     }
                 }
             };
@@ -971,7 +977,8 @@ public class ViewVideo extends AppCompatActivity {
         if (show) {
             mControllers.setVisibility(View.VISIBLE);
         } else {
-            mControllers.setVisibility(View.INVISIBLE);
+            if (!(mMediaType == PlaybackType.MUSIC))
+                mControllers.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -984,14 +991,14 @@ public class ViewVideo extends AppCompatActivity {
                         shouldStartPlayback = true;
                         if(mMediaType == PlaybackType.VIDEO) {
                             videoView.start();
+                            startControllersTimer();
+                            restartTrickplayTimer();
                         } else {
                             Log.d(TAG, "MEDIAPLAYER START RUN");
                             mediaPlayer.start();
                         }
                         Log.d(TAG, "Playing locally...");
                         mPlaybackState = PlaybackState.PLAYING;
-                        startControllersTimer();
-                        restartTrickplayTimer();
                         updatePlaybackLocation(PlaybackLocation.LOCAL);
                         break;
                     case REMOTE:
@@ -1032,13 +1039,13 @@ public class ViewVideo extends AppCompatActivity {
                             videoView.seekTo(0);
                             shouldStartPlayback = true;
                             videoView.start();
+                            restartTrickplayTimer();
                         } else {
                             //mediaPlayer.reset();
                             Log.d(TAG, "Audio checkpoint 1");
                             playAudio();
                         }
                         mPlaybackState = PlaybackState.PLAYING;
-                        restartTrickplayTimer();
                         updatePlaybackLocation(PlaybackLocation.LOCAL);
                         break;
                     case REMOTE:
@@ -1073,8 +1080,17 @@ public class ViewVideo extends AppCompatActivity {
         if (mLocation == PlaybackLocation.REMOTE) {
             return;
         }
-        mControllersTimer = new Timer();
-        mControllersTimer.schedule(new HideControllersTask(), 5000);
+        switch (mMediaType){
+            case VIDEO:
+                    mControllersTimer = new Timer();
+                    mControllersTimer.schedule(new HideControllersTask(), 5000);
+                break;
+            case MUSIC:
+                break;
+            default:
+                break;
+        }
+
     }
 
     //Hides the media controller
@@ -1093,6 +1109,51 @@ public class ViewVideo extends AppCompatActivity {
             });
 
         }
+    }
+
+    private void displayMusicErrorDialog() {
+        runOnUiThread(new Runnable() {
+            public void run() {
+                    if (!errorDialogIsOpen) {
+                        errorDialogIsOpen = true;
+                        new AlertDialog.Builder(ViewVideo.this)
+                                .setTitle("Media can't be played")
+                                .setMessage("Please check your connection and reload")
+                                .setPositiveButton("Reload", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        //Reload Media
+                                        errorDialogIsOpen = false;
+                                        loadActivity();
+                                    }
+                                })
+                                .setNegativeButton("Return to Gallery", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        errorDialogIsOpen = false;
+                                        if (videoData.getFolderPath().equals(getString(R.string.DIRECTORY_ROOT) + DANCEVIDEOPATH)) {
+                                            //Proceed to Line Dance video gallery
+                                            Intent intent = new Intent(ViewVideo.this, VideoGallery.class);
+                                            intent.putExtra("videoPath", DANCEVIDEOPATH); //using video path to set the gallery
+                                            startNewActivity(intent);
+                                        } else if (videoData.getFolderPath().equals(getString(R.string.DIRECTORY_ROOT) + FOODVIDEOPATH)) {
+                                            //Proceed to Food video gallery
+                                            Intent intent = new Intent(ViewVideo.this, VideoGallery.class);
+                                            intent.putExtra("videoPath", FOODVIDEOPATH); //using video path to set the gallery
+                                            startNewActivity(intent);
+                                        }
+
+                                    }
+                                })
+                                .setIcon(android.R.drawable.ic_dialog_alert)
+                                .setCancelable(false)
+                                .show();
+                    }
+                    mPlaybackState = PlaybackState.IDLE;
+                    updatePlayButton(mPlaybackState);
+                    mediaPlayer.stop();
+                    mediaPlayer.reset();
+                    //mediaPlayer.release();
+            }
+        });
     }
 
     //sets up necessary functions for videoview, seekbar, play/pause button.
@@ -1152,42 +1213,7 @@ public class ViewVideo extends AppCompatActivity {
                 Log.e(TAG, "OnErrorListener.onError(): MediaPlayer encountered an "
                         + "error, what: " + what + ", extra: " + extra);
 
-                if (!errorDialogIsOpen) {
-                    errorDialogIsOpen = true;
-                    new AlertDialog.Builder(ViewVideo.this)
-                            .setTitle("Media can't be played")
-                            .setMessage("Please check your connection and reload")
-                            .setPositiveButton("Reload", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    //Reload Media
-                                    errorDialogIsOpen = false;
-                                    loadActivity();
-                                }
-                            })
-                            .setNegativeButton("Return to Gallery", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    errorDialogIsOpen = false;
-                                    if (videoData.getFolderPath().equals(getString(R.string.DIRECTORY_ROOT) + DANCEVIDEOPATH)) {
-                                        //Proceed to Line Dance video gallery
-                                        Intent intent = new Intent(ViewVideo.this, VideoGallery.class);
-                                        intent.putExtra("videoPath", DANCEVIDEOPATH); //using video path to set the gallery
-                                        startNewActivity(intent);
-                                    } else if (videoData.getFolderPath().equals(getString(R.string.DIRECTORY_ROOT) + FOODVIDEOPATH)) {
-                                        //Proceed to Food video gallery
-                                        Intent intent = new Intent(ViewVideo.this, VideoGallery.class);
-                                        intent.putExtra("videoPath", FOODVIDEOPATH); //using video path to set the gallery
-                                        startNewActivity(intent);
-                                    }
-
-                                }
-                            })
-                            .setIcon(android.R.drawable.ic_dialog_alert)
-                            .setCancelable(false)
-                            .show();
-                }
-                mediaPlayer.stop();
-                mPlaybackState = PlaybackState.IDLE;
-                updatePlayButton(mPlaybackState);
+                displayMusicErrorDialog();
                 return true;
             }
         });
@@ -1395,7 +1421,16 @@ public class ViewVideo extends AppCompatActivity {
             default:
                 break;
         }
-        restartTrickplayTimer();
+        switch (mMediaType) {
+            case VIDEO:
+                restartTrickplayTimer();
+                break;
+            case MUSIC:
+                break;
+            default:
+                break;
+        }
+
     }
 
     //Opens the app setting so the user can turn notifications on or off
@@ -1454,7 +1489,9 @@ public class ViewVideo extends AppCompatActivity {
                 mPlayCircle.setVisibility(!castSessionLoading && isConnected ? View.VISIBLE : View.GONE);
                 Log.d(TAG, "!castSessionLoading & isConnected: " + (!castSessionLoading && isConnected));
                 Log.d(TAG, "mPlayCircle state visible: " + (mPlayCircle.getVisibility() == View.VISIBLE));
-                mControllers.setVisibility(View.GONE);
+                if (!(mMediaType == PlaybackType.MUSIC)) {
+                    mControllers.setVisibility(View.GONE);
+                }
                 break;
             case PAUSED:
                 if(!mediaReloadInProgress && !castSessionLoading){
@@ -1608,6 +1645,7 @@ public class ViewVideo extends AppCompatActivity {
 
                 //if a matching pdf is found
                 if (!pdfData.getName().equals("")) {
+                    ((TextView) findViewById(R.id.pdfWebviewTitle)).setText(pdfData.getName());
                     findViewById(R.id.pdfReloadMessage).setVisibility(View.GONE);
                     noPdfMsg.setVisibility(View.GONE);
 
@@ -1649,6 +1687,7 @@ public class ViewVideo extends AppCompatActivity {
         //hide pdf view and display appropriate message.
         TextView noPdfMsg = findViewById(R.id.noSheetMsg);
         webview.setVisibility(View.GONE);
+        webviewOverlay.setVisibility(View.GONE);
 
         boolean requireStepsheet = videoData.getFolderPath().equals(getString(R.string.DIRECTORY_ROOT) + DANCEVIDEOPATH);
         boolean requireRecipe = videoData.getFolderPath().equals(getString(R.string.DIRECTORY_ROOT) + FOODVIDEOPATH);
@@ -1676,6 +1715,7 @@ public class ViewVideo extends AppCompatActivity {
 
         final String pdf = pdfData.getfilePathURL().replaceAll(" ", "%20");
         webview.loadUrl("https://docs.google.com/viewer?url=" + pdf);
+        webviewOverlay.setVisibility(View.VISIBLE);
         webview.setVisibility(View.VISIBLE);
         webview.getSettings().setBuiltInZoomControls(true); //allows zoom controls and pinch zooming.
         webview.getSettings().setDisplayZoomControls(false); //hides webview zoom controls
@@ -1700,8 +1740,11 @@ public class ViewVideo extends AppCompatActivity {
             //@SuppressWarnings("deprecation")
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                pdfIsRedirecting = true; //activity should be flagged as redirecting to avoid testing the webview when the activity is inactive.
+                //TODO Replace this code with custom toolbar
                 view.reload();
+               /* pdfIsRedirecting = true; //activity should be flagged as redirecting to avoid testing the webview when the activity is inactive.
+                view.reload();
+                Log.d("Share pdf", "Starting Legacy Intent.");
                 //urls format spaces as %20 which needs to be done during comparison.
                 if (url.contains("print=true") || url.replaceAll(" ", "%20").equals(pdf.replaceAll(" ", "%20"))) {
                     //run the following if print or open original document are pressed.
@@ -1712,7 +1755,7 @@ public class ViewVideo extends AppCompatActivity {
                     //run the following if sign in is pressed.
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                     startActivity(intent);
-                }
+                }*/
                 return false;
             }
 
@@ -1720,9 +1763,13 @@ public class ViewVideo extends AppCompatActivity {
             @TargetApi(Build.VERSION_CODES.N)
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                //TODO Replace this code with custom toolbar
+                view.reload();
+                /*
                 pdfIsRedirecting = true; //activity should be flagged as redirecting to avoid testing the webview when the activity is inactive.
                 Uri url = request.getUrl();
                 view.reload();
+                Log.d("Share pdf", "Starting Intent.");
                 //urls format spaces as %20 which needs to be done during comparison.
                 if (url.toString().contains("print=true") || url.toString().replaceAll(" ", "%20").equals(pdf.replaceAll(" ", "%20"))) {
                     //run the following if print or open original document are pressed.
@@ -1733,7 +1780,7 @@ public class ViewVideo extends AppCompatActivity {
                     //run the following if sign in is pressed.
                     Intent intent = new Intent(Intent.ACTION_VIEW, url);
                     startActivity(intent);
-                }
+                }*/
                 return false;
             }
 
@@ -1741,9 +1788,37 @@ public class ViewVideo extends AppCompatActivity {
             public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
                 // Make a note about the failed load.
                 webview.setVisibility(View.GONE);
+                webviewOverlay.setVisibility(View.GONE);
                 findViewById(R.id.pdfReloadMessage).setVisibility(View.VISIBLE);
             }
         });
+    }
+
+    //TODO make pdf bar visible / invisible when pdf is loaded / fails to load / not found.
+    public void openPdfViewer(View v) {
+        try {
+            pdfIsRedirecting = true; //activity should be flagged as redirecting to avoid testing the webview when the activity is inactive.
+            String pdfURL = pdfData.getfilePathURL().replaceAll(" ", "%20");
+        /*Uri url = request.getUrl();
+        view.reload();*/
+            Log.d("Share pdf", "Starting Intent.");
+            //urls format spaces as %20 which needs to be done during comparison.
+
+            //run the following if print or open original document are pressed.
+            Uri uri = Uri.parse(pdfURL);
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(uri, "application/pdf");
+            intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+            startActivity(intent);
+        } catch (IllegalStateException ise) {
+            ise.printStackTrace();
+            pdfIsRedirecting = false;
+            appData.showToastMessage("Please install a PDF viewer to use this feature.", true, getApplicationContext());
+        } catch (ActivityNotFoundException anfe) {
+            anfe.printStackTrace();
+            pdfIsRedirecting = false;
+            appData.showToastMessage("Please install a PDF viewer to use this feature.", true, getApplicationContext());
+        }
     }
 
     //Converts a View to Bitmap. Returns null if the view is not visible to avoid crashing.

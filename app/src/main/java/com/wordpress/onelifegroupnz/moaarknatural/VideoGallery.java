@@ -96,11 +96,15 @@ public class VideoGallery extends AppCompatActivity {
         }
         //prepare gallery based on target folder
         TextView galleryTitle = findViewById(R.id.galleryTitle);
-        if (targetFolder.equals(DANCEVIDEOPATH))
+        TextView subTitle = findViewById(R.id.videoGalleryText);
+        if (targetFolder.equals(DANCEVIDEOPATH)) {
             galleryTitle.setText(getString(R.string.title_activity_dance_video_gallery));
-        else
-            if (targetFolder.equals(FOODVIDEOPATH))
+            subTitle.setText(R.string.text_video_gallery_desc_dance);
+        } else
+            if (targetFolder.equals(FOODVIDEOPATH)) {
                 galleryTitle.setText(getString(R.string.title_activity_food_video_gallery));
+                subTitle.setText(R.string.text_video_gallery_desc_food);
+            }
 
         galleryViewButtonsLoaded = 0;
 

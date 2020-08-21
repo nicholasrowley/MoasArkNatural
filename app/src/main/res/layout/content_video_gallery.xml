@@ -39,7 +39,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/text_video_gallery_desc"
+                android:text="@string/text_video_gallery_desc_generic"
                 android:id="@+id/videoGalleryText"
                 android:textSize="@dimen/description_text_size" />
 

@@ -55,8 +55,17 @@ tools:showIn="@layout/activity_view_video">
                     android:layout_height="match_parent"
                     android:scaleX="0.5"
                     android:scaleY="0.5"
-                    android:visibility="visible"
+                    android:visibility="gone"
                     ads:srcCompat="@drawable/music_icon_green" />
+
+                <TextView
+                    android:id="@+id/musicPreviewText"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="MUSIC PREVIEW"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="14dp" />
 
                 <ImageButton
                     android:id="@+id/play_circle"

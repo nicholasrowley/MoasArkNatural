@@ -22,7 +22,6 @@ import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.widget.MediaController.MediaPlayerControl;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -395,7 +394,7 @@ public class ViewVideo extends AppCompatActivity {
         pdfTestAttempts = 0;
 
         //Sets up the media playback type
-        findViewById(R.id.musicBackground).setVisibility(View.GONE);
+        findViewById(R.id.musicPreviewText).setVisibility(View.GONE);
         updatePlaybackType(PlaybackType.VIDEO);
         musicToggle = findViewById(R.id.musicToggle);
         musicToggle.setOnClickListener(new View.OnClickListener() {
@@ -417,9 +416,9 @@ public class ViewVideo extends AppCompatActivity {
                             videoContainer.setLayoutParams(params);
                             Log.d(TAG, "Audio checkpoint 3");
                             playAudio();
-                            findViewById(R.id.musicBackground).setVisibility(View.VISIBLE);
+                            findViewById(R.id.musicPreviewText).setVisibility(View.VISIBLE);
                         } else {
-                            findViewById(R.id.musicBackground).setVisibility(View.GONE);
+                            findViewById(R.id.musicPreviewText).setVisibility(View.GONE);
                             updatePlaybackType(PlaybackType.VIDEO);
                             mediaPlayer.reset();
                             //set the container height and orientation elements for viewing videos
@@ -431,30 +430,6 @@ public class ViewVideo extends AppCompatActivity {
                         }
                     }
                 };
-
-                /*final Thread setUpUi = new Thread() {
-                    public void run() {
-                        //run this before network operations
-                        //toggle video to music and vice versa
-                        if (mMediaType == PlaybackType.VIDEO) {
-                            updatePlaybackType(PlaybackType.MUSIC);
-                        } else {
-                            updatePlaybackType(PlaybackType.VIDEO);
-                        }
-                        progressBar.setVisibility(View.VISIBLE);
-                    }
-                };*/
-
-                /*final Thread finishUiLoad = new Thread() {
-                    public void run() {
-                        //ui tasks to run after network operations are complete
-                        if (mMediaType == PlaybackType.MUSIC) {
-                            prepareAudioUI();
-                        } else {
-                            prepareVideoUI();
-                        }
-                    }
-                };*/
 
                 final Thread toggle = new Thread() {
                     public void run() {
@@ -2548,38 +2523,6 @@ public class ViewVideo extends AppCompatActivity {
 
         return(msg);
     }
-
-    /*private long DownloadData (Uri uri, View v) {
-        long downloadReference;
-
-        // Create request for android download manager
-        downloadManager = (DownloadManager)getSystemService(DOWNLOAD_SERVICE);
-        DownloadManager.Request request = new DownloadManager.Request(uri);
-
-        //Setting title of request
-        request.setTitle("Data Download");
-
-        //Setting description of request
-        request.setDescription("Android Data download using DownloadManager.");
-
-        //Set the local destination for the downloaded file to a path
-        //within the application's external files directory
-        if(v.getId() == R.id.DownloadMusic)
-            request.setDestinationInExternalFilesDir(MainActivity.this,
-                    Environment.DIRECTORY_DOWNLOADS,"AndroidTutorialPoint.mp3");
-        else if(v.getId() == R.id.DownloadImage)
-            request.setDestinationInExternalFilesDir(MainActivity.this,
-                    Environment.DIRECTORY_DOWNLOADS,"AndroidTutorialPoint.jpg");
-
-        //Enqueue download and save into referenceId
-        downloadReference = downloadManager.enqueue(request);
-
-        Button DownloadStatus = (Button) findViewById(R.id.DownloadStatus);
-        DownloadStatus.setEnabled(true);
-        Button CancelDownload = (Button) findViewById(R.id.CancelDownload);
-        CancelDownload.setEnabled(true);
-        return downloadReference;
-    }*/
 
     //TODO check if next button functionality is being changed by looking for the video existing in the list.
     private void refreshVideoSeekBtnUI() {

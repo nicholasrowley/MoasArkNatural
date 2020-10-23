@@ -95,7 +95,7 @@ import com.google.android.gms.cast.MediaMetadata;
 /*- Plays videos from Moa's Ark server in Android videoview (Note: all videos must be encoded in H.264 Baseline to guarantee
 * playability in Android 5.0 or lower.)
 * - Shows a pdf that matches the video content (if there is one)*/
-public class ViewVideo extends AppCompatActivity {
+public class ViewVideo extends AppCompatActivity implements MediaPlayerControl{
 
     private static final String TAG = "ViewVideo";
     private GlobalAppData appData; //singleton instance of globalAppData
@@ -180,6 +180,94 @@ public class ViewVideo extends AppCompatActivity {
     private long lastDownload=-1L;
     private static final int WRITE_EXTERNAL_STORAGE = 459;
     private PlaybackType downloadRequested;
+
+    private MusicController controller;
+
+    //MediaPlayerControl Methods
+    @Override
+    public void start() {
+
+    }
+
+    @Override
+    public void pause() {
+
+    }
+
+    @Override
+    public int getDuration() {
+        return 0;
+    }
+
+    @Override
+    public int getCurrentPosition() {
+        return 0;
+    }
+
+    @Override
+    public void seekTo(int pos) {
+
+    }
+
+    @Override
+    public boolean isPlaying() {
+        return false;
+    }
+
+    @Override
+    public int getBufferPercentage() {
+        return 0;
+    }
+
+    @Override
+    public boolean canPause() {
+        return false;
+    }
+
+    @Override
+    public boolean canSeekBackward() {
+        return false;
+    }
+
+    @Override
+    public boolean canSeekForward() {
+        return false;
+    }
+
+    @Override
+    public int getAudioSessionId() {
+        return 0;
+    }
+
+    private void setController(){
+        //set the controller up
+        controller = new MusicController(this);
+        controller.setPrevNextListeners(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //playNext();
+            }
+        }, new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //playPrev();
+            }
+        });
+        controller.setMediaPlayer(this);
+        controller.setAnchorView(findViewById(R.id.song_list));
+        controller.setEnabled(true);
+    }
+
+    private void playNext(){
+        musicSrv.playNext();
+        controller.show(0);
+    }
+
+    //play previous
+    private void playPrev(){
+        musicSrv.playPrev();
+        controller.show(0);
+    }
 
     /**
      * indicates whether we are doing a local or a remote playback
@@ -501,6 +589,8 @@ public class ViewVideo extends AppCompatActivity {
                 new IntentFilter(DownloadManager.ACTION_NOTIFICATION_CLICKED));
 
         playlistDialogIsOpen = false;
+
+        setController();
     }
 
     @Override

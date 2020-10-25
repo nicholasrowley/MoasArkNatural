@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 
 import androidx.core.content.ContextCompat;
@@ -32,7 +31,6 @@ import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.MobileAds;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -269,12 +267,6 @@ public class VideoGallery extends AppCompatActivity {
             String buttonText = appData.getVideoData(targetFolder).get(i).getName();
             galleryLinks.get(i % FolderContentLister.LOADAMOUNT).setText(buttonText);
             galleryLinks.get(i % FolderContentLister.LOADAMOUNT).setId(i);
-
-            //use this for pre v21 devices (no longer needed with custom buttons)
-            /*if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                //noinspection deprecation
-                galleryLinks.get(i % FolderContentLister.LOADAMOUNT).setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-            }*/
 
             //set button size
             LinearLayout.LayoutParams layoutParams =

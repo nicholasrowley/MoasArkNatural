@@ -6,9 +6,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 
 import com.google.android.gms.ads.AdRequest;
@@ -16,7 +14,6 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.cast.framework.CastButtonFactory;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -41,9 +38,7 @@ import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -53,7 +48,6 @@ import static com.wordpress.onelifegroupnz.moaarknatural.GlobalAppData.FOODVIDEO
 
 public class PlaylistGallery extends AppCompatActivity {
 
-    //TODO add playlist mode
     private GlobalAppData appData;
     private boolean refreshing;
     private Button loadMore;
@@ -98,14 +92,6 @@ public class PlaylistGallery extends AppCompatActivity {
         //load more button
         loadMore = findViewById(R.id.loadMoreBtn);
         progressBar = findViewById(R.id.loadingProgressBar);
-
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //TODO add to playlist function
-            }
-        });
 
         galleryViewButtonsLoaded = 0;
         deletedViews = new ArrayList<>();
@@ -338,7 +324,6 @@ public class PlaylistGallery extends AppCompatActivity {
     /*Checks server side for videos in another thread and shows a progress bar.
      * Run when tbe activity needs to be loaded from scratch when opened or by refresh button. */
     public void refreshContent() {
-        //TODO display popup message to resolve internet connection if playlist update is required.
         if (!refreshing) {
             refreshing = true;
             findViewById(R.id.gallery).setVisibility(View.GONE);
@@ -357,7 +342,6 @@ public class PlaylistGallery extends AppCompatActivity {
             //Data load is done here
             final Thread refreshTask = new Thread() {
                 public void run() {
-                    //TODO refresh task needs to check for missing database files if playlist is unable to load.
                     try {
                         if (appData == null)
                             appData = GlobalAppData.getInstance(getString(R.string.DIRECTORY_ROOT), PlaylistGallery.this, "");
@@ -472,8 +456,6 @@ public class PlaylistGallery extends AppCompatActivity {
                     List<String> invalidEntries = appData.getPlaylist().getInvalidEntries();
                     Log.d("Initialise Playlist", "invalid entries = " + invalidEntries.size());
                     if(appData.getPlaylist().getInvalidEntries().size() > 0 && appData.playlistNeedsUpdate()){
-                        //TODO popup display with invalid entries and prompt the user to delete or return to home screen. (must handle videoview activity playlist functions as well)
-                        //TODO fix internet connection retry code so that it reloads the database.
                         //prompt to remove playlist entry
                         new AlertDialog.Builder(PlaylistGallery.this)
                                 .setTitle(appData.getPlaylist().getInvalidEntries().size() + " invalid entries found")
@@ -610,7 +592,6 @@ public class PlaylistGallery extends AppCompatActivity {
         }
 
         galleryLinks = new ArrayList<>();
-        //galleryItemRemoveContainer = new ArrayList<>();
         galleryItemRemoveButtons = new ArrayList<>();
         playlistButtons = new ArrayList<>();
         int buttonsToBeLoaded;
@@ -622,68 +603,40 @@ public class PlaylistGallery extends AppCompatActivity {
             buttonsToBeLoaded = galleryViewButtonsLoaded + FolderContentLister.LOADAMOUNT;
         }
 
-        //TODO create pressed versions of the cancel variation of the rounded button in drawable XML
-
         for (int i = galleryViewButtonsLoaded; i < buttonsToBeLoaded; i++) {
             //create the button for the video link with the correct characteristics
             Button newButton = new Button(this);
-            //RelativeLayout newRemoveButtonContainer = new RelativeLayout(this);
+
             Button newRemoveButton = new Button(this);
             LinearLayout newPlaylistItem = new LinearLayout(this);
             final int sdk = android.os.Build.VERSION.SDK_INT;
             Log.d("ANDROID VERSION = ", Integer.toString(sdk));
             Log.d( "JELLYBEAN", Integer.toString(android.os.Build.VERSION_CODES.JELLY_BEAN));
-            /*if(sdk < Build.VERSION_CODES.LOLLIPOP) {
-                Log.d("Button create:", "Running legacy code");
-                newButton.setBackgroundResource(0);
-                newRemoveButton.setBackgroundResource(0);
-                //noinspection deprecation
-                //newRemoveButtonContainer.setBackgroundDrawable(ContextCompat.getDrawable(this, R.drawable.delete_remove_icon));
-                //noinspection deprecation
-                //newButton.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(this, R.drawable.button), null, null, null);
-                //noinspection deprecation
-                //newRemoveButton.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(this, R.drawable.button_cancel), null, null, null);
-            } else {*/
-                //Log.d("Button create:", "Running default code");
-                //newRemoveButtonContainer.setBackground(ContextCompat.getDrawable(this, R.drawable.delete_remove_icon));
-                newButton.setBackground(ContextCompat.getDrawable(this, R.drawable.button));
-                newRemoveButton.setBackground(ContextCompat.getDrawable(this, R.drawable.button_cancel));
-            //}
+
+            newButton.setBackground(ContextCompat.getDrawable(this, R.drawable.button));
+            newRemoveButton.setBackground(ContextCompat.getDrawable(this, R.drawable.button_cancel));
             LinearLayout.LayoutParams parameter =  (LinearLayout.LayoutParams) galleryView.getLayoutParams();
             parameter.setMargins(5, 5, 5, 5); // left, top, right, bottom margins
             newButton.setLayoutParams(parameter);
             newRemoveButton.setLayoutParams(parameter);
-            //newRemoveButton.setLayoutParams(parameter);
             newPlaylistItem.setLayoutParams(parameter);
 
             newPlaylistItem.setOrientation(LinearLayout.HORIZONTAL);
 
             galleryLinks.add(newButton);
-            //galleryItemRemoveContainer.add(newRemoveButtonContainer);
+
             galleryItemRemoveButtons.add(newRemoveButton);
             playlistButtons.add(newPlaylistItem);
 
-            //TODO modify gallery code to work for playlist
-            //TODO modify gallery code so that it works when entries are deleted.
-            //TODO test for potential issue with backwards compatibility in android 4.1
-            //TODO fix delete button icon // in progress...
             String buttonText = appData.getPlaylist().getPlayListEntry(i - deletedViews.size()).getFileData().getName();
             String removeText = "";
             galleryLinks.get(i % FolderContentLister.LOADAMOUNT).setText(buttonText);
             galleryItemRemoveButtons.get(i % FolderContentLister.LOADAMOUNT).setText(removeText);
-            //galleryItemRemoveButtons.get(i % FolderContentLister.LOADAMOUNT).setCompoundDrawablesWithIntrinsicBounds(getApplicationContext().getResources().getDrawable(R.drawable.delete_remove_icon), null, null, null);
-            //galleryItemRemoveButtons.get(i % FolderContentLister.LOADAMOUNT).setPadding(galleryItemRemoveButtons.get(i % FolderContentLister.LOADAMOUNT).getWidth(),0,0,0);
+
             //give each view a unique id
             galleryLinks.get(i % FolderContentLister.LOADAMOUNT).setId(GALLERY_BUTTONS_START_ID + i);
             galleryItemRemoveButtons.get(i % FolderContentLister.LOADAMOUNT).setId(GALLERY_REMOVE_BUTTONS_START_ID + i);
             playlistButtons.get(i % FolderContentLister.LOADAMOUNT).setId(GALLERY_ITEM_LAYOUT_START_ID + i);
-
-            //use this for pre v21 devices
-            /*if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                //noinspection deprecation
-                galleryLinks.get(i % FolderContentLister.LOADAMOUNT).setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-                galleryItemRemoveButtons.get(i % FolderContentLister.LOADAMOUNT).setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-            }*/
 
             //set views and button sizes
             LinearLayout.LayoutParams layoutParamsLink =
@@ -731,7 +684,6 @@ public class PlaylistGallery extends AppCompatActivity {
             galleryItemRemoveButtons.get(i % FolderContentLister.LOADAMOUNT).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    //TODO deal with removing playlist entries and recalculating ids for all existing views
                     ((ViewGroup) view.getParent()).setVisibility(View.GONE);
                     deletedViews.add(((ViewGroup) view.getParent()).getId());
                     appData.removeFromPlayList(getApplicationContext(), appData.getPlayListEntry(view.getId() - GALLERY_REMOVE_BUTTONS_START_ID).getFileData().getName());

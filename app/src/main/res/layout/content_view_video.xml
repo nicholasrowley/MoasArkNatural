@@ -63,7 +63,7 @@ tools:showIn="@layout/activity_view_video">
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center"
-                    android:text="MUSIC PREVIEW"
+                    android:text="@string/music_preview_text"
                     android:textColor="@color/colorPrimary"
                     android:textSize="14dp" />
 

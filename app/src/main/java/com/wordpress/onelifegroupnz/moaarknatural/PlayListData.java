@@ -2,33 +2,29 @@ package com.wordpress.onelifegroupnz.moaarknatural;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/** Stores the playlist data */
 public class PlayListData implements Serializable {
     private Map<String, PlaylistEntry> playlistData;
     private List<String> invalidEntries;
-    private boolean placeholder21;
 
     public PlayListData() {
         playlistData = new LinkedHashMap<>();
         invalidEntries = new ArrayList<>();
     }
 
-    /* Stores filedata in the playlist with the file name as the unique key */
+    /** Stores filedata in the playlist with the file name as the unique key */
     public void addPlayListEntry(PlaylistEntry entry) {
         playlistData.put(entry.getFileData().getName(), entry);
     }
 
     /** Removes from the playlist based on the name of the video file */
     public void removePlayListEntry(String entryName) {
-        //if (playlistData.get(entryName) != null) {
-            playlistData.remove(entryName);
-        //}
+        playlistData.remove(entryName);
     }
 
     public int getSize() {
@@ -40,7 +36,6 @@ public class PlayListData implements Serializable {
     }
 
     public PlaylistEntry getPlayListEntry (int index) {
-        //TODO reduce overhead and use something like a linkedhashmap
         return playlistData.get(playlistData.keySet().toArray()[index].toString());
     }
 
@@ -54,7 +49,7 @@ public class PlayListData implements Serializable {
         return playlistVideoData;
     }
 
-    /* Fetches playlist data using a string set and updated information for backwards compatibility purposes. */
+    /** Fetches playlist data using a string set and updated information for backwards compatibility purposes. */
     public void updatePlaylistData(Set<String> list, List<FileDataListing> updatedDanceVideoList, List<FileDataListing> updatedFoodVideoList) {
         invalidEntries.clear();
         for(String entry : list) {
@@ -81,7 +76,6 @@ public class PlayListData implements Serializable {
                 invalidEntries.add(entry);
             }
         }
-        //invalidEntries.add("testinvalids");
     }
 
     public List<String> getInvalidEntries() {

@@ -88,9 +88,6 @@ import com.google.android.gms.cast.framework.media.RemoteMediaClient;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
 
-
-//TODO Fix improper seeking with chromecast
-//TODO Fix controlling the mediaplayer during a refresh operation
 /*- Plays videos from Moa's Ark server in Android videoview (Note: all videos must be encoded in H.264 Baseline to guarantee
 * playability in Android 5.0 or lower.)
 * - Shows a pdf that matches the video content (if there is one)*/
@@ -203,8 +200,6 @@ public class ViewVideo extends AppCompatActivity {
         PLAYING, PAUSED, BUFFERING, IDLE
     }
 
-    //TODO MediaReloadInProgress is being used for both video and media and is causing issues with media switching.
-    //TODO Get pdf title bar to hide properly.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -414,7 +409,6 @@ public class ViewVideo extends AppCompatActivity {
                             Log.d(TAG, "params height: " + params.height);
                             params.height = findViewById(R.id.playlist_bar).getLayoutParams().height + findViewById(R.id.control_bar).getLayoutParams().height;
                             videoContainer.setLayoutParams(params);
-                            Log.d(TAG, "Audio checkpoint 3");
                             playAudio();
                             findViewById(R.id.musicPreviewText).setVisibility(View.VISIBLE);
                         } else {
@@ -423,9 +417,7 @@ public class ViewVideo extends AppCompatActivity {
                             mediaPlayer.reset();
                             //set the container height and orientation elements for viewing videos
                             setOrientation();
-                            /*ViewGroup.LayoutParams params = videoContainer.getLayoutParams();
-                            params.height = videoViewHeight;
-                            videoContainer.setLayoutParams(params);*/
+
                             playVideo();
                         }
                     }
@@ -512,7 +504,6 @@ public class ViewVideo extends AppCompatActivity {
         //webview.pauseTimers(); //This also pauses ad banners on other activities
 
         videoView.pause();
-        //TODO implement audio as a system service.
         if (mediaPlayer.isPlaying())
             mediaPlayer.stop();
 
@@ -687,12 +678,10 @@ public class ViewVideo extends AppCompatActivity {
                 return true;
             case R.id.menu_share_video:
                 //Share video url with other apps
-                //TODO Implement custom popup tab for share options
                 toggleShareMedia();
                 return true;
             case R.id.menu_download_media:
                 //Download media that is currently selected.
-                //TODO Implement custom popup tab for download options
                 toggleDownloadMedia();
                 return true;
         }
@@ -767,9 +756,7 @@ public class ViewVideo extends AppCompatActivity {
                         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                         mediaPlayer.prepare(); //don't use prepareAsync for mp3 playback
                     } catch (IOException ioe) {
-                        //TODO replace with error message prompt instead.
                         Log.d("Audio Play Error :", ioe.toString());
-                        //exitActivity();
                         displayMusicErrorDialog();
                     }
                 }
@@ -1016,15 +1003,12 @@ public class ViewVideo extends AppCompatActivity {
                             videoView.start();
                             restartTrickplayTimer();
                         } else {
-                            //mediaPlayer.reset();
-                            Log.d(TAG, "Audio checkpoint 1");
                             playAudio();
                         }
                         mPlaybackState = PlaybackState.PLAYING;
                         updatePlaybackLocation(PlaybackLocation.LOCAL);
                         break;
                     case REMOTE:
-                        Log.d(TAG, "Test Remote play.");
                         if (mCastSession != null && mCastSession.isConnected()) {
                             Log.d(TAG, "Remote play starting.");
                             loadRemoteMedia(mSeekbar.getProgress(), true);
@@ -1126,7 +1110,6 @@ public class ViewVideo extends AppCompatActivity {
                     updatePlayButton(mPlaybackState);
                     mediaPlayer.stop();
                     mediaPlayer.reset();
-                    //mediaPlayer.release();
             }
         });
     }
@@ -1432,7 +1415,6 @@ public class ViewVideo extends AppCompatActivity {
         }
     }
 
-    //TODO Fix play button issue. (Fixed?)
     private void updatePlayButton(PlaybackState state) {
         Log.d(TAG, "Controls: PlayBackState: " + state);
         boolean isConnected = (mCastSession != null)
@@ -1715,22 +1697,8 @@ public class ViewVideo extends AppCompatActivity {
             //@SuppressWarnings("deprecation")
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                //TODO Replace this code with custom toolbar
+                //disables functionality of built in toolbar
                 view.reload();
-               /* pdfIsRedirecting = true; //activity should be flagged as redirecting to avoid testing the webview when the activity is inactive.
-                view.reload();
-                Log.d("Share pdf", "Starting Legacy Intent.");
-                //urls format spaces as %20 which needs to be done during comparison.
-                if (url.contains("print=true") || url.replaceAll(" ", "%20").equals(pdf.replaceAll(" ", "%20"))) {
-                    //run the following if print or open original document are pressed.
-                    Uri uri = Uri.parse(pdf);
-                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                    startActivity(intent);
-                } else if (url.contains("google.com/ServiceLogin")) {
-                    //run the following if sign in is pressed.
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                    startActivity(intent);
-                }*/
                 return false;
             }
 
@@ -1738,24 +1706,8 @@ public class ViewVideo extends AppCompatActivity {
             @TargetApi(Build.VERSION_CODES.N)
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                //TODO Replace this code with custom toolbar
+                //disables functionality of built in toolbar
                 view.reload();
-                /*
-                pdfIsRedirecting = true; //activity should be flagged as redirecting to avoid testing the webview when the activity is inactive.
-                Uri url = request.getUrl();
-                view.reload();
-                Log.d("Share pdf", "Starting Intent.");
-                //urls format spaces as %20 which needs to be done during comparison.
-                if (url.toString().contains("print=true") || url.toString().replaceAll(" ", "%20").equals(pdf.replaceAll(" ", "%20"))) {
-                    //run the following if print or open original document are pressed.
-                    Uri uri = Uri.parse(pdf);
-                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                    startActivity(intent);
-                } else if (url.toString().contains("google.com/ServiceLogin")) {
-                    //run the following if sign in is pressed.
-                    Intent intent = new Intent(Intent.ACTION_VIEW, url);
-                    startActivity(intent);
-                }*/
                 return false;
             }
 
@@ -1769,13 +1721,11 @@ public class ViewVideo extends AppCompatActivity {
         });
     }
 
-    //TODO make pdf bar visible / invisible when pdf is loaded / fails to load / not found.
     public void openPdfViewer(View v) {
         try {
             pdfIsRedirecting = true; //activity should be flagged as redirecting to avoid testing the webview when the activity is inactive.
             String pdfURL = pdfData.getfilePathURL().replaceAll(" ", "%20");
-        /*Uri url = request.getUrl();
-        view.reload();*/
+
             Log.d("Share pdf", "Starting Intent.");
             //urls format spaces as %20 which needs to be done during comparison.
 
@@ -2090,11 +2040,9 @@ public class ViewVideo extends AppCompatActivity {
                 supportInvalidateOptionsMenu();
             }
 
-            //TODO always visible controller in music mode
             private void onApplicationDisconnected() {
                 Log.d(TAG, "Remote Application Disconnected.");
                 updatePlaybackLocation(PlaybackLocation.LOCAL);
-                Log.d(TAG, "Setting playback state to IDLE 2.");
                 //prepare UI for local playback
                 mPlaybackState = PlaybackState.IDLE;
                 mLocation = PlaybackLocation.LOCAL;
@@ -2200,7 +2148,6 @@ public class ViewVideo extends AppCompatActivity {
 
         //finish preparing for remote cast
         mediaProgressBar.setVisibility(View.GONE);
-        //mPlayCircle.setVisibility(View.VISIBLE);
         if (mMediaType == PlaybackType.VIDEO) {
             return new MediaInfo.Builder(videoData.getfilePathURL().replaceAll(" ", "%20"))
                     .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
@@ -2392,15 +2339,10 @@ public class ViewVideo extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, WRITE_EXTERNAL_STORAGE);
         } else {
             downloadContent();
-
-            //v.setEnabled(false);
-            //TODO Query Button
-            //findViewById(R.id.query).setEnabled(true);
         }
     }
 
     public void downloadContent() {
-        //TODO Implement for audio and video
         hideAllOverlays();
 
         Uri uri;
@@ -2448,7 +2390,6 @@ public class ViewVideo extends AppCompatActivity {
         switch (requestCode) {
             case WRITE_EXTERNAL_STORAGE:
                 if ((grantResults.length > 0) && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    //TODO ???
                     downloadContent();
                 }
                 break;
@@ -2524,7 +2465,6 @@ public class ViewVideo extends AppCompatActivity {
         return(msg);
     }
 
-    //TODO check if next button functionality is being changed by looking for the video existing in the list.
     private void refreshVideoSeekBtnUI() {
         //sets up and enables / disables onclick functionality for next and previous buttons.
         if (videoTypePath != null) {
@@ -2553,8 +2493,6 @@ public class ViewVideo extends AppCompatActivity {
         //add video data to playlist
         Log.d("Initialise Playlist", "playlist still in bc mode = " + appData.playlistNeedsUpdate());
         if(appData.playlistNeedsUpdate()) {
-            //TODO run playlist update process here.
-            //TODO change previous video button the load the same video id (if 0 or higher otherwise load 0) if current video is removed
             appData.rebuildPlaylistDatabase();
             List<String> invalidEntries = appData.getPlaylist().getInvalidEntries();
             if(appData.getPlaylist().getInvalidEntries().size() > 0 && appData.playlistNeedsUpdate()) {

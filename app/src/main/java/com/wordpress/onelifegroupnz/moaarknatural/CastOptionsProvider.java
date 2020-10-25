@@ -10,7 +10,7 @@ import android.content.Context;
 
 import java.util.List;
 
-
+/** Used for Google Cast Functionality */
 public class CastOptionsProvider implements OptionsProvider {
 
     @Override

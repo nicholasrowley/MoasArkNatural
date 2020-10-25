@@ -4,6 +4,7 @@ import com.google.android.gms.cast.framework.CastButtonFactory;
 import com.google.android.gms.cast.framework.media.widget.ExpandedControllerActivity;
 import android.view.Menu;
 
+/** Used for Google Cast media controller */
 public class ExpandedControlsActivity extends ExpandedControllerActivity {
 
     @Override

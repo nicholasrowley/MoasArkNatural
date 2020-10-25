@@ -3,9 +3,8 @@ package com.wordpress.onelifegroupnz.moaarknatural;
 import android.content.Context;
 
 import java.io.Serializable;
-import java.util.List;
 
-//TODO check integrity of playlist entry when user tries to open it.
+/** Stores a single entry in a playlist */
 public class PlaylistEntry implements Serializable {
     private FileDataListing playlistMediaData;
     private String videoPath;

@@ -420,12 +420,12 @@ public class GlobalAppData {
         }
     }
 
+    /* Fetch playlist data from shared preferences when app starts*/
     public void initialisePlaylist(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE);
         try {
             long currentSerialVersionID = ObjectStreamClass.lookup(PlayListData.class).getSerialVersionUID();
             Log.d("Initialise Playlist", "Current playlist class serial ID is " + currentSerialVersionID);
-            //TODO if Playlist object is updated in the future then use the network to deserialise the playlist
             savedPlayList = (PlayListData) ObjectSerializer.deserialize(prefs.getString(PLAYLISTCODE, ObjectSerializer.serialize(new PlayListData())));
         } catch (IOException e) {
             e.printStackTrace();
@@ -435,7 +435,7 @@ public class GlobalAppData {
         bcPlaylistData = prefs.getStringSet(CURRENTPLAYLISTVERSION, null);
         playlistBcMode = false;
         if (savedPlayList == null) {
-            //TODO avoid overwriting playlist data if corrupt.
+            //Rebuilds playlist data if it is incompatible with the current version of the app.
             savedPlayList = new PlayListData();
             playlistBcMode = bcPlaylistData != null; //if old version data exists then activate backwards compatibility mode.
             Log.d("Initialise Playlist", "Playlist not found. Creating blank playlist.");
@@ -514,18 +514,8 @@ public class GlobalAppData {
         }
     }
 
-    //TODO method to save changes and disable backwards compatibility mode. (allow for rebuild database function in video view activity.)
+    //saves the playlist data to shared preferences.
     public void savePlaylistDataInSharedPreferences(Context context) throws IOException {
-        //TODO do not run if playlist update is invalid
-        Log.d("Playlist", "dancevideofilelister is not null: " + (danceVideoFileLister != null));
-        Log.d("Playlist", "foodVideoFileLister is not null: " + (foodVideoFileLister != null));
-        Log.d("Playlist", "danceVideoInfoList is not null: " + (danceVideoInfoList != null));
-        Log.d("Playlist", "foodVideoInfoList is not null: " + (foodVideoInfoList != null));
-        Log.d("Playlist", "danceVideoFileLister is successful: " + danceVideoFileLister.httpConnectionSuccessful());
-        Log.d("Playlist", "foodVideoFileLister is successful: " + foodVideoFileLister.httpConnectionSuccessful());
-        Log.d("Playlist", "danceVideoFileLister size: " + danceVideoFileLister.getLoadData().size());
-        Log.d("Playlist", "foodVideoFileLister size: " + foodVideoFileLister.getLoadData().size());
-        Log.d("Playlist", "bcPlaylistData is not null: " + (bcPlaylistData != null));
 
         if (danceVideoFileLister != null && foodVideoFileLister != null && danceVideoInfoList != null && foodVideoInfoList != null && danceVideoFileLister.httpConnectionSuccessful() && foodVideoFileLister.httpConnectionSuccessful() && bcPlaylistData != null) {
             SharedPreferences prefs = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);

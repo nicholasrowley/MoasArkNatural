@@ -54,12 +54,12 @@
     <string name="banner_ad_unit_id">ca-app-pub-2838047532476449/3742836256</string>
 
     <!-- BGP sign up and contact form strings -->
-    <string name="title_activity_sign_up">SIGN UP</string>
+    <string name="title_activity_sign_up">DIY Living Wills and Trusts</string>
     <string name="sign_up_page_title">Beneficial Group Purchase</string>
-    <string name="participation_agreement_in_bgp_one_life_trust">Participation Agreement in BGP One Life Trust</string>
-    <string name="notice_of_application_for_bgp_shares">Notice of application for BGP Shares</string>
+    <string name="participation_agreement_in_bgp_one_life_trust">Will for Living Trust</string>
+    <string name="notice_of_application_for_bgp_shares">Plain English Living Trust</string>
     <string name="sales_email">sales@moasarknaturalnz.com</string>
-    <string name="sales_email_desc">If you have already completed a form please send it to the following email address:</string>
+    <string name="sales_email_desc">If you require further assistance with these forms or have any suggestions or comments you would like to share, you can contact us at the following email address:</string>
     <string name="bgp_sign_up_desc">You can view and download the following forms from here.</string>
     <string name="copy_text_desc">Copy to clipboard</string>
     <string name="title_activity_contact_form">Contact Form</string>
@@ -94,8 +94,9 @@
     <string name="splash_message">Starting</string>
 
     <!--PDF urls-->
-    <string name="BGP_Shares_url">https://shoptradenz.com/moasapp/forms/Notice-of-Application-for-BGP-Shares-Form.pdf</string>
-    <string name="bgp_agreement_url">https://shoptradenz.com/moasapp/forms/Participation-Agreement-in-BGP-One-Life-Trust-Digital-Exchange-Form.pdf</string>
+    <string name="bgp_agreement_url">https://shoptradenz.com/moasapp/forms/Will-for-Living-Trust.pdf</string>
+    <string name="BGP_Shares_url">https://shoptradenz.com/moasapp/forms/Plain-English-Living-Trust.pdf</string>
+
 
     <!--BGP Register URL-->
     <string name="website_bgp_register_url">https://moasarknaturalnz.com/bgp/</string>

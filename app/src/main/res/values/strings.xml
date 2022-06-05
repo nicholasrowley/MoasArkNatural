@@ -54,8 +54,8 @@
     <string name="banner_ad_unit_id">ca-app-pub-2838047532476449/3742836256</string>
 
     <!-- BGP sign up and contact form strings -->
-    <string name="title_activity_sign_up">DIY Living Wills and Trusts</string>
-    <string name="sign_up_page_title">Beneficial Group Purchase</string>
+    <string name="title_activity_sign_up">SIGN UP</string>
+    <string name="sign_up_page_title">DIY Living Wills and Trusts</string>
     <string name="participation_agreement_in_bgp_one_life_trust">Will for Living Trust</string>
     <string name="notice_of_application_for_bgp_shares">Plain English Living Trust</string>
     <string name="sales_email">sales@moasarknaturalnz.com</string>

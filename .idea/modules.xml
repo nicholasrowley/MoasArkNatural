@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/MoasArkNatural.iml" filepath="$PROJECT_DIR$/MoasArkNatural.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/MoasArkNatural.iml" filepath="$PROJECT_DIR$/.idea/modules/MoasArkNatural.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/MoasArkNatural.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/MoasArkNatural.app.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/MoasArkNatural.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/MoasArkNatural.app.androidTest.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/MoasArkNatural.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/MoasArkNatural.app.main.iml" />

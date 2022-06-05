@@ -1,11 +1,11 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 32
+    compileSdkVersion 29
     defaultConfig {
         applicationId "com.wordpress.onelifegroupnz.moaarknatural"
         minSdkVersion 16
-        targetSdkVersion 32
+        targetSdkVersion 29
         versionCode 10
         versionName "2.2.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -57,3 +57,4 @@ dependencies {
 }
 
 apply plugin: 'com.google.gms.google-services'
+

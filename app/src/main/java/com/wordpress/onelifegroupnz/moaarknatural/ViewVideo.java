@@ -200,6 +200,7 @@ public class ViewVideo extends AppCompatActivity {
         PLAYING, PAUSED, BUFFERING, IDLE
     }
 
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -462,10 +463,21 @@ public class ViewVideo extends AppCompatActivity {
 
         //Set up Download Manager
         mgr=(DownloadManager)getSystemService(DOWNLOAD_SERVICE);
-        registerReceiver(onDLComplete,
-                new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-        registerReceiver(onDLNotificationClick,
-                new IntentFilter(DownloadManager.ACTION_NOTIFICATION_CLICKED));
+
+        //java.lang.SecurityException gets thrown without receiver type specified in API 33+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(onDLComplete,
+                    new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE), Context.RECEIVER_NOT_EXPORTED);
+            registerReceiver(onDLNotificationClick,
+                new IntentFilter(DownloadManager.ACTION_NOTIFICATION_CLICKED), Context.RECEIVER_NOT_EXPORTED);
+        }
+        else
+        {
+            registerReceiver(onDLComplete,
+                    new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+            registerReceiver(onDLNotificationClick,
+                    new IntentFilter(DownloadManager.ACTION_NOTIFICATION_CLICKED));
+        }
 
         playlistDialogIsOpen = false;
     }

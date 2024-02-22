@@ -4,6 +4,7 @@ import android.media.MediaMetadata;
 import android.media.MediaMetadataRetriever;
 import android.util.Log;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 
@@ -55,7 +56,11 @@ public class FileDataListing implements Serializable {
         duration = Long.parseLong(time);
         Log.d("duration", time);
         Log.d("duration", test);
-        retriever.release();
+        try {
+            retriever.release();
+        } catch (IOException e) {
+            Log.w("FileDataListing", "Error attempting to release the MediaMetadataRetriever after update.");
+        }
     }
 
     public long getDurationInMilliseconds() { return duration; }
